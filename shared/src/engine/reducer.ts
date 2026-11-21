@@ -1,0 +1,128 @@
+import type { EndReason, GameContent } from '../types/content';
+import type { Action, GameState } from '../types/state';
+import { buy, callPitch, choosePlan, confirmInvest, endDay, invest } from './day';
+import { invariant } from './errors';
+import { resolveEventChoice } from './events';
+import { applyCaught, escapeAttempt } from './escape';
+import { HEAT_MAX } from './effects';
+import { goToLaunder } from './day';
+import { launder } from './launder';
+import { getCharacter } from './lookup';
+import { hashSeed, Rng } from './rng';
+import { computeScore, pickDangerSigns, pickEnding } from './score';
+
+/** เริ่มรอบใหม่ — seed มาจาก server (หรือสุ่มเองตอนเล่น offline) */
+export function newGame(seed: string, characterId: string, c: GameContent): GameState {
+  const ch = getCharacter(c, characterId);
+  return {
+    version: 1,
+    seed,
+    rng: hashSeed(seed),
+    day: 1,
+    phase: 'plan',
+    characterId,
+    gangLevel: 1,
+    dirtyCash: ch.startDirtyCash ?? c.config.startDirtyCash,
+    cleanCash: 0,
+    totalLaundered: 0,
+    heat: 0,
+    fame: 0,
+    karma: 0,
+    henchmen: [],
+    nextHenchmanId: 1,
+    modifiers: [],
+    dailyItems: {},
+    upgrades: {},
+    todayMethodId: null,
+    romance: { bond: 0, idleDays: 0 },
+    call: null,
+    pendingEvents: [],
+    seenEvents: [],
+    launderOffer: [],
+    flags: [],
+    escapes: 0,
+    methodsUsed: [],
+    history: [],
+    lastResults: [],
+    end: null,
+  };
+}
+
+function finish(s: GameState, c: GameContent, rng: Rng, reason: EndReason): void {
+  if (reason === 'caught') applyCaught(s, c);
+  s.phase = 'ended';
+  s.end = {
+    reason,
+    endingId: pickEnding(s, c, reason),
+    dangerSignIds: pickDangerSigns(s, c, rng),
+    score: computeScore(s, c, reason),
+  };
+}
+
+function expectPhase(s: GameState, ...phases: GameState['phase'][]): void {
+  invariant(phases.includes(s.phase), `action not allowed in phase "${s.phase}"`);
+}
+
+/**
+ * pure function: คืน state ใหม่ ไม่แก้ของเดิม
+ * action ผิดกติกา → โยน InvalidActionError
+ */
+export function step(prev: GameState, action: Action, c: GameContent): GameState {
+  invariant(prev.phase !== 'ended', 'game already ended');
+  const s = structuredClone(prev);
+  s.lastResults = [];
+  const rng = new Rng(s.rng);
+
+  switch (action.t) {
+    case 'choosePlan':
+      expectPhase(s, 'plan');
+      choosePlan(s, c, action.methodId);
+      break;
+    case 'invest':
+      expectPhase(s, 'invest');
+      invest(s, c, rng, action.itemId);
+      break;
+    case 'confirmInvest':
+      expectPhase(s, 'invest');
+      confirmInvest(s, c, rng);
+      break;
+    case 'callPitch':
+      expectPhase(s, 'call');
+      callPitch(s, c, rng, action.pitchId);
+      break;
+    case 'eventChoice':
+      expectPhase(s, 'event');
+      resolveEventChoice(s, c, rng, action.choiceIdx);
+      if (s.heat >= HEAT_MAX) s.phase = 'escape';
+      else if (s.pendingEvents.length === 0) goToLaunder(s, c, rng);
+      break;
+    case 'launder':
+      expectPhase(s, 'launder');
+      launder(s, c, rng, action.cardId);
+      s.phase = s.heat >= HEAT_MAX ? 'escape' : 'shop';
+      break;
+    case 'buy':
+      expectPhase(s, 'shop');
+      buy(s, c, action.itemId);
+      break;
+    case 'endDay':
+      expectPhase(s, 'shop');
+      if (endDay(s, c)) finish(s, c, rng, 'survived');
+      break;
+    case 'escapeAttempt':
+      expectPhase(s, 'escape');
+      if (escapeAttempt(s, c, rng)) finish(s, c, rng, 'caught');
+      break;
+    case 'retire':
+      expectPhase(s, 'plan', 'shop');
+      finish(s, c, rng, 'retired');
+      break;
+    default: {
+      const never: never = action;
+      invariant(false, `unknown action ${JSON.stringify(never)}`);
+    }
+  }
+
+  s.rng = rng.state;
+  return s;
+}
