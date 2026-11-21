@@ -4,6 +4,24 @@ import type { Ending } from '../src/types/content';
 // ทุกฉากจบตามด้วยการ์ดสัญญาณอันตราย (engine เลือกให้)
 export const endings: Ending[] = [
   {
+    id: 'home_again',
+    priority: 3,
+    when: { reasons: ['retired', 'survived'], flagsAll: ['promised_family'], karma: [0, 9999] },
+    title: { th: 'กลับบ้าน' },
+    body: {
+      th: 'คุณเก็บซิมทั้งหมดใส่ถุง ขึ้นรถทัวร์กลับบ้าน ไปช่วยครอบครัวขายข้าวแกง ลูกค้าคนแรกคือป้าสมศรีที่เคยเกือบเป็นเหยื่อ',
+    },
+  },
+  {
+    id: 'comeback_star',
+    priority: 4,
+    when: { reasons: ['retired', 'survived'], flagsAll: ['comeback'] },
+    title: { th: 'คัมแบ็กเป็นพระเอกละคร' },
+    body: {
+      th: 'ละครเรื่อง "มิจฉาชีพกลับใจ" เรตติ้งถล่มทลาย คนดูชมว่าพระเอกเล่นสมจริงมาก ไม่มีใครรู้ว่าทำไม',
+    },
+  },
+  {
     id: 'redeemed',
     priority: 5,
     when: { karma: [20, 9999] },

@@ -25,6 +25,16 @@ export const unluckyEvents: GameEvent[] = [
         ],
       },
       {
+        text: { th: '[ทนาย] ให้ทนายออกแถลงการณ์' },
+        requires: { upgrades: ['lucky_lawyer'] },
+        outcomes: [
+          {
+            text: { th: 'แถลงการณ์ยาว 14 หน้าจนไม่มีใครอ่านจบ เรื่องเงียบไปเอง' },
+            effects: [{ kind: 'add', stat: 'heat', value: -18 }],
+          },
+        ],
+      },
+      {
         text: { th: 'ไลฟ์แก้ข่าวทั้งน้ำตา' },
         outcomes: [
           {
@@ -144,6 +154,19 @@ export const unluckyEvents: GameEvent[] = [
             effects: [
               { kind: 'add', stat: 'dirtyCash', value: -1_500 },
               { kind: 'add', stat: 'heat', value: 5 },
+            ],
+          },
+        ],
+      },
+      {
+        text: { th: '[เซลส์ประกัน] เปลี่ยนเรื่อง ขายประกันให้ตำรวจ' },
+        requires: { characters: ['ex_insurance'] },
+        outcomes: [
+          {
+            text: { th: 'ตำรวจซื้อประกันอุบัติเหตุไปหนึ่งกรมธรรม์ และลืมถามว่าคุณโทรมาทำไม' },
+            effects: [
+              { kind: 'add', stat: 'dirtyCash', value: 3_000 },
+              { kind: 'add', stat: 'heat', value: -5 },
             ],
           },
         ],

@@ -23,6 +23,20 @@ export const shopItems: ShopItem[] = [
     desc: { th: 'จ้างเพจ "คนไทยชอบของถูก" โปรโมต รายได้วันนี้ +15% ต่อครั้ง' },
   },
   {
+    id: 'celebrity_promo',
+    kind: 'daily',
+    price: 6_000,
+    maxStack: 1,
+    minLevel: 3,
+    methodId: 'gambling',
+    incomePct: 60,
+    heatPct: 25,
+    name: { th: 'จ้างดาราโปรโมต' },
+    desc: {
+      th: 'จ้าง "คุณหลิว เสียงหวาน" ไลฟ์ชวนเล่นเว็บ รายได้เว็บพนันวันนี้ +60% แต่ Heat +25% เพราะดาราชอบพูดเกินบท',
+    },
+  },
+  {
     id: 'henchman',
     kind: 'henchman',
     price: 2_000,

@@ -1,10 +1,15 @@
 import type { GameContent } from '../src/types/content';
-import { victims, pitches } from './callCenter';
+import { victims, pitches, victimParts } from './callCenter';
+import { festivals, news } from './calendar';
 import { characters } from './characters';
 import { config } from './config';
 import { dangerSigns } from './dangerSigns';
 import { endings } from './endings';
+import { characterEvents } from './events/characters';
 import { karmaEvents } from './events/karma';
+import { newsEvents } from './events/news';
+import { seasonalEvents } from './events/seasonal';
+import { storyEvents } from './events/stories';
 import { luckyEvents } from './events/lucky';
 import { sillyEvents } from './events/silly';
 import { unluckyEvents } from './events/unlucky';
@@ -17,11 +22,23 @@ export const content: GameContent = {
   config,
   methods,
   launderCards,
-  events: [...luckyEvents, ...unluckyEvents, ...sillyEvents, ...karmaEvents],
+  events: [
+    ...luckyEvents,
+    ...unluckyEvents,
+    ...sillyEvents,
+    ...karmaEvents,
+    ...characterEvents,
+    ...storyEvents,
+    ...seasonalEvents,
+    ...newsEvents,
+  ],
   characters,
   shopItems,
   victims,
+  victimParts,
   pitches,
   dangerSigns,
   endings,
+  festivals,
+  news,
 };

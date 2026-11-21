@@ -10,9 +10,10 @@ describe('ข้อมูลเกม', () => {
   });
 
   it('มีเนื้อหาครบตาม Phase 1', () => {
-    expect(content.methods).toHaveLength(3);
-    expect(content.launderCards).toHaveLength(5);
-    expect(content.events.length).toBeGreaterThanOrEqual(15);
+    expect(content.methods).toHaveLength(7);
+    expect(content.launderCards.length).toBeGreaterThanOrEqual(10);
+    expect(content.events.length).toBeGreaterThanOrEqual(60);
+    expect(content.characters.length).toBeGreaterThanOrEqual(11);
     const cats = new Set(content.events.map((e) => e.category));
     expect(cats).toEqual(new Set(['lucky', 'unlucky', 'silly', 'karma']));
   });
@@ -64,7 +65,7 @@ describe('กติกา', () => {
     expect(s.phase).toBe('call');
     expect(s.call?.pitchIds).toHaveLength(3);
     // ต้องมีมุกที่ตรงจุดอ่อนอย่างน้อย 1 ตัว
-    const victim = content.victims.find((v) => v.id === s.call?.victimId);
+    const victim = s.call?.victim;
     const weaknesses = s.call?.pitchIds.map(
       (id) => content.pitches.find((p) => p.id === id)?.weakness,
     );
