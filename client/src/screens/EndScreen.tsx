@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import type { GameState } from '@hts/shared';
+import { awardRun } from '../game/meta';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, Panel } from '../components/ui';
@@ -13,6 +15,8 @@ export function EndScreen({
   onAgain: () => void;
   onMenu: () => void;
 }) {
+  // ให้แต้มแก๊งครั้งเดียวต่อรอบ (meta กันนับซ้ำด้วย seed อยู่แล้ว)
+  const [award] = useState(() => awardRun(state));
   const end = state.end;
   if (!end) return null;
   const ending = content.endings.find((e) => e.id === end.endingId);
@@ -52,6 +56,20 @@ export function EndScreen({
           {t('end.clean', { n: state.cleanCash })} · {t('end.days', { n: days })}
         </div>
       </Panel>
+
+      {(award.gained > 0 || award.unlocked.length > 0) && (
+        <div className="anim-rise-in flex flex-col gap-1 rounded-2xl border-[3px] border-ink bg-grape p-3 text-center text-white shadow-pop">
+          {award.gained > 0 && (
+            <div className="font-display text-lg">⭐ {t('end.xpGain', { n: award.gained })}</div>
+          )}
+          {award.unlocked.map((c) => (
+            <div key={c.id} className="font-display flex items-center justify-center gap-2">
+              <Art id={`char:${c.id}`} size={40} />
+              {t('end.unlocked', { name: lt(c.name) })}
+            </div>
+          ))}
+        </div>
+      )}
 
       <section className="anim-rise-in" style={{ animationDelay: '0.2s' }}>
         <h3 className="flex items-center gap-2 text-xl font-semibold">

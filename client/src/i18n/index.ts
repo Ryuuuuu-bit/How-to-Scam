@@ -1,5 +1,5 @@
 import type { LocalizedText } from '@hts/shared';
-import { th } from './th';
+import { th, thMonths } from './th';
 
 type Join<P extends string, K> = K extends string ? `${P}.${K}` : never;
 type Paths<T> = {
@@ -29,3 +29,6 @@ export function t(key: MessageKey, vars: Record<string, string | number> = {}): 
 export const lt = (text: LocalizedText): string => text.th;
 
 export const fmt = (n: number): string => Math.round(n).toLocaleString('th-TH');
+
+/** ชื่อเดือนย่อ (1–12) */
+export const monthName = (m: number): string => thMonths[m - 1] ?? '';

@@ -5,7 +5,7 @@ import { content } from '@hts/shared/data';
 
 // เซฟเก็บแค่ seed + ตัวละคร + action log แล้ว replay ตอนโหลด
 // รูปแบบเดียวกับที่จะส่งให้ server ตรวจใน Phase 3
-const SAVE_KEY = 'hts.save.v1';
+const SAVE_KEY = 'hts.save.v2';
 
 interface SaveData {
   seed: string;

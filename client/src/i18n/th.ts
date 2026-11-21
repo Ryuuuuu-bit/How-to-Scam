@@ -14,9 +14,14 @@ export const th = {
     leaderboardSoon: 'กระดานคะแนนออนไลน์ เร็วๆ นี้',
   },
   character: {
-    title: 'เลือกตัวละคร',
+    title: 'เลือกอาชีพ',
     start: 'เริ่มเลย',
     back: 'กลับ',
+    xp: 'แต้มแก๊ง {n}',
+    lockedXp: 'ปลดล็อกที่แต้มแก๊ง {n}',
+    lockedSecret: 'ตัวลับ: ปลดล็อกจากฉากจบพิเศษ',
+    pros: 'เด่น',
+    cons: 'ด้อย',
   },
   hud: {
     day: 'วันที่ {day}/{max}',
@@ -27,6 +32,14 @@ export const th = {
     level: 'แก๊ง Lv.{level}',
     henchmen: 'ลูกน้อง {n}',
     romance: 'เหยื่อติดใจ {n}',
+    date: '{date} {month}',
+  },
+  news: {
+    label: 'ข่าวประจำสัปดาห์',
+    until: 'ถึงวันที่ {n}',
+  },
+  festival: {
+    label: 'เทศกาล',
   },
   phase: {
     plan: 'วางแผนวันนี้',
@@ -44,6 +57,13 @@ export const th = {
     heat: 'Heat +{min}–{max}',
     locked: 'ปลดล็อกที่แก๊ง Lv.{level}',
     noMoney: 'เงินไม่พอ',
+    banned: 'อาชีพนี้ใช้ไม่ได้',
+    cooldown: 'พักชั่วคราว ถึงวันที่ {n}',
+    ponziRisk: 'โอกาสล่มวันนี้ {n}%',
+    ponziStreak: 'ทบต้น {n} วัน',
+    exposure: 'ชาวเน็ตขุด {n}%',
+    festivalBoost: 'ช่วงเทศกาล ×2',
+    boost: 'โบนัส {n}%',
     rest: 'พักวันนี้ (Heat -{n})',
     retire: 'เกษียณ',
     retireConfirm: 'เกษียณตอนนี้? รอบนี้จะจบทันทีและนับคะแนนจากเงินสะอาด',
@@ -53,12 +73,18 @@ export const th = {
     buy: 'ซื้อ ฿{n}',
     hire: 'จ้าง ฿{n}',
     owned: 'มีแล้ว {n}/{max}',
+    onlyFor: 'เฉพาะ{name}',
     go: 'เริ่มงาน!',
     restGo: 'นอนพักทั้งวัน',
   },
   call: {
     hint: 'อ่านนิสัยเหยื่อ แล้วเลือกมุกให้ตรงจุดอ่อน',
     age: 'อายุ {n}',
+    reveal: 'ตาทิพย์: จุดอ่อนคือ "{w}"',
+  },
+  weakness: { greed: 'โลภ', fear: 'กลัว', faith: 'ศรัทธา', lonely: 'เหงา' },
+  event: {
+    special: 'ทางเลือกพิเศษ',
   },
   launder: {
     hint: 'เลือกการ์ด 1 ใบ เพื่อเปลี่ยนเงินสกปรกเป็นเงินสะอาด',
@@ -92,6 +118,10 @@ export const th = {
     levelUp: 'แก๊งขึ้นเป็น Lv.{level}! ปลดล็อกวิธีใหม่',
     escapeOk: 'หนีรอด! ไปกบดานต่อ',
     escapeFail: 'หนีไม่รอด...',
+    viral: 'ไวรัล! ยอดบริจาค ×3',
+    exposed: 'ชาวเน็ตขุดเจอมูลนิธิ! Heat พุ่ง ปิดมูลนิธิชั่วคราว',
+    ponziCrash: 'แชร์ลูกโซ่ล่ม! สมาชิกแห่ถอนเงิน เงินสกปรกหายไป 30%',
+    newsTitle: 'ข่าวประจำสัปดาห์: {title}',
   },
   end: {
     reason: {
@@ -105,6 +135,8 @@ export const th = {
     dangerTitle: 'สัญญาณอันตราย ในชีวิตจริง',
     dangerHint: 'มุกในเกมเป็นเรื่องแต่ง แต่กลโกงแบบนี้มีอยู่จริง สังเกตแบบนี้:',
     again: 'เล่นอีกรอบ',
+    xpGain: 'ได้แต้มแก๊ง +{n}',
+    unlocked: 'ปลดล็อกอาชีพใหม่: {name}',
     menu: 'กลับเมนู',
   },
   common: {
@@ -113,3 +145,18 @@ export const th = {
 } as const;
 
 export type Messages = typeof th;
+
+export const thMonths = [
+  'ม.ค.',
+  'ก.พ.',
+  'มี.ค.',
+  'เม.ย.',
+  'พ.ค.',
+  'มิ.ย.',
+  'ก.ค.',
+  'ส.ค.',
+  'ก.ย.',
+  'ต.ค.',
+  'พ.ย.',
+  'ธ.ค.',
+];

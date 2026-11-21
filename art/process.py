@@ -27,12 +27,22 @@ SHEETS = {
         "misc--handcuffs", "misc--island", "misc--condo", "misc--skewer",
     ]),
     "sheet-characters": (3, 1, ["char--ex_insurance", "char--gamer_kid", "char--temple_kid"]),
+    "sheet-characters-2": (4, 2, [
+        "char--live_seller", "char--phone_tech", "char--fortune_teller", "char--rich_coach",
+        "char--fallen_star", "char--ex_banker", "char--share_auntie", "char--orange_cat",
+    ]),
+    "sheet-icons-c": (4, 4, [
+        "method--foundation", "method--merit", "method--gambling", "method--ponzi",
+        "card--specialty_cafe", "card--golden_durian", "card--ghost_concert", "card--accounting_firm",
+        "card--variegated_plant", "shop--celebrity_promo", "icon--news", "icon--festival",
+        "icon--cooldown", "icon--viral", "icon--ponzi_crash", "icon--exposed",
+    ]),
     "sheet-victims": (3, 2, [
         "victim--v_somsri", "victim--v_tong", "victim--v_boonma",
         "victim--v_praewa", "victim--v_kong", "victim--v_mali",
     ]),
 }
-SPRITE_MAX = {"sheet-characters": 360, "sheet-victims": 256}
+SPRITE_MAX = {"sheet-characters": 360, "sheet-characters-2": 360, "sheet-victims": 256}
 
 
 def remove_white_bg(img: Image.Image, tol: int = 38) -> Image.Image:

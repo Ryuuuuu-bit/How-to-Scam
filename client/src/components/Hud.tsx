@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { activeFestivals, dateOf } from '@hts/shared';
 import type { GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
-import { fmt, t } from '../i18n';
+import { fmt, lt, monthName, t } from '../i18n';
 import { Art } from './ui';
 
 /** ตัวเลขไหลขึ้น/ลงแบบนับ + ตัวเลขลอยบอกส่วนต่าง */
@@ -128,6 +129,8 @@ export function HeatBar({ heat }: { heat: number }) {
 }
 
 export function Hud({ state }: { state: GameState }) {
+  const date = dateOf(state, state.day);
+  const fests = activeFestivals(state, content);
   return (
     <header className="sticky top-0 z-20 border-b-[3px] border-ink bg-cream/95 px-3 pt-[max(env(safe-area-inset-top),8px)] pb-2 backdrop-blur">
       <div className="mx-auto flex max-w-md flex-col gap-1.5">
@@ -135,6 +138,9 @@ export function Hud({ state }: { state: GameState }) {
           <span className="flex items-center gap-1">
             <Art id="icon:day" size={20} />
             {t('hud.day', { day: state.day, max: content.config.maxDays })}
+            <span className="text-ink-soft">
+              · {date.date} {monthName(date.month)}
+            </span>
           </span>
           <span className="flex items-center gap-2 text-ink-soft">
             <span>{t('hud.level', { level: state.gangLevel })}</span>
@@ -165,6 +171,19 @@ export function Hud({ state }: { state: GameState }) {
           />
         </div>
         <HeatBar heat={state.heat} />
+        {fests.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {fests.map((f) => (
+              <span
+                key={f.id}
+                className="font-display flex items-center gap-1 rounded-full border-2 border-ink bg-sun px-2 text-xs"
+              >
+                <Art id="icon:festival" size={16} />
+                {lt(f.name)}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </header>
   );

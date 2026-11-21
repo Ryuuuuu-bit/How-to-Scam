@@ -23,13 +23,13 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
       };
     }
     case 'call': {
-      const [victimId, pitchId] = (r.textKey ?? '').split(':');
-      const victim = content.victims.find((v) => v.id === victimId);
+      const [victimId, pitchId, nameIdx] = (r.textKey ?? '').split(':');
+      const name = content.victimParts.names[Number(nameIdx)];
       const pitch = content.pitches.find((p) => p.id === pitchId);
       return {
         tone: r.success ? 'good' : 'bad',
         title: r.success ? t('result.callSuccess') : t('result.callFail'),
-        body: `${victim ? lt(victim.name) : ''}: "${pitch ? lt(pitch.text) : ''}"`,
+        body: `${name ? lt(name) : ''}: "${pitch ? lt(pitch.text) : ''}"`,
         art: `victim:${victimId}`,
       };
     }
@@ -74,6 +74,22 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
         title: t('result.levelUp', { level: s.gangLevel }),
         art: 'icon:clean',
       };
+    case 'viral':
+      return { tone: 'good', title: t('result.viral'), art: 'icon:viral' };
+    case 'exposed':
+      return { tone: 'bad', title: t('result.exposed'), art: 'icon:exposed' };
+    case 'ponziCrash':
+      return { tone: 'bad', title: t('result.ponziCrash'), art: 'icon:ponzi_crash' };
+    case 'news': {
+      const n = content.news.find((x) => x.id === r.textKey);
+      if (!n) return null;
+      return {
+        tone: 'neutral',
+        title: t('result.newsTitle', { title: lt(n.title) }),
+        body: lt(n.body),
+        art: 'icon:news',
+      };
+    }
     case 'escape':
       return {
         tone: r.success ? 'good' : 'bad',

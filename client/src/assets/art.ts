@@ -17,16 +17,34 @@ const EMOJI: Record<string, ArtEntry> = {
   'icon:rest': { emoji: '😴' },
   'icon:police': { emoji: '🚨' },
   'icon:goldfish': { emoji: '🐟' },
+  'icon:news': { emoji: '📰' },
+  'icon:festival': { emoji: '🏮' },
+  'icon:cooldown': { emoji: '⏳' },
+  'icon:viral': { emoji: '💥' },
+  'icon:ponzi_crash': { emoji: '📉' },
+  'icon:exposed': { emoji: '🔍' },
 
   // ตัวละคร
   'char:ex_insurance': { emoji: '🤵' },
   'char:gamer_kid': { emoji: '🎮' },
   'char:temple_kid': { emoji: '🐷' },
+  'char:live_seller': { emoji: '🤳' },
+  'char:phone_tech': { emoji: '🔧' },
+  'char:fortune_teller': { emoji: '🔮' },
+  'char:rich_coach': { emoji: '📈' },
+  'char:fallen_star': { emoji: '🕶️' },
+  'char:ex_banker': { emoji: '🏦' },
+  'char:share_auntie': { emoji: '📒' },
+  'char:orange_cat': { emoji: '🐈' },
 
   // วิธีโกง
   'method:fake_shop': { emoji: '📦' },
   'method:romance': { emoji: '💘' },
   'method:call_center': { emoji: '☎️' },
+  'method:foundation': { emoji: '🎗️' },
+  'method:merit': { emoji: '🎪' },
+  'method:gambling': { emoji: '🎰' },
+  'method:ponzi': { emoji: '🪙' },
 
   // การ์ดฟอกเงิน
   'card:goldfish': { emoji: '🐠' },
@@ -34,6 +52,12 @@ const EMOJI: Record<string, ArtEntry> = {
   'card:cat_painting': { emoji: '🖼️' },
   'card:empty_mookata': { emoji: '🥓' },
   'card:temple_change': { emoji: '🧧' },
+  'card:specialty_cafe': { emoji: '☕' },
+  'card:golden_durian': { emoji: '🍈' },
+  'card:ghost_concert': { emoji: '🎫' },
+  'card:accounting_firm': { emoji: '🧮' },
+  'card:variegated_plant': { emoji: '🪴' },
+  'shop:celebrity_promo': { emoji: '🎤' },
 
   // ร้านค้า
   'shop:sim_pack': { emoji: '📱' },
@@ -63,6 +87,8 @@ const EMOJI: Record<string, ArtEntry> = {
   'ending:out_scammed_abroad': { emoji: '🏝️' },
   'ending:rich_alone': { emoji: '🏙️' },
   'ending:confused_retiree': { emoji: '🍖' },
+  'ending:home_again': { emoji: '🏡' },
+  'ending:comeback_star': { emoji: '🌟' },
   danger: { emoji: '⚠️' },
 };
 

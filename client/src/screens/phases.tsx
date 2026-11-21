@@ -1,5 +1,14 @@
-import type { Action, GameState } from '@hts/shared';
-import { unlockedMethods } from '@hts/shared';
+import type { Action, GameState, ScamMethod } from '@hts/shared';
+import {
+  activeFestivals,
+  choiceAvailable,
+  currentNews,
+  launderSuccessPct,
+  methodBlock,
+  perksOfKind,
+  ponziCrashPct,
+  priceOf,
+} from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, Panel, ScreenTitle } from '../components/ui';
@@ -11,30 +20,86 @@ interface PhaseProps {
 
 const money = (s: GameState) => s.dirtyCash + s.cleanCash;
 
+/** ข่าวประจำสัปดาห์ แสดงบนหน้าวางแผน */
+function NewsCard({ state }: { state: GameState }) {
+  const n = currentNews(state, content);
+  if (!n) return null;
+  return (
+    <div className="anim-rise-in mb-3 flex items-start gap-2 rounded-2xl border-[3px] border-ink bg-white p-2.5 shadow-pop-sm">
+      <Art id="icon:news" size={40} className="shrink-0" />
+      <div className="min-w-0">
+        <div className="text-[11px] font-semibold text-ink-soft">
+          {t('news.label')} · {t('news.until', { n: state.news?.untilDay ?? 0 })}
+        </div>
+        <div className="font-display leading-tight font-semibold">{lt(n.title)}</div>
+        <div className="text-xs text-ink-soft">{lt(n.body)}</div>
+      </div>
+    </div>
+  );
+}
+
+/** ป้ายสถานะเฉพาะของแต่ละวิธีโกง */
+function MethodChips({ state, m }: { state: GameState; m: ScamMethod }) {
+  const ms = state.methodState[m.id];
+  const chips: { text: string; cls: string }[] = [];
+  if (m.mechanic === 'romance' && state.romance.bond > 0) {
+    chips.push({ text: t('hud.romance', { n: state.romance.bond }), cls: 'text-pink' });
+  }
+  if (m.mechanic === 'ponzi') {
+    if (ms?.streak)
+      chips.push({ text: t('plan.ponziStreak', { n: ms.streak }), cls: 'text-clean' });
+    chips.push({
+      text: t('plan.ponziRisk', { n: ponziCrashPct(state, content) }),
+      cls: 'text-danger',
+    });
+  }
+  if (m.mechanic === 'foundation' && ms?.exposure) {
+    chips.push({ text: t('plan.exposure', { n: Math.min(99, ms.exposure) }), cls: 'text-danger' });
+  }
+  if (m.mechanic === 'merit' && activeFestivals(state, content).length > 0) {
+    chips.push({ text: t('plan.festivalBoost'), cls: 'text-clean' });
+  }
+  return (
+    <>
+      {chips.map((c) => (
+        <Chip key={c.text} className={c.cls}>
+          {c.text}
+        </Chip>
+      ))}
+    </>
+  );
+}
+
 // ---------- 1. วางแผน ----------
 export function PlanPhase({ state, dispatch }: PhaseProps) {
-  const unlocked = new Set(unlockedMethods(state, content).map((m) => m.id));
   return (
     <>
       <ScreenTitle title={t('phase.plan')} hint={t('plan.hint')} />
+      <NewsCard state={state} />
       <div className="flex flex-col gap-3">
         {content.methods.map((m, i) => {
-          const locked = !unlocked.has(m.id);
+          const block = methodBlock(state, content, m);
           const broke = money(state) < m.cost;
-          const bond = m.mechanic === 'romance' && state.romance.bond > 0;
+          const hidden = block === 'level';
           return (
             <button
               key={m.id}
               type="button"
-              disabled={locked || broke}
+              disabled={block !== null || broke}
               onClick={() => dispatch({ t: 'choosePlan', methodId: m.id })}
-              className="anim-rise-in flex items-start gap-3 rounded-3xl border-[3px] border-ink bg-paper p-3 text-left shadow-pop transition active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:shadow-none"
-              style={{ animationDelay: `${i * 0.05}s` }}
+              className="anim-rise-in flex items-start gap-3 rounded-3xl border-[3px] border-ink bg-paper p-3 text-left shadow-pop transition active:translate-y-1 active:shadow-none disabled:opacity-55 disabled:shadow-none"
+              style={{ animationDelay: `${i * 0.04}s` }}
             >
-              <Art id={locked ? 'icon:lock' : `method:${m.id}`} size={52} className="shrink-0" />
+              <Art
+                id={
+                  hidden ? 'icon:lock' : block === 'cooldown' ? 'icon:cooldown' : `method:${m.id}`
+                }
+                size={52}
+                className="shrink-0"
+              />
               <div className="min-w-0 flex-1">
                 <div className="font-display text-lg font-semibold">{lt(m.name)}</div>
-                {locked ? (
+                {hidden ? (
                   <div className="text-sm text-ink-soft">
                     {t('plan.locked', { level: m.level })}
                   </div>
@@ -49,9 +114,13 @@ export function PlanPhase({ state, dispatch }: PhaseProps) {
                       <Chip className="text-danger">
                         {t('plan.heat', { min: m.heat[0], max: m.heat[1] })}
                       </Chip>
-                      {bond && (
-                        <Chip className="text-pink">
-                          {t('hud.romance', { n: state.romance.bond })}
+                      <MethodChips state={state} m={m} />
+                      {block === 'banned' && (
+                        <Chip className="text-danger">{t('plan.banned')}</Chip>
+                      )}
+                      {block === 'cooldown' && (
+                        <Chip className="text-danger">
+                          {t('plan.cooldown', { n: state.methodState[m.id]?.cooldownUntil ?? 0 })}
                         </Chip>
                       )}
                       {broke && <Chip className="text-danger">{t('plan.noMoney')}</Chip>}
@@ -86,46 +155,80 @@ function RetireButton({ dispatch }: { dispatch: PhaseProps['dispatch'] }) {
   );
 }
 
+function ItemRow({
+  state,
+  itemId,
+  owned,
+  label,
+  onBuy,
+}: {
+  state: GameState;
+  itemId: string;
+  owned: number;
+  label: (price: number) => string;
+  onBuy: () => void;
+}) {
+  const it = content.shopItems.find((x) => x.id === itemId);
+  if (!it) return null;
+  const price = priceOf(state, content, it.id, it.price);
+  const maxed = owned >= it.maxStack;
+  const only = it.methodId ? content.methods.find((m) => m.id === it.methodId) : undefined;
+  return (
+    <Panel className="flex items-center gap-3 p-3">
+      <Art id={`shop:${it.id}`} size={44} className="shrink-0" />
+      <div className="min-w-0 flex-1">
+        <div className="font-display font-semibold">{lt(it.name)}</div>
+        <div className="text-xs text-ink-soft">{lt(it.desc)}</div>
+        <div className="mt-1 flex flex-wrap gap-1 text-xs font-semibold">
+          <span>{t('invest.owned', { n: owned, max: it.maxStack })}</span>
+          {only && (
+            <span className="text-grape">· {t('invest.onlyFor', { name: lt(only.name) })}</span>
+          )}
+          {price < it.price && (
+            <span className="text-clean line-through decoration-2">฿{it.price}</span>
+          )}
+        </div>
+      </div>
+      <Button
+        tone="sun"
+        className="shrink-0 px-3 py-2 text-sm"
+        disabled={maxed || money(state) < price}
+        onClick={onBuy}
+      >
+        {maxed ? t('shop.maxed') : label(price)}
+      </Button>
+    </Panel>
+  );
+}
+
 // ---------- 2. ลงทุน ----------
 export function InvestPhase({ state, dispatch }: PhaseProps) {
   const resting = state.todayMethodId === null;
   const items = content.shopItems.filter(
     (it) =>
       (it.kind === 'daily' || it.kind === 'henchman') &&
-      (!it.minLevel || it.minLevel <= state.gangLevel),
+      (!it.minLevel || it.minLevel <= state.gangLevel) &&
+      (!it.methodId || it.methodId === state.todayMethodId),
   );
   return (
     <>
       <ScreenTitle title={t('phase.invest')} hint={t('invest.hint')} />
       {!resting && (
         <div className="flex flex-col gap-3">
-          {items.map((it) => {
-            const owned =
-              it.kind === 'henchman' ? state.henchmen.length : (state.dailyItems[it.id] ?? 0);
-            const maxed = owned >= it.maxStack;
-            return (
-              <Panel key={it.id} className="flex items-center gap-3 p-3">
-                <Art id={`shop:${it.id}`} size={44} className="shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <div className="font-display font-semibold">{lt(it.name)}</div>
-                  <div className="text-xs text-ink-soft">{lt(it.desc)}</div>
-                  <div className="mt-1 text-xs font-semibold">
-                    {t('invest.owned', { n: owned, max: it.maxStack })}
-                  </div>
-                </div>
-                <Button
-                  tone="sun"
-                  className="shrink-0 px-3 py-2 text-sm"
-                  disabled={maxed || money(state) < it.price}
-                  onClick={() => dispatch({ t: 'invest', itemId: it.id })}
-                >
-                  {it.kind === 'henchman'
-                    ? t('invest.hire', { n: it.price })
-                    : t('invest.buy', { n: it.price })}
-                </Button>
-              </Panel>
-            );
-          })}
+          {items.map((it) => (
+            <ItemRow
+              key={it.id}
+              state={state}
+              itemId={it.id}
+              owned={
+                it.kind === 'henchman' ? state.henchmen.length : (state.dailyItems[it.id] ?? 0)
+              }
+              label={(n) =>
+                it.kind === 'henchman' ? t('invest.hire', { n }) : t('invest.buy', { n })
+              }
+              onBuy={() => dispatch({ t: 'invest', itemId: it.id })}
+            />
+          ))}
         </div>
       )}
       <Button
@@ -143,19 +246,31 @@ export function InvestPhase({ state, dispatch }: PhaseProps) {
 // ---------- มินิเกมคอลเซ็นเตอร์ ----------
 export function CallPhase({ state, dispatch }: PhaseProps) {
   const call = state.call;
-  const victim = content.victims.find((v) => v.id === call?.victimId);
-  if (!call || !victim) return null;
+  if (!call) return null;
+  const v = call.victim;
+  const parts = content.victimParts;
+  const name = parts.names[v.nameIdx];
+  const job = parts.jobs[v.jobIdx];
+  const trait = parts.traits[v.weakness][v.traitIdx];
+  const reveal = perksOfKind(state, content, 'revealWeakness').some((p) =>
+    p.weaknesses.includes(v.weakness),
+  );
   return (
     <>
       <ScreenTitle title={t('phase.call')} hint={t('call.hint')} />
       <Panel tone="sun" className="anim-rise-in flex items-center gap-3">
-        <Art id={`victim:${victim.id}`} size={72} className="shrink-0" />
+        <Art id={`victim:${v.portrait}`} size={76} className="shrink-0" />
         <div>
-          <div className="font-display text-lg font-semibold">{lt(victim.name)}</div>
+          <div className="font-display text-lg font-semibold">{name ? lt(name) : ''}</div>
           <div className="text-sm">
-            {t('call.age', { n: victim.age })} · {lt(victim.job)}
+            {t('call.age', { n: v.age })} · {job ? lt(job.text) : ''}
           </div>
-          <div className="mt-1 text-sm italic">“{lt(victim.trait)}”</div>
+          <div className="mt-1 text-sm italic">“{trait ? lt(trait) : ''}”</div>
+          {reveal && (
+            <div className="mt-1 inline-block rounded-full border-2 border-ink bg-grape px-2 text-xs font-semibold text-white">
+              🔮 {t('call.reveal', { w: t(`weakness.${v.weakness}`) })}
+            </div>
+          )}
         </div>
       </Panel>
       <div className="mt-4 flex flex-col gap-3">
@@ -183,6 +298,7 @@ export function CallPhase({ state, dispatch }: PhaseProps) {
 export function EventPhase({ state, dispatch }: PhaseProps) {
   const ev = content.events.find((e) => e.id === state.pendingEvents[0]);
   if (!ev) return null;
+  const tones = ['pink', 'mint', 'grape'] as const;
   return (
     <>
       <ScreenTitle title={t('phase.event')} />
@@ -194,17 +310,26 @@ export function EventPhase({ state, dispatch }: PhaseProps) {
         <p className="mt-2">{lt(ev.body)}</p>
       </Panel>
       <div className="mt-4 flex flex-col gap-3">
-        {ev.choices.map((c, i) => (
-          <Button
-            key={i}
-            tone={i === 0 ? 'pink' : i === 1 ? 'mint' : 'grape'}
-            block
-            className="text-left"
-            onClick={() => dispatch({ t: 'eventChoice', choiceIdx: i })}
-          >
-            {lt(c.text)}
-          </Button>
-        ))}
+        {ev.choices.map((c, i) => {
+          if (!choiceAvailable(state, c.requires)) return null;
+          const special = Boolean(c.requires);
+          return (
+            <Button
+              key={i}
+              tone={special ? 'sun' : (tones[i % 3] ?? 'pink')}
+              block
+              className={`text-left ${special ? 'ring-4 ring-grape/40' : ''}`}
+              onClick={() => dispatch({ t: 'eventChoice', choiceIdx: i })}
+            >
+              {special && (
+                <span className="mr-1 rounded-full bg-grape px-2 py-0.5 text-xs text-white">
+                  ✨ {t('event.special')}
+                </span>
+              )}
+              {lt(c.text)}
+            </Button>
+          );
+        })}
       </div>
     </>
   );
@@ -242,7 +367,9 @@ export function LaunderPhase({ state, dispatch }: PhaseProps) {
                 </div>
               </div>
               <div className="mt-2 flex flex-wrap gap-1">
-                <Chip className="text-clean">{t('launder.success', { n: c.successPct })}</Chip>
+                <Chip className="text-clean">
+                  {t('launder.success', { n: launderSuccessPct(state, content, c.id) })}
+                </Chip>
                 <Chip>{t('launder.loss', { n: c.lossPct })}</Chip>
                 <Chip className="text-danger">{t('launder.heat', { n: c.heat })}</Chip>
                 <Chip>{t('launder.capacity', { n: amount })}</Chip>
@@ -273,30 +400,16 @@ export function ShopPhase({ state, dispatch }: PhaseProps) {
     <>
       <ScreenTitle title={t('phase.shop')} hint={t('shop.hint')} />
       <div className="flex flex-col gap-3">
-        {items.map((it) => {
-          const owned = state.upgrades[it.id] ?? 0;
-          const maxed = owned >= it.maxStack;
-          return (
-            <Panel key={it.id} className="flex items-center gap-3 p-3">
-              <Art id={`shop:${it.id}`} size={44} className="shrink-0" />
-              <div className="min-w-0 flex-1">
-                <div className="font-display font-semibold">{lt(it.name)}</div>
-                <div className="text-xs text-ink-soft">{lt(it.desc)}</div>
-                <div className="mt-1 text-xs font-semibold">
-                  {t('invest.owned', { n: owned, max: it.maxStack })}
-                </div>
-              </div>
-              <Button
-                tone="sun"
-                className="shrink-0 px-3 py-2 text-sm"
-                disabled={maxed || money(state) < it.price}
-                onClick={() => dispatch({ t: 'buy', itemId: it.id })}
-              >
-                {maxed ? t('shop.maxed') : t('shop.buy', { n: it.price })}
-              </Button>
-            </Panel>
-          );
-        })}
+        {items.map((it) => (
+          <ItemRow
+            key={it.id}
+            state={state}
+            itemId={it.id}
+            owned={state.upgrades[it.id] ?? 0}
+            label={(n) => t('shop.buy', { n })}
+            onBuy={() => dispatch({ t: 'buy', itemId: it.id })}
+          />
+        ))}
       </div>
       <div className="mt-4 grid grid-cols-[1fr_auto] gap-3">
         <Button tone="pink" onClick={() => dispatch({ t: 'endDay' })}>
@@ -313,8 +426,10 @@ export function EscapePhase({ dispatch }: PhaseProps) {
   return (
     <div className="flex flex-col items-center gap-4 pt-6 text-center">
       <Art id="icon:police" size={110} className="anim-shake" />
-      <h2 className="text-3xl font-semibold text-danger">{t('phase.escape')}</h2>
-      <p>{t('escape.body')}</p>
+      <h2 className="rounded-2xl border-[3px] border-ink bg-paper px-3 text-3xl font-semibold text-danger">
+        {t('phase.escape')}
+      </h2>
+      <p className="rounded-2xl bg-paper/90 p-2">{t('escape.body')}</p>
       <Button
         tone="danger"
         block
