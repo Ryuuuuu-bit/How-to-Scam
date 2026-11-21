@@ -25,7 +25,7 @@ export function CharacterSelect({
               className={`anim-rise-in flex items-center gap-3 rounded-3xl border-[3px] border-ink p-3 text-left transition ${active ? 'bg-sun shadow-pop' : 'bg-paper opacity-80'}`}
               style={{ animationDelay: `${i * 0.06}s` }}
             >
-              <Art id={`char:${c.id}`} size={72} className="shrink-0" />
+              <Art id={`char:${c.id}`} size={96} className="shrink-0" />
               <div>
                 <div className="font-display text-lg font-semibold">{lt(c.name)}</div>
                 <div className="text-sm text-ink-soft">{lt(c.desc)}</div>

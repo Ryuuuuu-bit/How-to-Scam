@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Action, GameState } from '@hts/shared';
 import { Hud } from '../components/Hud';
 import { ResultSheet } from '../components/ResultSheet';
+import { SceneBackdrop } from '../components/SceneBackdrop';
 import { describeResult } from '../game/results';
 import type { ResultLine } from '../game/results';
 import {
@@ -35,13 +36,21 @@ export function PlayScreen({
   }, [tick]);
 
   const props = { state, dispatch };
+  const scene =
+    state.phase === 'event' && state.pendingEvents[0]
+      ? `ev_${state.pendingEvents[0]}`
+      : state.phase;
+  // ฉากเหตุการณ์/คอลเซ็นเตอร์/หนีตำรวจ เปิดภาพให้เห็นเยอะ หน้าที่เป็นรายการให้เห็นน้อยลง
+  const tall = ['event', 'call', 'escape'].includes(state.phase);
   return (
-    <div className="min-h-dvh">
+    <div className="relative min-h-dvh">
+      <SceneBackdrop id={scene} />
       <Hud state={state} />
       <main
-        className="mx-auto max-w-md px-4 pt-4 pb-[max(env(safe-area-inset-bottom),24px)]"
-        key={`${state.day}-${state.phase}`}
+        className="relative z-10 mx-auto max-w-md px-4 pb-[max(env(safe-area-inset-bottom),24px)]"
+        key={`${state.day}-${state.phase}-${state.pendingEvents[0] ?? ''}`}
       >
+        <div className={tall ? 'h-[30vh]' : 'h-[12vh]'} />
         {state.phase === 'plan' && <PlanPhase {...props} />}
         {state.phase === 'invest' && <InvestPhase {...props} />}
         {state.phase === 'call' && <CallPhase {...props} />}

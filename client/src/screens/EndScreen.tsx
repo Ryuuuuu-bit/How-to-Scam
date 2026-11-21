@@ -2,6 +2,7 @@ import type { GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, Panel } from '../components/ui';
+import { sceneUrl } from '../assets/art';
 
 export function EndScreen({
   state,
@@ -30,7 +31,15 @@ export function EndScreen({
 
       {ending && (
         <Panel tone="sun" className="anim-rise-in text-center">
-          <Art id={`ending:${ending.id}`} size={96} className="mx-auto" />
+          {sceneUrl(`end_${ending.id}`) ? (
+            <img
+              src={sceneUrl(`end_${ending.id}`)}
+              alt=""
+              className="anim-scene-in aspect-[4/3] w-full rounded-2xl border-[3px] border-ink object-cover object-top"
+            />
+          ) : (
+            <Art id={`ending:${ending.id}`} size={96} className="mx-auto" />
+          )}
           <h2 className="mt-2 text-2xl font-semibold">{lt(ending.title)}</h2>
           <p className="mt-1">{lt(ending.body)}</p>
         </Panel>

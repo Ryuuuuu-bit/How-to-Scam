@@ -5,7 +5,7 @@ export interface ArtEntry {
   src?: string;
 }
 
-export const ART: Record<string, ArtEntry> = {
+const EMOJI: Record<string, ArtEntry> = {
   // ไอคอน HUD
   'icon:dirty': { emoji: '💰' },
   'icon:clean': { emoji: '💎' },
@@ -65,3 +65,20 @@ export const ART: Record<string, ArtEntry> = {
   'ending:confused_retiree': { emoji: '🍖' },
   danger: { emoji: '⚠️' },
 };
+
+// ภาพจริงใน ./img โหลดอัตโนมัติ: ชื่อไฟล์ "icon--dirty.webp" → id "icon:dirty"
+const files = import.meta.glob<string>('./img/*.webp', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
+export const ART: Record<string, ArtEntry> = { ...EMOJI };
+for (const [path, url] of Object.entries(files)) {
+  const id = path.replace('./img/', '').replace('.webp', '').replace('--', ':');
+  ART[id] = { emoji: EMOJI[id]?.emoji ?? '', src: url };
+}
+if (ART['icon:henchman']?.src) ART['shop:henchman'] = ART['icon:henchman'];
+
+/** URL ของฉากพื้นหลัง (ถ้ายังไม่มีภาพคืน undefined) */
+export const sceneUrl = (id: string): string | undefined => ART[`scene:${id}`]?.src;

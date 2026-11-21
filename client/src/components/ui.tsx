@@ -94,9 +94,9 @@ export function Art({
 
 export function ScreenTitle({ title, hint }: { title: string; hint?: string }) {
   return (
-    <div className="mb-3">
-      <h2 className="text-2xl font-semibold">{title}</h2>
-      {hint && <p className="text-sm text-ink-soft">{hint}</p>}
+    <div className="mb-3 inline-block max-w-full -rotate-1 rounded-2xl border-[3px] border-ink bg-sun px-3 py-1.5 shadow-pop-sm">
+      <h2 className="text-xl leading-tight font-semibold">{title}</h2>
+      {hint && <p className="text-xs leading-snug">{hint}</p>}
     </div>
   );
 }

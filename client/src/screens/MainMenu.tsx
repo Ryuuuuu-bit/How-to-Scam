@@ -1,6 +1,7 @@
 import type { Run } from '../game/useGame';
 import { t } from '../i18n';
 import { Art, Button } from '../components/ui';
+import { SceneBackdrop } from '../components/SceneBackdrop';
 
 export function MainMenu({
   saved,
@@ -12,19 +13,20 @@ export function MainMenu({
   onContinue: () => void;
 }) {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-6 px-4 py-10 text-center">
-      <div className="anim-rise-in flex gap-1">
-        <Art id="char:ex_insurance" size={72} />
-        <Art id="char:gamer_kid" size={72} />
-        <Art id="char:temple_kid" size={72} />
+    <main className="relative mx-auto flex min-h-dvh max-w-md flex-col items-center justify-end gap-5 px-4 pt-10 pb-[max(env(safe-area-inset-bottom),28px)] text-center">
+      <SceneBackdrop id="menu" />
+      <div className="anim-rise-in relative z-10 -mb-3 flex items-end">
+        <Art id="char:ex_insurance" size={112} />
+        <Art id="char:gamer_kid" size={112} className="-mx-3" />
+        <Art id="char:temple_kid" size={112} />
       </div>
-      <div className="anim-rise-in">
+      <div className="anim-rise-in relative z-10">
         <h1 className="text-5xl font-semibold tracking-tight text-pink drop-shadow-[3px_3px_0_#2b2140]">
           {t('app.title')}
         </h1>
         <p className="font-display mt-1 text-lg">{t('app.subtitle')}</p>
       </div>
-      <div className="flex w-full flex-col gap-3">
+      <div className="relative z-10 flex w-full flex-col gap-3">
         {saved && (
           <Button tone="mint" block onClick={onContinue}>
             {t('menu.continue', { day: saved.state.day })}
@@ -43,7 +45,7 @@ export function MainMenu({
           {t('menu.leaderboardSoon')}
         </Button>
       </div>
-      <p className="text-xs text-ink-soft">{t('app.disclaimer')}</p>
+      <p className="relative z-10 text-xs text-ink-soft">{t('app.disclaimer')}</p>
     </main>
   );
 }
