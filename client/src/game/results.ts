@@ -1,0 +1,84 @@
+import type { GameState, LastResult } from '@hts/shared';
+import { content } from '@hts/shared/data';
+import { fmt, lt, t } from '../i18n';
+
+export interface ResultLine {
+  tone: 'good' | 'bad' | 'neutral';
+  title: string;
+  body?: string;
+  art?: string;
+}
+
+/** แปลงผลจาก engine เป็นข้อความสำหรับแสดงบนจอ */
+export function describeResult(r: LastResult, s: GameState): ResultLine | null {
+  switch (r.kind) {
+    case 'resolve': {
+      const income = r.dirtyCash ?? 0;
+      const heat = r.heat ?? 0;
+      return {
+        tone: income > 0 ? 'good' : 'bad',
+        title: income > 0 ? `${t('result.income')} +฿${fmt(income)}` : t('result.noIncome'),
+        ...(heat > 0 ? { body: `${t('result.heatUp')} +${heat}` } : {}),
+        art: income > 0 ? 'icon:dirty' : 'icon:rest',
+      };
+    }
+    case 'call': {
+      const [victimId, pitchId] = (r.textKey ?? '').split(':');
+      const victim = content.victims.find((v) => v.id === victimId);
+      const pitch = content.pitches.find((p) => p.id === pitchId);
+      return {
+        tone: r.success ? 'good' : 'bad',
+        title: r.success ? t('result.callSuccess') : t('result.callFail'),
+        body: `${victim ? lt(victim.name) : ''}: "${pitch ? lt(pitch.text) : ''}"`,
+        art: `victim:${victimId}`,
+      };
+    }
+    case 'event': {
+      const [eventId, ci, oi] = (r.textKey ?? '').split(':');
+      const ev = content.events.find((e) => e.id === eventId);
+      const outcome = ev?.choices[Number(ci)]?.outcomes[Number(oi)];
+      if (!ev || !outcome) return null;
+      const parts: string[] = [];
+      if (r.dirtyCash)
+        parts.push(
+          `${t('hud.dirty')} ${r.dirtyCash > 0 ? '+' : '−'}฿${fmt(Math.abs(r.dirtyCash))}`,
+        );
+      if (r.cleanCash)
+        parts.push(
+          `${t('hud.clean')} ${r.cleanCash > 0 ? '+' : '−'}฿${fmt(Math.abs(r.cleanCash))}`,
+        );
+      if (r.heat) parts.push(`Heat ${r.heat > 0 ? '+' : ''}${r.heat}`);
+      return {
+        tone:
+          (r.dirtyCash ?? 0) + (r.cleanCash ?? 0) >= 0 && (r.heat ?? 0) <= 0 ? 'good' : 'neutral',
+        title: lt(outcome.text),
+        ...(parts.length ? { body: parts.join(' · ') } : {}),
+        art: `event:${ev.category}`,
+      };
+    }
+    case 'launder': {
+      const card = content.launderCards.find((c) => c.id === r.textKey);
+      if (!card) return null;
+      return {
+        tone: r.success ? 'good' : 'bad',
+        title: r.success ? t('result.launderSuccess') : t('result.launderFail'),
+        body: lt(r.success ? card.successText : card.failText),
+        art: `card:${card.id}`,
+      };
+    }
+    case 'romanceFled':
+      return { tone: 'bad', title: t('result.romanceFled'), art: 'method:romance' };
+    case 'levelUp':
+      return {
+        tone: 'good',
+        title: t('result.levelUp', { level: s.gangLevel }),
+        art: 'icon:clean',
+      };
+    case 'escape':
+      return {
+        tone: r.success ? 'good' : 'bad',
+        title: r.success ? t('result.escapeOk') : t('result.escapeFail'),
+        art: 'icon:police',
+      };
+  }
+}

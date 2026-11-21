@@ -1,4 +1,4 @@
 packages:
   - shared
-  # - client  (Phase 2)
+  - client
   # - server  (Phase 3)
