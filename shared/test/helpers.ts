@@ -1,0 +1,47 @@
+import { content } from '../data';
+import { newGame, step, unlockedMethods } from '../src';
+import type { Action, GameState } from '../src';
+
+/** บอทเล่นอัตโนมัติแบบตายตัว (ไม่มีสุ่มของตัวเอง) ใช้ทดสอบทั้งรอบ */
+export function botAction(s: GameState): Action {
+  const money = s.dirtyCash + s.cleanCash;
+  switch (s.phase) {
+    case 'plan': {
+      if (s.day === 30 && s.cleanCash > 0 && s.heat > 90) return { t: 'retire' };
+      if (s.heat > 85) return { t: 'choosePlan', methodId: null };
+      const options = unlockedMethods(s, content).filter((m) => m.cost <= money);
+      if (options.length === 0) return { t: 'choosePlan', methodId: null };
+      // สลับวิธีตามวัน เพื่อให้ทดสอบหลายกลไก
+      const m = options[s.day % options.length];
+      return { t: 'choosePlan', methodId: m?.id ?? null };
+    }
+    case 'invest': {
+      const bought = s.dailyItems['ads'] ?? 0;
+      if (bought === 0 && money > 10_000 && s.todayMethodId) return { t: 'invest', itemId: 'ads' };
+      return { t: 'confirmInvest' };
+    }
+    case 'call':
+      return { t: 'callPitch', pitchId: s.call?.pitchIds[0] ?? '' };
+    case 'event':
+      return { t: 'eventChoice', choiceIdx: 0 };
+    case 'launder':
+      return { t: 'launder', cardId: s.launderOffer[0] ?? null };
+    case 'shop':
+      return { t: 'endDay' };
+    case 'escape':
+      return { t: 'escapeAttempt' };
+    case 'ended':
+      throw new Error('game ended');
+  }
+}
+
+export function autoPlay(seed: string, characterId = 'ex_insurance') {
+  let s = newGame(seed, characterId, content);
+  const actions: Action[] = [];
+  for (let i = 0; i < 5_000 && s.phase !== 'ended'; i++) {
+    const a = botAction(s);
+    actions.push(a);
+    s = step(s, a, content);
+  }
+  return { state: s, actions };
+}
