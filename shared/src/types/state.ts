@@ -7,9 +7,11 @@ import type {
   EventId,
   GangLevel,
   MethodId,
+  NewsId,
   PitchId,
   ShopItemId,
   VictimId,
+  Weakness,
 } from './content';
 
 /**
@@ -42,10 +44,32 @@ export interface RomanceState {
   idleDays: number;
 }
 
+/** เหยื่อที่สุ่มประกอบขึ้นสำหรับสายนี้ (เก็บเป็น index ของชิ้นส่วนใน data) */
+export interface CallVictim {
+  /** รูปหน้าตา (id ใน content.victims) */
+  portrait: VictimId;
+  nameIdx: number;
+  jobIdx: number;
+  traitIdx: number;
+  age: number;
+  weakness: Weakness;
+  wealth: number;
+}
+
 export interface CallState {
-  victimId: VictimId;
+  victim: CallVictim;
   /** มุก 3 ตัวเลือก */
   pitchIds: PitchId[];
+}
+
+/** สถานะเฉพาะของแต่ละวิธีโกง */
+export interface MethodState {
+  /** ทำติดกันกี่วัน (แชร์ลูกโซ่) */
+  streak: number;
+  /** มาตรวัดชาวเน็ตขุด 0–100 (มูลนิธิ) */
+  exposure: number;
+  /** ปิดใช้งานถึงวันนี้ (รวม) */
+  cooldownUntil: number;
 }
 
 export interface DayLog {
@@ -61,7 +85,18 @@ export interface DayLog {
 
 /** ผลล่าสุดที่ UI เอาไปแสดง (ข้อความ + ตัวเลขที่เปลี่ยน) */
 export interface LastResult {
-  kind: 'resolve' | 'call' | 'event' | 'launder' | 'escape' | 'romanceFled' | 'levelUp';
+  kind:
+    | 'resolve'
+    | 'call'
+    | 'event'
+    | 'launder'
+    | 'escape'
+    | 'romanceFled'
+    | 'levelUp'
+    | 'viral'
+    | 'exposed'
+    | 'ponziCrash'
+    | 'news';
   textKey?: string;
   dirtyCash?: number;
   cleanCash?: number;
@@ -70,11 +105,14 @@ export interface LastResult {
 }
 
 export interface GameState {
-  version: 1;
+  version: 2;
   seed: string;
   /** สถานะภายในของ RNG (uint32) */
   rng: number;
   day: number;
+  /** ปฏิทินของรอบนี้: วันที่ 1 ของเกมตรงกับวันที่เท่าไหร่ เดือนอะไร */
+  startMonth: number;
+  startDate: number;
   phase: DayPhase;
   characterId: CharacterId;
   gangLevel: GangLevel;
@@ -94,8 +132,15 @@ export interface GameState {
   /** อัปเกรดถาวรที่ซื้อแล้ว */
   upgrades: Record<ShopItemId, number>;
   todayMethodId: MethodId | null;
+  /** ทำงานติดกันกี่วัน (วันพักรีเซ็ต) */
+  workStreak: number;
   romance: RomanceState;
+  methodState: Record<MethodId, MethodState>;
   call: CallState | null;
+  /** ข่าวประจำสัปดาห์ที่มีผลอยู่ */
+  news: { id: NewsId; untilDay: number } | null;
+  /** เหตุการณ์ต่อเนื่องที่ถูกนัดไว้ */
+  scheduled: { eventId: EventId; day: number }[];
   pendingEvents: EventId[];
   seenEvents: EventId[];
   launderOffer: CardId[];

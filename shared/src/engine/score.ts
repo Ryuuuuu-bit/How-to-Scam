@@ -22,6 +22,7 @@ export function pickEnding(s: GameState, c: GameContent, reason: EndReason): str
     if (w.karma && (s.karma < w.karma[0] || s.karma > w.karma[1])) continue;
     if (w.minCleanCash !== undefined && s.cleanCash < w.minCleanCash) continue;
     if (w.maxCleanCash !== undefined && s.cleanCash > w.maxCleanCash) continue;
+    if (w.flagsAll && !w.flagsAll.every((f) => s.flags.includes(f))) continue;
     return e.id;
   }
   const fallback = sorted.at(-1);
@@ -43,4 +44,11 @@ export function pickDangerSigns(s: GameState, c: GameContent, rng: Rng): string[
   const generic = c.dangerSigns.filter((d) => !d.triggers.methods && !d.triggers.events);
   const pick = generic.length > 0 ? rng.pick(generic) : c.dangerSigns[0];
   return pick ? [pick.id] : [];
+}
+
+/** แต้มประสบการณ์แก๊งที่ได้จากรอบนี้ (ใช้ปลดล็อกอาชีพ) */
+export function xpForRun(s: GameState): number {
+  if (!s.end) return 0;
+  const days = s.end.reason === 'survived' ? 30 : s.day;
+  return days + Math.floor(s.end.score / 5_000) + s.methodsUsed.length * 3;
 }

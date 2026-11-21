@@ -1,11 +1,19 @@
 import type { EndReason, GameContent } from '../types/content';
 import type { Action, GameState } from '../types/state';
-import { buy, callPitch, choosePlan, confirmInvest, endDay, invest } from './day';
+import {
+  buy,
+  callPitch,
+  choosePlan,
+  confirmInvest,
+  endDay,
+  goToLaunder,
+  invest,
+  rollNews,
+} from './day';
 import { invariant } from './errors';
 import { resolveEventChoice } from './events';
 import { applyCaught, escapeAttempt } from './escape';
 import { HEAT_MAX } from './effects';
-import { goToLaunder } from './day';
 import { launder } from './launder';
 import { getCharacter } from './lookup';
 import { hashSeed, Rng } from './rng';
@@ -14,19 +22,24 @@ import { computeScore, pickDangerSigns, pickEnding } from './score';
 /** เริ่มรอบใหม่ — seed มาจาก server (หรือสุ่มเองตอนเล่น offline) */
 export function newGame(seed: string, characterId: string, c: GameContent): GameState {
   const ch = getCharacter(c, characterId);
-  return {
-    version: 1,
+  const rng = new Rng(hashSeed(seed));
+  const perk = <K extends 'startFame' | 'startCash'>(k: K) =>
+    ch.perks.filter((p) => p.kind === k).reduce((n, p) => n + ('value' in p ? p.value : 0), 0);
+  const s: GameState = {
+    version: 2,
     seed,
-    rng: hashSeed(seed),
+    rng: 0,
     day: 1,
+    startMonth: rng.int(1, 12),
+    startDate: rng.int(1, 28),
     phase: 'plan',
     characterId,
     gangLevel: 1,
-    dirtyCash: ch.startDirtyCash ?? c.config.startDirtyCash,
+    dirtyCash: c.config.startDirtyCash + perk('startCash'),
     cleanCash: 0,
     totalLaundered: 0,
     heat: 0,
-    fame: 0,
+    fame: perk('startFame'),
     karma: 0,
     henchmen: [],
     nextHenchmanId: 1,
@@ -34,8 +47,12 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
     dailyItems: {},
     upgrades: {},
     todayMethodId: null,
+    workStreak: 0,
     romance: { bond: 0, idleDays: 0 },
+    methodState: {},
     call: null,
+    news: null,
+    scheduled: [],
     pendingEvents: [],
     seenEvents: [],
     launderOffer: [],
@@ -46,6 +63,9 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
     lastResults: [],
     end: null,
   };
+  rollNews(s, c, rng);
+  s.rng = rng.state;
+  return s;
 }
 
 function finish(s: GameState, c: GameContent, rng: Rng, reason: EndReason): void {
@@ -107,7 +127,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       break;
     case 'endDay':
       expectPhase(s, 'shop');
-      if (endDay(s, c)) finish(s, c, rng, 'survived');
+      if (endDay(s, c, rng)) finish(s, c, rng, 'survived');
       break;
     case 'escapeAttempt':
       expectPhase(s, 'escape');

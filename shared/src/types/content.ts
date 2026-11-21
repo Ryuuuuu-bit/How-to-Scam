@@ -19,6 +19,8 @@ export type DangerSignId = string;
 export type EndingId = string;
 export type PitchId = string;
 export type VictimId = string;
+export type NewsId = string;
+export type FestivalId = string;
 
 export type GangLevel = 1 | 2 | 3 | 4;
 
@@ -33,10 +35,10 @@ export type MethodMechanic =
   | 'none'
   | 'romance' // ต้องเลี้ยงเหยื่อต่อเนื่อง
   | 'callCenter' // มินิเกมจับคู่มุก
-  | 'foundation' // ตัวนับเวลาก่อนโดนขุด (Phase 4)
-  | 'merit' // โบนัสเทศกาล (Phase 4)
-  | 'gambling' // จ้างดารา (Phase 4)
-  | 'ponzi'; // โอกาสล่มสะสม (Phase 4)
+  | 'foundation' // มีโอกาสไวรัล + มาตรวัดชาวเน็ตขุด
+  | 'merit' // รายได้ ×2 ช่วงเทศกาล
+  | 'gambling' // จ้างดาราโปรโมตได้
+  | 'ponzi'; // ทบต้นทุกวันที่ทำต่อเนื่อง แต่โอกาสล่มเพิ่มขึ้น
 
 export interface ScamMethod {
   id: MethodId;
@@ -56,6 +58,14 @@ export interface ScamMethod {
   desc: LocalizedText;
 }
 
+/** ตัวคูณที่ใช้ร่วมกันโดยข่าว/เทศกาล/effect */
+export interface ModifierSpec {
+  target: 'income' | 'heat';
+  methodId?: MethodId;
+  /** +200 = ×3, -50 = ครึ่งเดียว */
+  pct: number;
+}
+
 export type Effect =
   /** บวก/ลบค่าคงที่ หรือสุ่มในช่วง */
   | { kind: 'add'; stat: Stat; value: number | Range }
@@ -64,20 +74,19 @@ export type Effect =
   /** ตั้ง/ลบ flag ไว้ใช้เป็นเงื่อนไขภายหลัง */
   | { kind: 'flag'; flag: string; remove?: boolean }
   /** ตัวคูณชั่วคราวหลายวัน เช่น มูลนิธิ ×3 ช่วงน้ำท่วม */
-  | {
-      kind: 'modifier';
-      target: 'income' | 'heat';
-      methodId?: MethodId;
-      /** +200 = ×3, -50 = ครึ่งเดียว */
-      pct: number;
-      days: number;
-    }
+  | (ModifierSpec & { kind: 'modifier'; days: number })
   /** ลูกน้องหายไป 1 คน (หนี/โดนจับ) */
   | { kind: 'loseHenchman' }
+  /** ได้ลูกน้องฟรี 1 คน */
+  | { kind: 'gainHenchman'; loyalty?: number }
   /** ความภักดีลูกน้องทุกคนเปลี่ยน */
   | { kind: 'loyalty'; value: number }
   /** ความผูกพันเหยื่อหลอกรักเปลี่ยน */
-  | { kind: 'romanceBond'; value: number };
+  | { kind: 'romanceBond'; value: number }
+  /** นัดเหตุการณ์ต่อเนื่องให้เกิดในอีก N วัน */
+  | { kind: 'schedule'; eventId: EventId; inDays: number }
+  /** ปิดวิธีโกงชั่วคราว */
+  | { kind: 'cooldown'; methodId: MethodId; days: number };
 
 export interface EventOutcome {
   /** น้ำหนักโอกาสของผลลัพธ์นี้ (ค่าเริ่มต้น 1) */
@@ -86,8 +95,19 @@ export interface EventOutcome {
   effects: Effect[];
 }
 
+/** เงื่อนไขที่ทางเลือกจะโผล่ (ทางเลือกพิเศษตามอาชีพ/ของที่มี) */
+export interface ChoiceRequirement {
+  characters?: CharacterId[];
+  upgrades?: ShopItemId[];
+  minFame?: number;
+  minDirtyCash?: number;
+  minHenchmen?: number;
+  flags?: string[];
+}
+
 export interface EventChoice {
   text: LocalizedText;
+  requires?: ChoiceRequirement;
   /** สุ่ม 1 ผลตามน้ำหนัก */
   outcomes: EventOutcome[];
 }
@@ -95,8 +115,12 @@ export interface EventChoice {
 export interface EventCondition {
   /** แผนของวันนี้ต้องเป็นหนึ่งในนี้ */
   methods?: MethodId[];
+  /** เคยใช้วิธีนี้แล้วในรอบนี้ */
+  usedMethods?: MethodId[];
   heat?: Range;
   day?: Range;
+  karma?: Range;
+  minFame?: number;
   minLevel?: GangLevel;
   flagsAll?: string[];
   flagsNone?: string[];
@@ -104,6 +128,16 @@ export interface EventCondition {
   needsHenchman?: boolean;
   /** เงินสกปรกขั้นต่ำ */
   minDirtyCash?: number;
+  /** เฉพาะอาชีพเหล่านี้ */
+  characters?: CharacterId[];
+  /** เดือน (1–12) ตามปฏิทินของรอบนี้ */
+  months?: number[];
+  /** วันที่ของเดือน เช่น [1, 16] วันหวยออก */
+  dates?: number[];
+  /** มีเทศกาลนี้อยู่ */
+  festivals?: FestivalId[];
+  /** ทำงานติดกันอย่างน้อย N วัน */
+  minWorkStreak?: number;
 }
 
 export type EventCategory = 'lucky' | 'unlucky' | 'silly' | 'karma';
@@ -114,10 +148,12 @@ export interface GameEvent {
   weight: number;
   /** เกิดได้ครั้งเดียวต่อรอบ (ค่าเริ่มต้น true) */
   once?: boolean;
+  /** เกิดเฉพาะเมื่อถูกนัดจากเหตุการณ์อื่น (ตอนต่อของเรื่อง) */
+  chainOnly?: boolean;
   when: EventCondition;
   title: LocalizedText;
   body: LocalizedText;
-  /** 1–3 ทางเลือก */
+  /** 1–3 ทางเลือกปกติ + ทางเลือกพิเศษ */
   choices: EventChoice[];
 }
 
@@ -140,13 +176,41 @@ export interface LaunderCard {
   failText: LocalizedText;
 }
 
+/** ความสามารถ/ข้อเสียของอาชีพ */
+export type Perk =
+  | { kind: 'methodIncome'; methodId: MethodId; pct: number }
+  | { kind: 'methodHeat'; methodId: MethodId; pct: number }
+  | { kind: 'startFame'; value: number }
+  | { kind: 'startCash'; value: number }
+  /** Heat ทุกงานเพิ่ม pct% ต่อชื่อเสียง 10 แต้ม */
+  | { kind: 'fameHeat'; pctPer10Fame: number }
+  | { kind: 'launderOffer'; extra: number }
+  | { kind: 'launderSuccess'; pct: number }
+  | { kind: 'launderFailHeat'; mul: number }
+  | { kind: 'shopDiscount'; itemIds: ShopItemId[]; pct: number }
+  /** UI บอกจุดอ่อนเหยื่อแบบนี้ให้เลย */
+  | { kind: 'revealWeakness'; weaknesses: Weakness[] }
+  /** รายได้ทุกงานสุ่มคูณ min–max */
+  | { kind: 'chaos'; min: number; max: number }
+  | { kind: 'bannedMethod'; methodId: MethodId }
+  /** โอกาสแชร์ลูกโซ่ล่มคูณ */
+  | { kind: 'ponziRisk'; mul: number }
+  | { kind: 'karmaMul'; mul: number }
+  | { kind: 'eventWeight'; eventIds: EventId[]; mul: number }
+  | { kind: 'victimWealth'; pct: number };
+
 export interface Character {
   id: CharacterId;
-  /** โบนัสรายได้ของวิธีโกงที่ถนัด */
-  bonus: { methodId: MethodId; pct: number };
-  startDirtyCash?: number;
+  /** ใช้แต้มประสบการณ์แก๊งเท่านี้เพื่อปลดล็อก (ไม่ใส่ = เปิดตั้งแต่แรก) */
+  unlockXp?: number;
+  /** ตัวลับ: ปลดล็อกเมื่อเคยเห็นฉากจบนี้ */
+  unlockEnding?: EndingId;
+  perks: Perk[];
   name: LocalizedText;
   desc: LocalizedText;
+  /** ข้อความสรุปจุดเด่น/ข้อเสียสั้นๆ */
+  pros: LocalizedText;
+  cons: LocalizedText;
 }
 
 export type ShopItemKind = 'daily' | 'permanent' | 'henchman';
@@ -159,6 +223,8 @@ export interface ShopItem {
   /** ซื้อซ้ำได้กี่ครั้ง (permanent) หรือต่อวัน (daily) */
   maxStack: number;
   minLevel?: GangLevel;
+  /** ผลเฉพาะวิธีโกงนี้ (ไม่ใส่ = ทุกวิธี) */
+  methodId?: MethodId;
   /** ผลของไอเท็ม (ต่อชิ้น) */
   incomePct?: number;
   heatPct?: number;
@@ -170,6 +236,7 @@ export interface ShopItem {
   desc: LocalizedText;
 }
 
+/** ตัวละครเหยื่อหน้าตา (ใช้รูป) */
 export interface Victim {
   id: VictimId;
   age: number;
@@ -179,6 +246,13 @@ export interface Victim {
   name: LocalizedText;
   job: LocalizedText;
   trait: LocalizedText;
+}
+
+/** ชิ้นส่วนสำหรับสุ่มประกอบเหยื่อ */
+export interface VictimParts {
+  names: LocalizedText[];
+  jobs: { text: LocalizedText; wealth: number; age: Range }[];
+  traits: Record<Weakness, LocalizedText[]>;
 }
 
 export interface Pitch {
@@ -206,7 +280,30 @@ export interface Ending {
     karma?: Range;
     minCleanCash?: number;
     maxCleanCash?: number;
+    flagsAll?: string[];
   };
+  title: LocalizedText;
+  body: LocalizedText;
+}
+
+/** เทศกาลตามปฏิทินไทย */
+export interface Festival {
+  id: FestivalId;
+  /** ช่วงวันที่ [เดือน, วัน] ถึง [เดือน, วัน] */
+  from: readonly [number, number];
+  to: readonly [number, number];
+  modifiers: ModifierSpec[];
+  name: LocalizedText;
+}
+
+/** ข่าวประจำสัปดาห์ — เปลี่ยนกติกา 7 วัน */
+export interface News {
+  id: NewsId;
+  weight: number;
+  minLevel?: GangLevel;
+  modifiers: ModifierSpec[];
+  launderSuccessPct?: number;
+  victimWealthPct?: number;
   title: LocalizedText;
   body: LocalizedText;
 }
@@ -224,9 +321,19 @@ export interface GameConfig {
   launderOfferSize: number;
   callCenter: { matchSuccessPct: number; missSuccessPct: number; failHeat: number };
   romance: { bondIncomePct: number; maxBond: number; fleeAfterIdleDays: number };
-  /** ตัวแทนโหมดหนีชั่วคราวของ Phase 1 (ของจริงมาใน Phase 4) */
+  foundation: {
+    viralPct: number;
+    viralMul: number;
+    exposurePerUse: Range;
+    exposureDecay: number;
+    exposedHeat: number;
+    exposedCooldown: number;
+  };
+  ponzi: { growthPct: number; baseCrashPct: number; crashPctPerDay: number; crashHeat: number };
+  /** ตัวแทนโหมดหนีชั่วคราว (ของจริงมาใน Phase 4) */
   escapePlaceholder: { successPct: number; heatAfter: number };
   caughtCleanKeepPct: number;
+  newsEveryDays: number;
   score: { daysWeight: number; maxVarietyBonus: number; noEscapeBonus: number };
 }
 
@@ -238,7 +345,10 @@ export interface GameContent {
   characters: Character[];
   shopItems: ShopItem[];
   victims: Victim[];
+  victimParts: VictimParts;
   pitches: Pitch[];
   dangerSigns: DangerSign[];
   endings: Ending[];
+  festivals: Festival[];
+  news: News[];
 }
