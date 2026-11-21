@@ -1,0 +1,4 @@
+packages:
+  - shared
+  # - client  (Phase 2)
+  # - server  (Phase 3)
