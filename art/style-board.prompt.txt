@@ -1,0 +1,10 @@
+Use your built-in image generation tool to create ONE image, then save the resulting PNG file into this repository at art/style-board.png (copy it from wherever the tool saves generated images). Do not write any code or change any other files.
+
+Image brief (a game art style board, landscape 1536x1024):
+A style reference sheet for a cute, funny 2D mobile card game. Style: cute chibi characters (big heads, tiny bodies, 2.5-head proportions), thick clean dark outlines, flat vivid saturated colors with soft cel shading, playful and goofy expressions, sticker-like look, white background.
+Left side: three chibi starter characters standing side by side, full body:
+ 1) a sweaty overconfident former insurance salesman in a slightly too-tight suit and loosened tie, holding two old phones, huge fake smile;
+ 2) a sleepy teenage gamer with messy hair, oversized hoodie, gaming headset, dark eye bags, holding a game controller;
+ 3) a mischievous young temple-fair helper in a plain white short-sleeve shirt and simple trousers (NOT a monk, no robes, no religious symbols), holding a donation box shaped like a piggy bank, sly grin.
+Right side: a UI kit sample: one rounded game card frame (bright yellow with thick outline), two chunky rounded buttons (one hot pink, one mint green), a horizontal "heat" meter bar going from green to orange to red with a cartoon flame at the end, and a row of 6 round icons: a dirty money bag with stink lines, a sparkling clean money bag, a cartoon flame, a heart with a megaphone (social fame), a calendar page, and a cute goldfish.
+IMPORTANT: absolutely no text, letters, numbers or logos anywhere in the image. No real brands. Keep it lighthearted and cartoonish.
