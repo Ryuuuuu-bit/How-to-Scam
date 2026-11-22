@@ -330,8 +330,7 @@ export interface GameConfig {
     exposedCooldown: number;
   };
   ponzi: { growthPct: number; baseCrashPct: number; crashPctPerDay: number; crashHeat: number };
-  /** ตัวแทนโหมดหนีชั่วคราว (ของจริงมาใน Phase 4) */
-  escapePlaceholder: { successPct: number; heatAfter: number };
+  escape: EscapeConfig;
   caughtCleanKeepPct: number;
   newsEveryDays: number;
   score: { daysWeight: number; maxVarietyBonus: number; noEscapeBonus: number };
@@ -398,6 +397,58 @@ export interface DailyOffer {
   desc: LocalizedText;
 }
 
+/** โหมดหนีตำรวจ: ชุดปลอมตัว */
+export interface Disguise {
+  id: string;
+  cost: number;
+  bonus: number;
+  /** เข้ากับเส้นทางไหน ได้โบนัสเพิ่ม */
+  goodFor: string[];
+  goodBonus: number;
+  name: LocalizedText;
+  desc: LocalizedText;
+}
+
+export interface EscapeEventChoice {
+  text: LocalizedText;
+  /** บวก/ลบ % โอกาสรอด */
+  chance: number;
+  cost?: number;
+  karma?: number;
+  result: LocalizedText;
+}
+
+export interface EscapeEvent {
+  id: string;
+  text: LocalizedText;
+  choices: EscapeEventChoice[];
+}
+
+/** โหมดหนีตำรวจ: ที่หนี */
+export interface EscapeRoute {
+  id: string;
+  cost: number;
+  baseChance: number;
+  /** ต้องกบดานกี่วัน (ข้ามวัน ไม่มีรายได้) */
+  hideDays: number;
+  heatAfter: number;
+  events: EscapeEvent[];
+  name: LocalizedText;
+  desc: LocalizedText;
+}
+
+export interface EscapeConfig {
+  bribePct: number;
+  bribeMin: number;
+  bribeTrustPct: number;
+  bribeGood: number;
+  bribeBad: number;
+  qteTargets: number;
+  qtePerHit: number;
+  /** หนีรอดมาแล้วกี่ครั้ง ครั้งต่อไปยากขึ้น % ต่อครั้ง */
+  repeatPenalty: number;
+}
+
 export interface GameContent {
   config: GameConfig;
   methods: ScamMethod[];
@@ -415,4 +466,6 @@ export interface GameContent {
   titles: Title[];
   achievements: Achievement[];
   offers: DailyOffer[];
+  disguises: Disguise[];
+  routes: EscapeRoute[];
 }

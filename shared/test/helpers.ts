@@ -1,5 +1,5 @@
 import { content } from '../data';
-import { currentOffer, newGame, step, unlockedMethods } from '../src';
+import { currentOffer, escapeOf, newGame, step, unlockedMethods } from '../src';
 import type { Action, GameState } from '../src';
 
 /** บอทเล่นอัตโนมัติแบบตายตัว (ไม่มีสุ่มของตัวเอง) ใช้ทดสอบทั้งรอบ */
@@ -30,8 +30,14 @@ export function botAction(s: GameState): Action {
       return { t: 'launder', cardId: s.launderOffer[0] ?? null };
     case 'shop':
       return { t: 'endDay' };
-    case 'escape':
-      return { t: 'escapeAttempt' };
+    case 'escape': {
+      const e = escapeOf(s);
+      if (e.step === 'disguise') return { t: 'escapeDisguise', id: 'none' };
+      if (e.step === 'route') return { t: 'escapeRoute', id: 'market' };
+      if (e.step === 'event') return { t: 'escapeEvent', choiceIdx: 1 };
+      if (e.step === 'bribe') return { t: 'escapeBribe', pay: false };
+      return { t: 'escapeQte', hits: 3 };
+    }
     case 'ended':
       throw new Error('game ended');
   }

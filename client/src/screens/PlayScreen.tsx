@@ -4,13 +4,15 @@ import { Hud } from '../components/Hud';
 import { DayPlanner, lastPlanFrom } from './DayPlanner';
 import { ResultSheet } from '../components/ResultSheet';
 import { SceneBackdrop } from '../components/SceneBackdrop';
+import { sceneUrl } from '../assets/art';
 import { describeResult } from '../game/results';
 import type { ResultLine } from '../game/results';
 import { audio } from '../audio/audio';
 import { playCues } from '../audio/cues';
 import { lt, t } from '../i18n';
 import { content } from '@hts/shared/data';
-import { CallPhase, EscapePhase, EventPhase, InvestPhase, LaunderPhase, ShopPhase } from './phases';
+import { CallPhase, EventPhase, InvestPhase, LaunderPhase, ShopPhase } from './phases';
+import { EscapePhase } from './EscapePhase';
 
 export function PlayScreen({
   state,
@@ -46,7 +48,11 @@ export function PlayScreen({
   const scene =
     state.phase === 'event' && state.pendingEvents[0]
       ? `ev_${state.pendingEvents[0]}`
-      : state.phase;
+      : state.phase === 'escape' &&
+          state.escape?.routeId &&
+          sceneUrl(`escape_${state.escape.routeId}`)
+        ? `escape_${state.escape.routeId}`
+        : state.phase;
   // ฉากเหตุการณ์/คอลเซ็นเตอร์/หนีตำรวจ เปิดภาพให้เห็นเยอะ หน้าที่เป็นรายการให้เห็นน้อยลง
   const tall = ['event', 'call', 'escape'].includes(state.phase);
   return (
@@ -71,7 +77,7 @@ export function PlayScreen({
       </aside>
       <main
         className="decision-panel relative z-10"
-        key={`${state.day}-${state.phase}-${state.pendingEvents[0] ?? ''}`}
+        key={`${state.day}-${state.phase}-${state.pendingEvents[0] ?? ''}-${state.escape?.step ?? ''}`}
       >
         <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />
         {state.phase === 'plan' && (

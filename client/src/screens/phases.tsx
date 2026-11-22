@@ -420,24 +420,3 @@ export function ShopPhase({ state, dispatch }: PhaseProps) {
     </>
   );
 }
-
-// ---------- หนีตำรวจ (ตัวแทนชั่วคราว) ----------
-export function EscapePhase({ dispatch }: PhaseProps) {
-  return (
-    <div className="flex flex-col items-center gap-4 pt-6 text-center">
-      <Art id="icon:police" size={110} className="anim-shake" />
-      <h2 className="rounded-2xl border-[3px] border-ink bg-paper px-3 text-3xl font-semibold text-danger">
-        {t('phase.escape')}
-      </h2>
-      <p className="rounded-2xl bg-paper/90 p-2">{t('escape.body')}</p>
-      <Button
-        tone="danger"
-        block
-        className="text-xl"
-        onClick={() => dispatch({ t: 'escapeAttempt' })}
-      >
-        {t('escape.run')}
-      </Button>
-    </div>
-  );
-}

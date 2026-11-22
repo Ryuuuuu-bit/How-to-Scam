@@ -1,7 +1,7 @@
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { newGame, replay, step, unlockedMethods } from '@hts/shared';
+import { escapeOf, newGame, replay, step, unlockedMethods } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { createApp } from '../src/app';
@@ -83,8 +83,14 @@ function play(seed: string, characterId: string): Action[] {
       case 'shop':
         a = { t: 'endDay' };
         break;
-      default:
-        a = { t: 'escapeAttempt' };
+      default: {
+        const e = escapeOf(s);
+        if (e.step === 'disguise') a = { t: 'escapeDisguise', id: 'none' };
+        else if (e.step === 'route') a = { t: 'escapeRoute', id: 'market' };
+        else if (e.step === 'event') a = { t: 'escapeEvent', choiceIdx: 1 };
+        else if (e.step === 'bribe') a = { t: 'escapeBribe', pay: false };
+        else a = { t: 'escapeQte', hits: 3 };
+      }
     }
     actions.push(a);
     s = step(s, a, content);

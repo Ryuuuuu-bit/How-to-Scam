@@ -62,6 +62,18 @@ export interface CallState {
   pitchIds: PitchId[];
 }
 
+/** ขั้นตอนของโหมดหนีตำรวจ */
+export interface EscapeState {
+  step: 'disguise' | 'route' | 'event' | 'bribe' | 'qte';
+  /** % โอกาสรอดที่สะสมจากการเลือก (ก่อนบวกเส้นทาง) */
+  bonus: number;
+  disguiseId?: string;
+  routeId?: string;
+  eventId?: string;
+  eventChoice?: number;
+  bribe?: 'none' | 'good' | 'bad';
+}
+
 /** สถานะเฉพาะของแต่ละวิธีโกง */
 export interface MethodState {
   /** ทำติดกันกี่วัน (แชร์ลูกโซ่) */
@@ -142,6 +154,8 @@ export interface GameState {
   call: CallState | null;
   /** ข่าวประจำสัปดาห์ที่มีผลอยู่ */
   news: { id: NewsId; untilDay: number } | null;
+  /** อยู่ระหว่างหนีตำรวจ */
+  escape: EscapeState | null;
   /** ข้อเสนอของวันนี้ */
   offer: { id: string; accepted: boolean } | null;
   /** ภารกิจจากเฮียใหญ่ที่รับไว้ */
@@ -177,7 +191,11 @@ export type Action =
   | { t: 'launder'; cardId: CardId | null }
   | { t: 'buy'; itemId: ShopItemId }
   | { t: 'endDay' }
-  | { t: 'escapeAttempt' }
+  | { t: 'escapeDisguise'; id: string }
+  | { t: 'escapeRoute'; id: string }
+  | { t: 'escapeEvent'; choiceIdx: number }
+  | { t: 'escapeBribe'; pay: boolean }
+  | { t: 'escapeQte'; hits: number }
   | { t: 'retire' };
 
 export type PublicGameState = Omit<GameState, 'karma' | 'rng'>;

@@ -23,6 +23,18 @@ const EMOJI: Record<string, ArtEntry> = {
   'icon:viral': { emoji: '💥' },
   'icon:ponzi_crash': { emoji: '📉' },
   'icon:exposed': { emoji: '🔍' },
+  'icon:bribe': { emoji: '✉️' },
+
+  // โหมดหนีตำรวจ
+  'disguise:somtam': { emoji: '🥗' },
+  'disguise:rider': { emoji: '🛵' },
+  'disguise:tourist': { emoji: '🤳' },
+  'disguise:mascot': { emoji: '🐻' },
+  'disguise:none': { emoji: '🕶️' },
+  'route:province': { emoji: '🌾' },
+  'route:border': { emoji: '🚧' },
+  'route:island': { emoji: '🏝️' },
+  'route:market': { emoji: '🏮' },
 
   // ตัวละคร
   'char:ex_insurance': { emoji: '🤵' },

@@ -37,6 +37,12 @@ SHEETS = {
         "card--variegated_plant", "shop--celebrity_promo", "icon--news", "icon--festival",
         "icon--cooldown", "icon--viral", "icon--ponzi_crash", "icon--exposed",
     ]),
+    "sheet-icons-d": (4, 4, [
+        "disguise--somtam", "disguise--rider", "disguise--tourist", "disguise--mascot",
+        "disguise--none", "route--province", "route--border", "route--island",
+        "route--market", "icon--bribe", "icon--undercover", "icon--sting",
+        "icon--baitback", "icon--fakenews", "icon--wardrobe", "icon--reform",
+    ]),
     "sheet-victims": (3, 2, [
         "victim--v_somsri", "victim--v_tong", "victim--v_boonma",
         "victim--v_praewa", "victim--v_kong", "victim--v_mali",

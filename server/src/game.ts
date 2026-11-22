@@ -36,7 +36,11 @@ export const actionSchema: z.ZodType<Action> = z.discriminatedUnion('t', [
   z.object({ t: z.literal('launder'), cardId: id.nullable() }),
   z.object({ t: z.literal('buy'), itemId: id }),
   z.object({ t: z.literal('endDay') }),
-  z.object({ t: z.literal('escapeAttempt') }),
+  z.object({ t: z.literal('escapeDisguise'), id: z.string().max(40) }),
+  z.object({ t: z.literal('escapeRoute'), id: z.string().max(40) }),
+  z.object({ t: z.literal('escapeEvent'), choiceIdx: z.number().int().min(0).max(5) }),
+  z.object({ t: z.literal('escapeBribe'), pay: z.boolean() }),
+  z.object({ t: z.literal('escapeQte'), hits: z.number().int().min(0).max(20) }),
   z.object({ t: z.literal('retire') }),
 ]) as z.ZodType<Action>;
 

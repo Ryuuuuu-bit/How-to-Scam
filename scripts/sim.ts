@@ -4,6 +4,7 @@ import { content } from '../shared/data';
 import {
   choiceAvailable,
   currentOffer,
+  escapeOf,
   launderSuccessPct,
   newGame,
   ponziCrashPct,
@@ -98,8 +99,14 @@ function bot(s: GameState, style: Style, r: () => number): Action {
       if (up && style !== 'random') return { t: 'buy', itemId: up.id };
       return { t: 'endDay' };
     }
-    case 'escape':
-      return { t: 'escapeAttempt' };
+    case 'escape': {
+      const e = escapeOf(s);
+      if (e.step === 'disguise') return { t: 'escapeDisguise', id: 'none' };
+      if (e.step === 'route') return { t: 'escapeRoute', id: 'market' };
+      if (e.step === 'event') return { t: 'escapeEvent', choiceIdx: 1 };
+      if (e.step === 'bribe') return { t: 'escapeBribe', pay: false };
+      return { t: 'escapeQte', hits: 3 };
+    }
     case 'ended':
       throw new Error('ended');
   }

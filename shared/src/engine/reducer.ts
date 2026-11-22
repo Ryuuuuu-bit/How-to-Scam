@@ -13,7 +13,14 @@ import {
 } from './day';
 import { invariant } from './errors';
 import { resolveEventChoice } from './events';
-import { applyCaught, escapeAttempt } from './escape';
+import {
+  applyCaught,
+  escapeBribe,
+  escapeDisguise,
+  escapeEvent,
+  escapeQte,
+  escapeRoute,
+} from './escape';
 import { HEAT_MAX } from './effects';
 import { launder } from './launder';
 import { acceptOffer, rollOffer } from './offers';
@@ -56,6 +63,7 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
     news: null,
     offer: null,
     mission: null,
+    escape: null,
     scheduled: [],
     pendingEvents: [],
     seenEvents: [],
@@ -139,9 +147,25 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       expectPhase(s, 'shop');
       if (endDay(s, c, rng)) finish(s, c, rng, 'survived');
       break;
-    case 'escapeAttempt':
+    case 'escapeDisguise':
       expectPhase(s, 'escape');
-      if (escapeAttempt(s, c, rng)) finish(s, c, rng, 'caught');
+      escapeDisguise(s, c, action.id);
+      break;
+    case 'escapeRoute':
+      expectPhase(s, 'escape');
+      escapeRoute(s, c, rng, action.id);
+      break;
+    case 'escapeEvent':
+      expectPhase(s, 'escape');
+      escapeEvent(s, c, action.choiceIdx);
+      break;
+    case 'escapeBribe':
+      expectPhase(s, 'escape');
+      escapeBribe(s, c, rng, action.pay);
+      break;
+    case 'escapeQte':
+      expectPhase(s, 'escape');
+      if (escapeQte(s, c, rng, action.hits)) finish(s, c, rng, 'caught');
       break;
     case 'retire':
       expectPhase(s, 'plan', 'shop');
@@ -153,6 +177,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
     }
   }
 
+  if (s.phase === 'escape' && !s.escape) s.escape = { step: 'disguise', bonus: 0 };
   s.rng = rng.state;
   return s;
 }

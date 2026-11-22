@@ -150,6 +150,34 @@ export function validateContent(c: GameContent): string[] {
     }
   }
 
+  checkUnique(
+    'disguise',
+    c.disguises.map((x) => x.id),
+  );
+  checkUnique(
+    'route',
+    c.routes.map((x) => x.id),
+  );
+  const routeIds = new Set(c.routes.map((x) => x.id));
+  if (!c.disguises.some((d) => d.cost === 0)) errors.push('escape needs a free disguise');
+  if (!c.routes.some((r) => r.cost === 0)) errors.push('escape needs a free route');
+  for (const d of c.disguises) {
+    for (const r of d.goodFor) {
+      if (!routeIds.has(r)) errors.push(`disguise ${d.id}: unknown route ${r}`);
+    }
+  }
+  for (const r of c.routes) {
+    if (r.events.length === 0) errors.push(`route ${r.id}: no events`);
+    for (const ev of r.events) {
+      if (ev.choices.length < 2 || ev.choices.length > 3) {
+        errors.push(`route ${r.id} event ${ev.id}: needs 2-3 choices`);
+      }
+      if (!ev.choices.some((ch) => !ch.cost)) {
+        errors.push(`route ${r.id} event ${ev.id}: needs a free choice`);
+      }
+    }
+  }
+
   const weaknesses: Weakness[] = ['greed', 'fear', 'faith', 'lonely'];
   for (const w of weaknesses) {
     if (!c.pitches.some((p) => p.weakness === w)) errors.push(`no pitch for weakness ${w}`);
