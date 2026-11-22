@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './live-counter.css';
+import { audio } from '../audio/audio';
 
 export function LiveCounter({ seller, onFinish }: { seller: boolean; onFinish: (cat: boolean) => void }) {
   const [stage, setStage] = useState<'ready' | 'live' | 'photo'>('ready');
@@ -7,6 +8,14 @@ export function LiveCounter({ seller, onFinish }: { seller: boolean; onFinish: (
   const [left, setLeft] = useState(10);
   const sent = useRef(false);
   const cat = pan >= 55;
+  const spotted = useRef(false);
+  useEffect(() => {
+    if (stage === 'live' && cat && !spotted.current) {
+      spotted.current = true;
+      audio.sfx('sfx_spotted', 'event');
+    }
+    if (stage === 'photo' && !cat) audio.sfx('sfx_sale', 'cash');
+  }, [stage, cat]);
   useEffect(() => {
     if (stage !== 'live') return;
     const end = Date.now() + 10000;

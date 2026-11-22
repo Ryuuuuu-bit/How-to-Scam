@@ -3,6 +3,7 @@ import { dreamSequence, type Action, type GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { Art, Button } from '../components/ui';
 import './custody.css';
+import { audio } from '../audio/audio';
 
 const stamps = [{ icon: '🐟', name: 'ปลาทู' }, { icon: '🐾', name: 'อุ้งเท้า' }, { icon: '🌙', name: 'พระจันทร์' }];
 const contentKeep = content.config.caughtCleanKeepPct;
@@ -13,6 +14,9 @@ export function CustodyScene({ state, dispatch }: { state: GameState; dispatch: 
   const [answer, setAnswer] = useState<number[]>([]);
   const [photo, setPhoto] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(memorySeconds);
+  useEffect(() => {
+    if (page === 'play') audio.sfx('sfx_card_flip', 'paper');
+  }, [page]);
   useEffect(() => {
     if (page !== 'remember') return;
     const end = Date.now() + memorySeconds * 1000;

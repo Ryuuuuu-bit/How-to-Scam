@@ -17,7 +17,7 @@ const effects = {
 } as const;
 type Cue = keyof typeof effects;
 
-const recordedEffects = new Set(['sfx_click', 'sfx_cash', 'sfx_coins']);
+const recordedEffects = new Set(['sfx_click', 'sfx_cash', 'sfx_coins', 'sfx_card_flip', 'sfx_sale', 'sfx_spotted', 'sfx_chase']);
 export interface AudioSettings {
   muted: boolean;
   music: number;
@@ -40,7 +40,6 @@ function readSettings(): AudioSettings {
   }
 }
 
-// Original synthesized soundtrack; no downloaded tracks or network requests.
 class GameAudio {
   settings = readSettings();
   private context: AudioContext | null = null;
@@ -51,6 +50,8 @@ class GameAudio {
   private nextNote = 0;
   private danger = false;
   private enabled = false;
+  private marketTrack: AudioBuffer | null = null;
+  private marketNode: AudioBufferSourceNode | null = null;
   /** ไฟล์เสียงจาก ElevenLabs ที่โหลดแล้ว (null = ไม่มีไฟล์) */
   private buffers = new Map<string, Promise<AudioBuffer | null>>();
   private voiceNode: AudioBufferSourceNode | null = null;
@@ -88,6 +89,7 @@ class GameAudio {
         this.effectsGain.connect(limiter);
         limiter.connect(this.context.destination);
         this.applyVolume();
+        void this.load('bgm_market').then(buffer => { this.marketTrack = buffer; });
       }
       this.enabled = true;
       if (document.hidden) return;
@@ -145,6 +147,21 @@ class GameAudio {
   }
   private schedule() {
     if (!this.context || !this.musicGain || this.context.state !== 'running') return;
+    if (this.marketTrack && !this.danger) {
+      if (!this.marketNode) {
+        this.marketNode = this.context.createBufferSource();
+        this.marketNode.buffer = this.marketTrack;
+        this.marketNode.loop = true;
+        this.marketNode.connect(this.musicGain);
+        this.marketNode.start();
+      }
+      return;
+    }
+    if (this.marketNode) {
+      this.marketNode.stop();
+      this.marketNode.disconnect();
+      this.marketNode = null;
+    }
     if (this.nextNote < this.context.currentTime) this.nextNote = this.context.currentTime + 0.02;
     const bus = this.musicGain;
     // Eight-bar street-cafe progression. Alternate phrases leave space between UI cues.

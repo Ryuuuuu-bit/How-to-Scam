@@ -31,9 +31,9 @@ type Screen =
   | 'wardrobe';
 
 export function App() {
-  if (new URLSearchParams(window.location.search).get('preview') === 'scenes') return <ScenePreview />;
+  if (new URLSearchParams(window.location.search).get('preview') === 'scenes') return <><ScenePreview /><AudioControls /></>;
   if (new URLSearchParams(window.location.search).get('preview') === 'live') {
-    return <main><LiveCounter seller onFinish={() => window.location.assign('/')} /></main>;
+    return <><main><LiveCounter seller onFinish={() => window.location.assign('/')} /></main><AudioControls /></>;
   }
   return (
     <AuthProvider>

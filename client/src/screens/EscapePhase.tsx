@@ -5,6 +5,7 @@ import { content } from '@hts/shared/data';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, Panel } from '../components/ui';
 import { CustodyScene } from './CustodyScene';
+import { audio } from '../audio/audio';
 
 interface Props {
   state: GameState;
@@ -248,7 +249,7 @@ function QteStep({ state, dispatch }: Props) {
         <div className="chase-stage relative h-64 overflow-hidden rounded-2xl border-2 border-ink">
           {phase === 'ready' && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Button tone="danger" onClick={() => setPhase('run')}>
+              <Button tone="danger" onClick={() => { audio.sfx('sfx_chase', 'siren'); setPhase('run'); }}>
                 {t('escape.qteStart')}
               </Button>
             </div>
