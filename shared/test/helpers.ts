@@ -1,5 +1,5 @@
 import { content } from '../data';
-import { newGame, step, unlockedMethods } from '../src';
+import { currentOffer, newGame, step, unlockedMethods } from '../src';
 import type { Action, GameState } from '../src';
 
 /** บอทเล่นอัตโนมัติแบบตายตัว (ไม่มีสุ่มของตัวเอง) ใช้ทดสอบทั้งรอบ */
@@ -17,7 +17,9 @@ export function botAction(s: GameState): Action {
     }
     case 'invest': {
       const bought = s.dailyItems['ads'] ?? 0;
-      if (bought === 0 && money > 10_000 && s.todayMethodId) return { t: 'invest', itemId: 'ads' };
+      const banned = currentOffer(s, content)?.ban?.includes('ads') ?? false;
+      if (bought === 0 && money > 10_000 && s.todayMethodId && !banned)
+        return { t: 'invest', itemId: 'ads' };
       return { t: 'confirmInvest' };
     }
     case 'call':

@@ -18,6 +18,7 @@ import { methods } from './methods';
 import { shopItems } from './shop';
 import { titles } from './titles';
 import { achievements } from './achievements';
+import { offers } from './offers';
 
 /** เนื้อหาเกมทั้งหมด — client และ server import ตัวนี้ตัวเดียวกัน */
 export const content: GameContent = {
@@ -45,4 +46,5 @@ export const content: GameContent = {
   news,
   titles,
   achievements,
+  offers,
 };

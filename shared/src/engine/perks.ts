@@ -17,9 +17,13 @@ export function perksOfKind<K extends Perk['kind']>(
 
 /** ราคาหลังส่วนลดของอาชีพ */
 export function priceOf(s: GameState, c: GameContent, itemId: string, price: number): number {
-  const off = perksOfKind(s, c, 'shopDiscount')
-    .filter((p) => p.itemIds.includes(itemId))
-    .reduce((sum, p) => sum + p.pct, 0);
+  const offer = s.offer ? c.offers.find((o) => o.id === s.offer?.id) : undefined;
+  const offerPct =
+    offer?.kind === 'twist' && offer.discount?.itemIds.includes(itemId) ? offer.discount.pct : 0;
+  const off =
+    perksOfKind(s, c, 'shopDiscount')
+      .filter((p) => p.itemIds.includes(itemId))
+      .reduce((sum, p) => sum + p.pct, 0) + offerPct;
   return Math.round((price * (100 - Math.min(90, off))) / 100);
 }
 

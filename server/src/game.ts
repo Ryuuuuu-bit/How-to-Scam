@@ -29,6 +29,7 @@ const id = z.string().min(1).max(64);
 export const actionSchema: z.ZodType<Action> = z.discriminatedUnion('t', [
   z.object({ t: z.literal('choosePlan'), methodId: id.nullable() }),
   z.object({ t: z.literal('invest'), itemId: id }),
+  z.object({ t: z.literal('acceptOffer') }),
   z.object({ t: z.literal('confirmInvest') }),
   z.object({ t: z.literal('callPitch'), pitchId: id }),
   z.object({ t: z.literal('eventChoice'), choiceIdx: z.number().int().min(0).max(10) }),

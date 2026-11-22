@@ -3,6 +3,7 @@
 import { content } from '../shared/data';
 import {
   choiceAvailable,
+  currentOffer,
   launderSuccessPct,
   newGame,
   ponziCrashPct,
@@ -42,7 +43,12 @@ function bot(s: GameState, style: Style, r: () => number): Action {
     case 'invest': {
       if (s.todayMethodId && style !== 'careful') {
         const ads = content.shopItems.find((i) => i.id === 'ads');
-        if (ads && (s.dailyItems['ads'] ?? 0) === 0 && money > 20_000)
+        if (
+          ads &&
+          !currentOffer(s, content)?.ban?.includes('ads') &&
+          (s.dailyItems['ads'] ?? 0) === 0 &&
+          money > 20_000
+        )
           return { t: 'invest', itemId: 'ads' };
         if (s.henchmen.length < 2 && money > 30_000) return { t: 'invest', itemId: 'henchman' };
       }

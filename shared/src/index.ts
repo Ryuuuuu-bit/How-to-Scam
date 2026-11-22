@@ -23,3 +23,4 @@ export type { UnlockProgress } from './engine/titles';
 export { achievementsFor } from './engine/achievements';
 export type { PlayerTotals } from './engine/achievements';
 export { bangkokDate, dailyCharacter, isDailyDate } from './engine/daily';
+export { currentOffer } from './engine/offers';

@@ -9,12 +9,14 @@ import {
   goToLaunder,
   invest,
   rollNews,
+  spend,
 } from './day';
 import { invariant } from './errors';
 import { resolveEventChoice } from './events';
 import { applyCaught, escapeAttempt } from './escape';
 import { HEAT_MAX } from './effects';
 import { launder } from './launder';
+import { acceptOffer, rollOffer } from './offers';
 import { getCharacter } from './lookup';
 import { hashSeed, Rng } from './rng';
 import { computeScore, pickDangerSigns, pickEnding } from './score';
@@ -52,6 +54,8 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
     methodState: {},
     call: null,
     news: null,
+    offer: null,
+    mission: null,
     scheduled: [],
     pendingEvents: [],
     seenEvents: [],
@@ -65,6 +69,7 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
     end: null,
   };
   rollNews(s, c, rng);
+  rollOffer(s, c, rng);
   s.rng = rng.state;
   return s;
 }
@@ -102,6 +107,10 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
     case 'invest':
       expectPhase(s, 'invest');
       invest(s, c, rng, action.itemId);
+      break;
+    case 'acceptOffer':
+      expectPhase(s, 'plan', 'invest');
+      acceptOffer(s, c, rng, spend);
       break;
     case 'confirmInvest':
       expectPhase(s, 'invest');

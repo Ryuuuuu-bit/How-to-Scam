@@ -378,6 +378,26 @@ export interface Achievement {
   desc: LocalizedText;
 }
 
+/** ข้อเสนอประจำวันในขั้นลงทุน */
+export interface DailyOffer {
+  id: string;
+  kind: 'twist' | 'deal' | 'mission';
+  weight: number;
+  when?: EventCondition;
+  /** deal: ราคา */
+  price?: number;
+  /** deal: ผลเมื่อรับดีล */
+  effects?: Effect[];
+  /** twist: ลดราคาของ */
+  discount?: { itemIds: ShopItemId[]; pct: number };
+  /** twist: ห้ามซื้อของวันนี้ */
+  ban?: ShopItemId[];
+  /** mission: ทำวิธีนี้ (null = พัก) ติดกันกี่วัน แล้วได้รางวัล */
+  mission?: { methodId: MethodId | null; days: number; reward: Effect[] };
+  name: LocalizedText;
+  desc: LocalizedText;
+}
+
 export interface GameContent {
   config: GameConfig;
   methods: ScamMethod[];
@@ -394,4 +414,5 @@ export interface GameContent {
   news: News[];
   titles: Title[];
   achievements: Achievement[];
+  offers: DailyOffer[];
 }

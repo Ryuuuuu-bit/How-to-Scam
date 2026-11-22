@@ -5,6 +5,7 @@ import { addHenchman, clampHeat, HEAT_MAX, methodStateOf, modifierPct } from './
 import { invariant } from './errors';
 import { rollDailyEvents } from './events';
 import { dealLaunderOffer } from './launder';
+import { offerBans, rollOffer, tickMission } from './offers';
 import { getMethod, getPitch, getShopItem } from './lookup';
 import { karmaDelta, perksOfKind, priceOf } from './perks';
 import type { Rng } from './rng';
@@ -82,6 +83,7 @@ export function invest(s: GameState, c: GameContent, rng: Rng, itemId: string): 
   const item = getShopItem(c, itemId);
   invariant(item.kind === 'daily' || item.kind === 'henchman', `${itemId} is not a daily item`);
   invariant(!item.minLevel || s.gangLevel >= item.minLevel, `${itemId} is locked`);
+  invariant(!offerBans(s, c, item.id), `${itemId} is banned today`);
   const price = priceOf(s, c, item.id, item.price);
   if (item.kind === 'henchman') {
     invariant(s.henchmen.length < item.maxStack, 'henchman limit reached');
@@ -168,6 +170,7 @@ function makeVictim(s: GameState, c: GameContent, rng: Rng): CallVictim {
 /** กดยืนยันการลงทุน → จ่ายต้นทุน แล้วคำนวณผล หรือเข้ามินิเกมคอลเซ็นเตอร์ */
 export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
   const methodId = s.todayMethodId;
+  tickMission(s, c, rng, methodId);
   if (methodId === null) {
     // วันพัก: Heat ลดเอง
     s.heat -= c.config.heatDecayQuietDay;
@@ -381,6 +384,7 @@ export function endDay(s: GameState, c: GameContent, rng: Rng): boolean {
   if (s.day >= c.config.maxDays) return true;
   s.day++;
   if ((s.day - 1) % c.config.newsEveryDays === 0) rollNews(s, c, rng);
+  rollOffer(s, c, rng);
   s.phase = 'plan';
   return false;
 }

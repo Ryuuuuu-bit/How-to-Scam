@@ -130,6 +130,25 @@ export function validateContent(c: GameContent): string[] {
     }
   }
   if (c.news.length === 0) errors.push('no news');
+  const itemIds = new Set(c.shopItems.map((x) => x.id));
+  checkUnique(
+    'offer',
+    c.offers.map((x) => x.id),
+  );
+  for (const o of c.offers) {
+    for (const id of [...(o.discount?.itemIds ?? []), ...(o.ban ?? [])]) {
+      if (!itemIds.has(id)) errors.push(`offer ${o.id}: unknown item ${id}`);
+    }
+    if (o.kind === 'deal' && (o.price === undefined || !o.effects)) {
+      errors.push(`offer ${o.id}: deal needs price and effects`);
+    }
+    if (o.kind === 'mission') {
+      if (!o.mission) errors.push(`offer ${o.id}: mission data missing`);
+      else if (o.mission.methodId !== null && !methodIds.has(o.mission.methodId)) {
+        errors.push(`offer ${o.id}: unknown method ${o.mission.methodId}`);
+      }
+    }
+  }
 
   const weaknesses: Weakness[] = ['greed', 'fear', 'faith', 'lonely'];
   for (const w of weaknesses) {

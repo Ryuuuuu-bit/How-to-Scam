@@ -96,7 +96,10 @@ export interface LastResult {
     | 'viral'
     | 'exposed'
     | 'ponziCrash'
-    | 'news';
+    | 'news'
+    | 'offer'
+    | 'missionDone'
+    | 'missionFail';
   textKey?: string;
   dirtyCash?: number;
   cleanCash?: number;
@@ -139,6 +142,10 @@ export interface GameState {
   call: CallState | null;
   /** ข่าวประจำสัปดาห์ที่มีผลอยู่ */
   news: { id: NewsId; untilDay: number } | null;
+  /** ข้อเสนอของวันนี้ */
+  offer: { id: string; accepted: boolean } | null;
+  /** ภารกิจจากเฮียใหญ่ที่รับไว้ */
+  mission: { offerId: string; progress: number } | null;
   /** เหตุการณ์ต่อเนื่องที่ถูกนัดไว้ */
   scheduled: { eventId: EventId; day: number }[];
   pendingEvents: EventId[];
@@ -163,6 +170,7 @@ export interface GameState {
 export type Action =
   | { t: 'choosePlan'; methodId: MethodId | null }
   | { t: 'invest'; itemId: ShopItemId }
+  | { t: 'acceptOffer' }
   | { t: 'confirmInvest' }
   | { t: 'callPitch'; pitchId: PitchId }
   | { t: 'eventChoice'; choiceIdx: number }
