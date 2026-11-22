@@ -4,6 +4,7 @@ import type { GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { fmt, lt, monthName, t } from '../i18n';
 import { Art } from './ui';
+import { OnlineCount } from './OnlineCount';
 
 /** ตัวเลขไหลขึ้น/ลงแบบนับ + ตัวเลขลอยบอกส่วนต่าง */
 function useAnimatedValue(target: number, duration = 650) {
@@ -142,6 +143,9 @@ export function Hud({ state }: { state: GameState }) {
   return (
     <header className="game-hud sticky top-0 z-20 px-3 pt-[max(env(safe-area-inset-top),12px)] pb-3">
       <div className="hud-inner mx-auto flex flex-col gap-2">
+        <div className="flex">
+          <OnlineCount />
+        </div>
         <div className="hud-meta font-display flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-1">
             <Art id="icon:day" size={20} />

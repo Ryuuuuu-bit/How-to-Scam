@@ -66,6 +66,20 @@ async function guest() {
   return r.body as { token: string; user: { uid: string; kind: string } };
 }
 
+it('counts recent accounts once across tabs and expires inactive players', async () => {
+  const first = await guest();
+  const second = await guest();
+  const ping = (token: string) => api('/api/presence', { method: 'POST', token });
+  expect((await api('/api/presence', { method: 'POST' })).status).toBe(401);
+  expect((await ping(first.token)).body.count).toBe(1);
+  expect((await ping(first.token)).body.count).toBe(1);
+  expect((await ping(second.token)).body.count).toBe(2);
+  const future = new Date(Date.now() + 91_000);
+  expect(await store.markOnline(first.user.uid, future, new Date(future.getTime() - 90_000))).toBe(
+    1,
+  );
+});
+
 /** บอทง่ายๆ เล่นจนจบ */
 function play(seed: string, characterId: string): Action[] {
   let s: GameState = newGame(seed, characterId, content);

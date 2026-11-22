@@ -11,6 +11,7 @@ const inScope = (s: ScoreRow, scope: Scope) =>
 /** Store ในหน่วยความจำ สำหรับ test (พฤติกรรมเดียวกับ prismaStore) */
 export function memoryStore() {
   const users: UserRec[] = [];
+  const presence = new Map<string, number>();
   const runs: (RunRec & { reject?: string })[] = [];
   const scores: ScoreRow[] = [];
   const ach: { userId: string; id: string }[] = [];
@@ -35,6 +36,10 @@ export function memoryStore() {
     return u;
   };
   const store: Store = {
+    async markOnline(id, now, since) {
+      presence.set(id, now.getTime());
+      return Array.from(presence.values()).filter((at) => at > since.getTime()).length;
+    },
     async createGuest(displayName) {
       const u = mk({ displayName });
       users.push(u);

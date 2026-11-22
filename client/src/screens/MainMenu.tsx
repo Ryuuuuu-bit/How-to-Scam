@@ -7,6 +7,7 @@ import { useAuth } from '../net/auth';
 import { loadCosmetics, menuScenes } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
 import { HowToPlay } from './HowToPlay';
+import { OnlineCount } from '../components/OnlineCount';
 import { ConfirmPopup } from '../components/PopupControls';
 
 export function MainMenu({
@@ -55,7 +56,7 @@ export function MainMenu({
       <div className="menu-layout">
         <section className="menu-copy anim-rise-in">
           <div className="eyebrow">
-            <span className="live-dot" /> ยินดีต้อนรับสู่ด้านสีเทาของเมือง
+            <OnlineCount /> ยินดีต้อนรับสู่ด้านสีเทาของเมือง
           </div>
           <h1 className="game-logo">
             HOW TO

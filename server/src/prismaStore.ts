@@ -10,6 +10,15 @@ export function createPrisma(databaseUrl: string): PrismaClient {
 /** Store ที่เก็บจริงใน Postgres ผ่าน Prisma */
 export function prismaStore(db: PrismaClient): Store {
   return {
+    async markOnline(userId, now, since) {
+      return db.$transaction(async (tx) => {
+        await tx.$executeRaw`UPDATE "User" SET "lastOnlineAt" = ${now} WHERE id = ${userId}`;
+        const rows = await tx.$queryRaw<
+          { count: number }[]
+        >`SELECT COUNT(*)::int AS count FROM "User" WHERE "lastOnlineAt" > ${since}`;
+        return rows[0]?.count ?? 0;
+      });
+    },
     async createGuest(displayName) {
       return db.user.create({ data: { displayName, kind: 'guest' } });
     },

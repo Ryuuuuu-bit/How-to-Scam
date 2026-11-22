@@ -73,6 +73,7 @@ export interface NewRun {
 }
 
 export interface Store {
+  markOnline(userId: string, now: Date, since: Date): Promise<number>;
   createGuest(displayName: string): Promise<UserRec>;
   findUser(id: string): Promise<UserRec | null>;
   findByGoogleSub(sub: string): Promise<UserRec | null>;

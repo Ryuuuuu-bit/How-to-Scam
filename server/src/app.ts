@@ -67,6 +67,16 @@ export function createApp(d: AppDeps) {
     res.json({ ok: true });
   });
 
+  app.post(
+    '/api/presence',
+    limit(1, 90),
+    wrap(async (req) => {
+      const user = requireUser(req);
+      const now = new Date();
+      return { count: await d.store.markOnline(user.id, now, new Date(now.getTime() - 90_000)) };
+    }),
+  );
+
   app.get(
     '/api/config',
     wrap(async () => ({

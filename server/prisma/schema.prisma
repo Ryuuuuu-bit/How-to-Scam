@@ -36,9 +36,11 @@ model User {
   endings     String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  lastOnlineAt DateTime?
   runs        Run[]
   scores      Score[]
   achievements UserAchievement[]
+  @@index([lastOnlineAt])
 }
 
 /// เหรียญความสำเร็จที่ผู้เล่นได้แล้ว

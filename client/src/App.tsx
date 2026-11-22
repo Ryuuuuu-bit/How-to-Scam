@@ -12,6 +12,7 @@ import { ProfileSheet } from './screens/ProfileSheet';
 import { ResultSheet } from './components/ResultSheet';
 import { describeResult } from './game/results';
 import { AudioControls } from './components/AudioControls';
+import { PresenceProvider } from './components/OnlineCount';
 import { api } from './net/api';
 import { AuthProvider, useAuth } from './net/auth';
 import { t } from './i18n';
@@ -30,7 +31,9 @@ type Screen =
 export function App() {
   return (
     <AuthProvider>
-      <Gate />
+      <PresenceProvider>
+        <Gate />
+      </PresenceProvider>
       <AudioControls />
     </AuthProvider>
   );

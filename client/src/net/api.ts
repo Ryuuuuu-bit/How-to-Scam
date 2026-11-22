@@ -101,6 +101,7 @@ async function call<T>(path: string, init: { method?: string; body?: unknown } =
 }
 
 export const api = {
+  presence: () => call<{ count: number }>('/api/presence', { method: 'POST' }),
   config: () => call<{ googleClientId: string | null; season: string }>('/api/config'),
   guest: () =>
     call<{ token: string; user: PublicUser }>('/api/auth/guest', { method: 'POST', body: {} }),
