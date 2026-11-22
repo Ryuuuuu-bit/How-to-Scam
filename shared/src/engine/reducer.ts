@@ -59,6 +59,7 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
     flags: [],
     escapes: 0,
     methodsUsed: [],
+    stats: { specialChoices: 0, maxPonziStreak: 0, launderOk: 0 },
     history: [],
     lastResults: [],
     end: null,

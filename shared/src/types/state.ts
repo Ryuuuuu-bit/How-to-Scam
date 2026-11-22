@@ -147,6 +147,8 @@ export interface GameState {
   flags: string[];
   escapes: number;
   methodsUsed: MethodId[];
+  /** สถิติสำหรับ achievement */
+  stats: { specialChoices: number; maxPonziStreak: number; launderOk: number };
   history: DayLog[];
   lastResults: LastResult[];
   end: {

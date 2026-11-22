@@ -20,3 +20,6 @@ export { isEventEligible, choiceAvailable } from './engine/events';
 export { validateContent } from './validate';
 export { titleFor, isCharacterUnlocked } from './engine/titles';
 export type { UnlockProgress } from './engine/titles';
+export { achievementsFor } from './engine/achievements';
+export type { PlayerTotals } from './engine/achievements';
+export { bangkokDate, dailyCharacter, isDailyDate } from './engine/daily';

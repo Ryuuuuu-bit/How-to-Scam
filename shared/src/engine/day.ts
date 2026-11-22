@@ -236,6 +236,7 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
       } else {
         base = Math.round(base * Math.pow(1 + p.growthPct / 100, ms.streak));
         ms.streak++;
+        s.stats.maxPonziStreak = Math.max(s.stats.maxPonziStreak, ms.streak);
       }
       break;
     }

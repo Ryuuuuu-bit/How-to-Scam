@@ -353,6 +353,31 @@ export interface Title {
   name: LocalizedText;
 }
 
+/** เงื่อนไขของเหรียญความสำเร็จ: ตรวจจากรอบที่จบ หรือจากสถิติสะสมของผู้เล่น */
+export type AchievementRule =
+  | { kind: 'ending'; endingId: EndingId }
+  | { kind: 'reason'; reason: EndReason; maxDay?: number; minDay?: number }
+  | { kind: 'cleanCash'; min: number }
+  | { kind: 'level'; min: GangLevel }
+  | { kind: 'methodsUsed'; min: number }
+  | { kind: 'ponziStreak'; min: number }
+  | { kind: 'launderOk'; min: number }
+  | { kind: 'specialChoices'; min: number }
+  | { kind: 'seenEvent'; eventId: EventId }
+  | { kind: 'characterWin'; characterId: CharacterId }
+  | { kind: 'escapes'; min: number }
+  | { kind: 'dirtyHoarder'; min: number }
+  | { kind: 'runs'; min: number }
+  | { kind: 'daily' };
+
+export interface Achievement {
+  id: string;
+  icon: string;
+  rule: AchievementRule;
+  name: LocalizedText;
+  desc: LocalizedText;
+}
+
 export interface GameContent {
   config: GameConfig;
   methods: ScamMethod[];
@@ -368,4 +393,5 @@ export interface GameContent {
   festivals: Festival[];
   news: News[];
   titles: Title[];
+  achievements: Achievement[];
 }

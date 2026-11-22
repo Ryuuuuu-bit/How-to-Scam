@@ -17,6 +17,7 @@ import { launderCards } from './launderCards';
 import { methods } from './methods';
 import { shopItems } from './shop';
 import { titles } from './titles';
+import { achievements } from './achievements';
 
 /** เนื้อหาเกมทั้งหมด — client และ server import ตัวนี้ตัวเดียวกัน */
 export const content: GameContent = {
@@ -43,4 +44,5 @@ export const content: GameContent = {
   festivals,
   news,
   titles,
+  achievements,
 };

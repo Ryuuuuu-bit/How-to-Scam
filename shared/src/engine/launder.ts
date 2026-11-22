@@ -46,6 +46,7 @@ export function launder(s: GameState, c: GameContent, rng: Rng, cardId: string |
     const clean = Math.round(amount * (1 - card.lossPct / 100));
     s.cleanCash += clean;
     s.totalLaundered += clean;
+    s.stats.launderOk++;
     s.heat += card.heat;
   } else {
     // ส่วนที่ไม่หายกลับมาเป็นเงินสกปรก

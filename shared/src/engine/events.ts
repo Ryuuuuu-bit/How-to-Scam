@@ -93,6 +93,7 @@ export function resolveEventChoice(
   const choice = ev.choices[choiceIdx];
   invariant(choice, `invalid choice ${choiceIdx} for event ${ev.id}`);
   invariant(choiceAvailable(s, choice.requires), `choice ${choiceIdx} not available`);
+  if (choice.requires) s.stats.specialChoices++;
   const oi = rng.weightedIndex(choice.outcomes.map((o) => o.weight ?? 1));
   const outcome = choice.outcomes[oi];
   invariant(outcome, `event ${ev.id} choice ${choiceIdx} has no outcomes`);
