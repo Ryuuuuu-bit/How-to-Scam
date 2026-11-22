@@ -1066,7 +1066,8 @@ h3,
 .collection-screen > p.text-ink-soft, .end-screen > p.text-ink-soft { color: #c4c3cc; }
 .game-hud, .planner-actions, .collection-progress, .end-screen { font-variant-numeric: tabular-nums; }
 :where(button, a, summary, select, input, textarea):focus-visible { outline: 3px solid #45c9be; outline-offset: 3px; }
-.practice-nav { display: flex; align-items: center; gap: .85rem; flex-wrap: wrap; margin: 0 auto; padding: .65rem max(1rem, calc((100% - 1100px)/2)); background: #272935; color: #faf5e8; }
+.practice-nav { position: relative; z-index: 2; display: flex; align-items: center; gap: .85rem; flex-wrap: wrap; margin: 0 auto; padding: .2rem max(1rem, calc((100% - 1100px)/2)); background: #272935; color: #faf5e8; }
+.is-planning .play-heading:has(> :only-child) { display: none; }
 .practice-nav a, .practice-link { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: .2em; color: #e8fa71; }
 .practice-link { justify-content: center; }
 .practice-end { max-width: 34rem; margin: 10vh auto; padding: 1.5rem; display: grid; gap: 1rem; }
