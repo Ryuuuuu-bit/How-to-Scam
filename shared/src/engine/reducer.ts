@@ -119,7 +119,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       break;
     case 'choosePlan':
       expectPhase(s, 'plan');
-      choosePlan(s, c, action.methodId);
+      choosePlan(s, c, action.methodId, action.opening);
       break;
     case 'invest':
       expectPhase(s, 'invest');

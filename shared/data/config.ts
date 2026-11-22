@@ -5,7 +5,7 @@ export const config: GameConfig = {
   maxDays: 30,
   startDirtyCash: 5_000,
   // ยอดฟอกสำเร็จสะสมเพื่อขึ้นระดับ 2 / 3 / 4
-  levelThresholds: [25_000, 110_000, 380_000],
+  levelThresholds: [20_000, 95_000, 340_000],
   heatDecayQuietDay: 6,
   eventCountWeights: [25, 50, 25],
   launderOfferSize: 3,

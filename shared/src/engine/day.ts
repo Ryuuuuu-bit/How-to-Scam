@@ -1,4 +1,5 @@
 import type { GameContent, GangLevel, ScamMethod } from '../types/content';
+import { openingFor } from './opening';
 import type { CallVictim, GameState } from '../types/state';
 import { activeFestivals, currentNews } from './calendar';
 import { addHenchman, clampHeat, HEAT_MAX, methodStateOf, modifierPct } from './effects';
@@ -36,8 +37,8 @@ export function unlockedMethods(s: GameState, c: GameContent): ScamMethod[] {
   return c.methods.filter((m) => methodBlock(s, c, m) === null);
 }
 
-export function levelFor(totalLaundered: number, c: GameContent): GangLevel {
-  const [l2, l3, l4] = c.config.levelThresholds;
+export function levelFor(totalLaundered: number, c: GameContent, legacy = false): GangLevel {
+  const [l2, l3, l4] = legacy ? [25_000, 110_000, 380_000] as const : c.config.levelThresholds;
   if (totalLaundered >= l4) return 4;
   if (totalLaundered >= l3) return 3;
   if (totalLaundered >= l2) return 2;
@@ -45,7 +46,7 @@ export function levelFor(totalLaundered: number, c: GameContent): GangLevel {
 }
 
 export function updateLevel(s: GameState, c: GameContent): void {
-  const lvl = levelFor(s.totalLaundered, c);
+  const lvl = levelFor(s.totalLaundered, c, !s.seed.startsWith('v3:'));
   if (lvl > s.gangLevel) {
     s.gangLevel = lvl;
     s.lastResults.push({ kind: 'levelUp', textKey: `level${lvl}` });
@@ -61,13 +62,16 @@ export function ponziCrashPct(s: GameState, c: GameContent): number {
 }
 
 // ---------- 1. เลือกแผน ----------
-export function choosePlan(s: GameState, c: GameContent, methodId: string | null): void {
+export function choosePlan(s: GameState, c: GameContent, methodId: string | null, fromOpening = false): void {
+  const opening = fromOpening && s.day === 1 ? openingFor(s.seed, s.characterId) : null;
+  if (fromOpening) invariant(!!opening && (methodId === null || methodId === 'fake_shop'), 'invalid opening choice');
   if (methodId !== null) {
     const block = methodBlock(s, c, getMethod(c, methodId));
     invariant(block === null, `method ${methodId} unavailable (${block})`);
   }
   s.todayMethodId = methodId;
   s.history.push({
+    ...(opening && { opening }),
     repeatableCost: methodId ? getMethod(c, methodId).cost : 0,
     day: s.day,
     methodId,

@@ -92,6 +92,7 @@ export interface MethodState {
 }
 
 export interface DayLog {
+  opening?: 'mother' | 'guild' | 'parcel';
   recruits?: string[];
   interview?: 'henchman' | 'cat';
   repeatableCost?: number;
@@ -196,7 +197,7 @@ export interface GameState {
 
 /** การกระทำของผู้เล่น — server เก็บเป็น action log เพื่อ replay */
 export type Action =
-  | { t: 'choosePlan'; methodId: MethodId | null }
+  | { t: 'choosePlan'; methodId: MethodId | null; opening?: true | undefined }
   | { t: 'invest'; itemId: ShopItemId }
   | { t: 'acceptOffer' }
   | { t: 'scoutNews' }

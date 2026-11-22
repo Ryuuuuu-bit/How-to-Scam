@@ -1,5 +1,6 @@
 import type { DayLog, GameContent, GameState } from '@hts/shared';
 import { newspaperMeme } from './memes';
+import { openingStories } from './openingStories';
 import type { Meme } from './memes';
 
 export interface DailyArticle {
@@ -49,6 +50,7 @@ function articleFor(log: DayLog, content: GameContent): DailyArticle {
     image: method ? `newsphoto:${method.id}` : 'icon:rest',
     caption: method ? method.name.th : 'วันพักของตัวเอก',
     meme: newspaperMeme(log),
+    ...(log.opening && { headline: openingStories[log.opening][log.methodId ? 'workNews' : 'quietNews'] }),
     ...(log.interview === 'henchman' && {
       headline: 'โฆษกปากซอยยืนยัน ยังไม่ทราบว่าบริษัททำอะไร',
       body: 'เมื่อวานคุณส่งลูกน้องออกกล้อง เขาขอให้สถานีขึ้นชื่อว่า “โฆษกประจำซอย” พอเจ๊ถามว่าบริษัททำอะไร เขาหันไปถามตากล้องอีกที คลิปดังข้ามคืน ทั้งแฟนคลับและสายตรวจกำลังตามหาเขา',

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Action, GameState } from '@hts/shared';
-import { currentOffer, methodBlock, newsScout, priceOf } from '@hts/shared';
+import { currentOffer, methodBlock, newsScout, openingFor, priceOf } from '@hts/shared';
+import { openingStories } from '../game/openingStories';
 import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
@@ -92,6 +93,10 @@ export function DayPlanner({
     lastPlan?.methodId && !methodBlockFor(state, lastPlan.methodId) ? lastPlan.methodId : null,
   );
   const [cart, setCart] = useState<Record<string, number>>({});
+  const skipKey = 'hts.opening.skipped';
+  const [skipped, setSkipped] = useState(() => {
+    try { return localStorage.getItem(skipKey) === state.seed; } catch { return false; }
+  });
   const offer = currentOffer(state, content);
   const banned = (id: string) => offer?.kind === 'twist' && (offer.ban?.includes(id) ?? false);
   const methods = content.methods.map((method) => ({
@@ -114,8 +119,8 @@ export function DayPlanner({
   const total = (method?.cost ?? 0) + cartCost;
   const canAfford = total <= money(state);
 
-  const run = (mId: string | null, buy: string[]) => {
-    dispatch({ t: 'choosePlan', methodId: mId });
+  const run = (mId: string | null, buy: string[], opening = false) => {
+    dispatch({ t: 'choosePlan', methodId: mId, ...(opening && { opening: true as const }) });
     if (mId !== null) for (const id of buy) dispatch({ t: 'invest', itemId: id });
     dispatch({ t: 'confirmInvest' });
   };
@@ -139,9 +144,41 @@ export function DayPlanner({
   const difference = priorCost === undefined ? 0 : repeatCost - priorCost;
   const omitted = lastPlan?.items.filter(banned) ?? [];
 
+  const opening = state.day === 1 && !skipped && openingFor(state.seed, state.characterId);
+  const shop = methods.find(({ method }) => method.id === 'fake_shop');
+  if (opening && shop) {
+    const story = openingStories[opening];
+    const estimate = planEstimate(state, shop.method, {});
+    return (
+      <section className="grid gap-3 rounded-3xl border-2 border-ink bg-paper p-4 text-ink shadow-pop">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-bold">ข้อความเข้า · วันที่ 1</span>
+          <button type="button" className="min-h-11 px-2 underline" onClick={() => {
+            setSkipped(true);
+            try { localStorage.setItem(skipKey, state.seed); } catch { /* still skip in this session */ }
+          }}>ข้ามไปวางแผน</button>
+        </div>
+        <h2 className="font-display text-2xl">{story.sender}</h2>
+        <p className="rounded-2xl rounded-tl-none border border-ink bg-white p-3">{story.message}</p>
+        <Button tone="sun" block disabled={shop.block !== null || money(state) < shop.method.cost}
+          onClick={() => run(shop.method.id, [], true)}>
+          <span>{story.work}<small className="block font-normal">ทุน ฿{fmt(shop.method.cost)} · รายได้ ฿{fmt(estimate.income[0])}–{fmt(estimate.income[1])} · Heat +{estimate.heat.join('–')}</small></span>
+        </Button>
+        <Button tone="paper" block onClick={() => run(null, [], true)}>
+          <span>{story.rest}<small className="block font-normal">พักงานวันนี้ · Heat ลดได้สูงสุด {Math.min(state.heat, content.config.heatDecayQuietDay)}</small></span>
+        </Button>
+      </section>
+    );
+  }
+  const yesterday = state.day === 2 ? state.history.find(log => log.day === 1) : undefined;
+
   return (
     <>
       <ScreenTitle title={t('phase.plan')} hint={t('planner.hint')} />
+      {yesterday?.opening && <aside className="mb-3 rounded-xl border-2 border-ink bg-sun p-3 text-ink">
+        <small>ข่าวหน้าหนึ่งเช้านี้</small>
+        <p className="font-display">{openingStories[yesterday.opening][yesterday.methodId ? 'workNews' : 'quietNews']}</p>
+      </aside>}
       <NewsCard state={state} compact />
       <div className="flex flex-col gap-2">
         {methods
