@@ -8,6 +8,10 @@ export function LiveCounter({ seller, onFinish }: { seller: boolean; onFinish: (
   const [left, setLeft] = useState(10);
   const sent = useRef(false);
   const cat = pan >= 55;
+  useEffect(() => {
+    audio.setScene('live');
+    return () => audio.setScene('normal');
+  }, []);
   const spotted = useRef(false);
   useEffect(() => {
     if (stage === 'live' && cat && !spotted.current) {

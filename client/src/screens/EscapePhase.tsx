@@ -205,6 +205,10 @@ function BribeStep({ state, dispatch }: Props) {
 const QTE_MS = 850;
 
 function QteStep({ state, dispatch }: Props) {
+  useEffect(() => {
+    audio.setScene('chase');
+    return () => audio.setScene('normal');
+  }, []);
   const e = escapeOf(state);
   const total = content.config.escape.qteTargets;
   const [phase, setPhase] = useState<'ready' | 'run' | 'done'>('ready');

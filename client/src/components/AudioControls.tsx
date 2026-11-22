@@ -94,7 +94,7 @@ export function AudioControls() {
           >
             {settings.muted ? 'เปิดเสียงทั้งหมด' : 'ปิดเสียงทั้งหมด'}
           </PopupButton>
-          <p>เพลง Bangkok Half Past Five · ElevenLabs Music · พักเมื่อออกจากแท็บ</p>
+          <p>เพลง Soi Cat Shuffle · ElevenLabs Music · พักเมื่อออกจากแท็บ</p>
         </div>
       )}
     </aside>

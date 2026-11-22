@@ -16,6 +16,7 @@ const effects = {
   news: [392, 523, 659, 523, 784],
 } as const;
 type Cue = keyof typeof effects;
+type MusicScene = 'normal' | 'live' | 'focus' | 'chase';
 
 const recordedEffects = new Set(['sfx_click', 'sfx_cash', 'sfx_coins', 'sfx_card_flip', 'sfx_sale', 'sfx_spotted', 'sfx_chase']);
 export interface AudioSettings {
@@ -52,6 +53,8 @@ class GameAudio {
   private enabled = false;
   private marketTrack: AudioBuffer | null = null;
   private marketNode: AudioBufferSourceNode | null = null;
+  private filter: BiquadFilterNode | null = null;
+  private scene: MusicScene = 'normal';
   /** ไฟล์เสียงจาก ElevenLabs ที่โหลดแล้ว (null = ไม่มีไฟล์) */
   private buffers = new Map<string, Promise<AudioBuffer | null>>();
   private voiceNode: AudioBufferSourceNode | null = null;
@@ -68,7 +71,7 @@ class GameAudio {
     if (!this.context) return;
     const now = this.context.currentTime;
     this.musicGain?.gain.setTargetAtTime(
-      this.settings.muted ? 0 : this.settings.music * 0.22,
+      this.settings.muted ? 0 : this.settings.music * (this.scene === 'focus' ? 0.14 : 0.22),
       now,
       0.08,
     );
@@ -89,7 +92,7 @@ class GameAudio {
         this.effectsGain.connect(limiter);
         limiter.connect(this.context.destination);
         this.applyVolume();
-        void this.load('bgm_market').then(buffer => { this.marketTrack = buffer; });
+        void this.load('soi_cat_shuffle').then(buffer => { this.marketTrack = buffer; });
       }
       this.enabled = true;
       if (document.hidden) return;
@@ -105,6 +108,21 @@ class GameAudio {
   }
   setDanger(value: boolean) {
     this.danger = value;
+    this.mix();
+  }
+  setScene(scene: MusicScene) {
+    this.scene = scene;
+    this.mix();
+  }
+  private mix() {
+    if (!this.context) return;
+    const now = this.context.currentTime;
+    const chase = this.scene === 'chase' || (this.scene === 'normal' && this.danger);
+    const speed = chase ? 1.08 : this.scene === 'live' ? 1.035 : 1;
+    const cutoff = this.scene === 'focus' ? 1900 : this.scene === 'live' ? 11500 : 17000;
+    this.marketNode?.playbackRate.setTargetAtTime(speed, now, 0.22);
+    this.filter?.frequency.setTargetAtTime(cutoff, now, 0.18);
+    this.applyVolume();
   }
   visibility() {
     if (document.hidden) {
@@ -147,20 +165,19 @@ class GameAudio {
   }
   private schedule() {
     if (!this.context || !this.musicGain || this.context.state !== 'running') return;
-    if (this.marketTrack && !this.danger) {
+    if (this.marketTrack) {
       if (!this.marketNode) {
         this.marketNode = this.context.createBufferSource();
         this.marketNode.buffer = this.marketTrack;
         this.marketNode.loop = true;
-        this.marketNode.connect(this.musicGain);
+        this.filter = this.context.createBiquadFilter();
+        this.filter.type = 'lowpass';
+        this.filter.Q.value = 0.65;
+        this.marketNode.connect(this.filter).connect(this.musicGain);
+        this.mix();
         this.marketNode.start();
       }
       return;
-    }
-    if (this.marketNode) {
-      this.marketNode.stop();
-      this.marketNode.disconnect();
-      this.marketNode = null;
     }
     if (this.nextNote < this.context.currentTime) this.nextNote = this.context.currentTime + 0.02;
     const bus = this.musicGain;

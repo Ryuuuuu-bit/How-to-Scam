@@ -15,6 +15,10 @@ export function CustodyScene({ state, dispatch }: { state: GameState; dispatch: 
   const [photo, setPhoto] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(memorySeconds);
   useEffect(() => {
+    audio.setScene('focus');
+    return () => audio.setScene('normal');
+  }, []);
+  useEffect(() => {
     if (page === 'play') audio.sfx('sfx_card_flip', 'paper');
   }, [page]);
   useEffect(() => {
