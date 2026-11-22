@@ -122,6 +122,9 @@ ART['shop:host_tuk'] = { emoji: '🎤' };
 
 // Illustrated sets used for the neighborhood broadcasts and retirement scenes.
 const neighborhoodSets = {
+  end_soi_landlord: 'menu', end_soi_cinema: 'menu_studio', end_soi_shop: 'shop',
+  end_soi_cart: 'escape_market', end_soi_table: 'end_home_again',
+  end_jail_return: 'menu_jail', end_jail_cards: 'end_jailed',
   end_retire_radio: 'menu_studio', end_retire_crew: 'ev_auntie_neighbors_unite',
   end_retire_kitchen: 'end_home_again', end_retire_repair: 'ev_phone_repair_victim',
   end_retire_arcade: 'ev_gamer_sleep', end_retire_cat: 'ev_cat_keyboard',

@@ -5,6 +5,7 @@ import { characters } from './characters';
 import { config } from './config';
 import { dangerSigns } from './dangerSigns';
 import { endings } from './endings';
+export { day30Ending } from './endings';
 import { characterEvents } from './events/characters';
 import { cyberEvents } from './events/cyber';
 import { karmaEvents } from './events/karma';

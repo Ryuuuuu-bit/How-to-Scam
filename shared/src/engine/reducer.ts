@@ -211,6 +211,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
         invariant(answer.length === 3 && answer.every(n => Number.isInteger(n) && n >= 0 && n < 3), 'invalid dream');
       }
       if (!answer || !dreamSequence(s).every((n, i) => n === answer[i])) {
+        if (answer) s.flags.push('missed_custody_cards');
         finish(s, c, rng, 'caught');
         break;
       }

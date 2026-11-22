@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content, day30Ending } from '@hts/shared/data';
 import { sceneUrl } from '../assets/art';
 import { audio } from '../audio/audio';
 import { lt } from '../i18n';
@@ -18,6 +18,7 @@ export function EndingCard({ state, portrait = 'char:' + state.characterId }: { 
   if (!ending) return null;
   const scene = sceneUrl('end_' + ending.id);
   const character = content.characters.find(c => c.id === state.characterId);
+  const future = state.end?.reason === 'survived' ? day30Ending(state.cleanCash) : undefined;
   return <Panel tone="sun" className="anim-rise-in text-center">
     <div className="relative">
       {scene ? <img src={scene} alt="" className="anim-scene-in aspect-[4/3] w-full rounded-2xl border-[3px] border-ink object-cover object-top" />
@@ -29,5 +30,9 @@ export function EndingCard({ state, portrait = 'char:' + state.characterId }: { 
     </div>}
     <h2 className="mt-3 text-2xl font-semibold">{lt(ending.title)}</h2>
     <p className="mt-2 text-left leading-relaxed">{lt(ending.body)}</p>
+    {future && <div className="mt-4 rounded-2xl bg-paper p-3 text-left text-ink">
+      <strong>รอดครบ 30 วัน · เงินสะอาด ฿{state.cleanCash.toLocaleString('th-TH')}</strong>
+      {future.id !== ending.id && <><h3 className="mt-2 font-bold">{lt(future.title)}</h3><p>{lt(future.body)}</p></>}
+    </div>}
   </Panel>;
 }
