@@ -81,7 +81,7 @@ export function useGame() {
 
   /** เริ่มรอบ: ถ้ามี seed จาก server (runId) คะแนนจะส่งขึ้นกระดานได้ */
   const start = useCallback((characterId: string, server?: { runId: string; seed: string }) => {
-    const seed = server?.seed ?? 'v3:soi:' + randomSeed();
+    const seed = server?.seed ?? 'v3:soi:live:' + randomSeed();
     const next: Run = {
       seed,
       characterId,

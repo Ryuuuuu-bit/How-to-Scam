@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LiveCounter } from './screens/LiveCounter';
 import { loadSavedRun, useGame } from './game/useGame';
 import { CharacterSelect } from './screens/CharacterSelect';
 import { EndScreen } from './screens/EndScreen';
@@ -29,6 +30,9 @@ type Screen =
   | 'wardrobe';
 
 export function App() {
+  if (new URLSearchParams(window.location.search).get('preview') === 'live') {
+    return <main><LiveCounter seller onFinish={() => window.location.assign('/')} /></main>;
+  }
   return (
     <AuthProvider>
       <PresenceProvider>

@@ -1,0 +1,17 @@
+.live-counter{width:min(100%,34rem);margin:1rem auto;padding:clamp(14px,3vw,22px);background:#fff7e7;color:#251d2b;border:3px solid #201c26;border-radius:22px;box-shadow:0 6px 0 #141117;font-family:inherit}
+.live-counter header small{color:#76315c;font-weight:800}
+.live-counter h2{font:900 clamp(24px,6vw,36px)/1.25 var(--font-display,inherit);font-weight:900;font-size:clamp(24px,6vw,36px);margin:2px 0 12px}
+.live-shot{position:relative;isolation:isolate;height:clamp(195px,38svh,320px);overflow:hidden;border:3px solid #261e29;border-radius:15px;background:#443341 url('../assets/img/live-counter.webp') no-repeat;background-size:cover}
+.live-shot{background-size:auto max(100%,min(94vw,510px))}
+.live-shot input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}
+.live-shot:focus-within{outline:3px solid #7745d9;outline-offset:2px}
+.live-indicators,.live-comment{position:absolute;z-index:1;pointer-events:none;color:white;font-size:.82rem;font-weight:700}
+.live-indicators{top:9px;left:9px;right:9px;display:flex;justify-content:space-between}
+.live-indicators b,.live-indicators span,.live-comment{border-radius:9px;padding:4px 9px;background:#201b28e8}
+.live-indicators b{background:#b91a51}.live-comment{bottom:9px;left:9px;max-width:92%}
+.live-focus{position:absolute;inset:35% 36%;border:2px dashed white;border-radius:10px;box-shadow:0 0 0 1px #25202d85;pointer-events:none}
+.live-counter p{font-size:.97rem;margin:12px 0;line-height:1.55}
+.live-counter button{display:block;width:100%;min-height:44px;background:#ede962;color:#231c28;border:2px solid #28202d;border-radius:12px;font-weight:800;padding:8px;cursor:pointer;box-shadow:0 2px 0 #28202d}
+.live-counter .live-secondary{background:transparent;box-shadow:none;border-color:transparent;margin-top:4px}
+.live-subjects{display:flex;gap:6px;margin-bottom:10px}.live-subjects button{background:#fff}.live-subjects button[aria-pressed=true]{background:#eddaff;border-color:#683e82}
+.live-print{border:6px solid white;box-shadow:0 2px 7px #30203055;transform:rotate(-1deg)}

@@ -2,7 +2,25 @@ import { expect, it } from 'vitest';
 import { newGame, priceOf, step } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { dailyArticles } from '../src/game/newspaper';
-import { isEventEligible } from '../../shared/src/engine/events';
+import { isEventEligible, rollDailyEvents } from '../../shared/src/engine/events';
+import { Rng } from '../../shared/src/engine/rng';
+
+it.each([0, 1])('plays the counter once and records camera choice %i', choiceIdx => {
+  const s = step(newGame('v3:soi:live:test', 'ex_insurance', content),
+    { t: 'choosePlan', methodId: 'fake_shop' }, content);
+  const rng = new Rng(s.rng);
+  rollDailyEvents(s, content, rng);
+  expect(s.pendingEvents[0]).toBe('counter_live');
+  const next = step({ ...s, phase: 'event' }, { t: 'eventChoice', choiceIdx }, content);
+  expect(next.dirtyCash - s.dirtyCash).toBe(choiceIdx ? 0 : 500);
+  expect(next.fame - s.fame).toBe(choiceIdx ? 4 : 0);
+  expect(dailyArticles({ ...next, day: 2 }, content)).not.toHaveLength(0);
+  next.pendingEvents = [];
+  rollDailyEvents(next, content, rng);
+  expect(next.pendingEvents).not.toContain('counter_live');
+  const event = content.events.find(e => e.id === 'counter_live')!;
+  expect(isEventEligible({ ...s, seed: 'v3:soi:older', pendingEvents: [], seenEvents: [] }, content, event)).toBe(false);
+});
 
 it.each(['lift', 'stay'] as const)('prints the matching live-sale ending for %s', (ending) => {
   const event = content.events.find(e => e.id === 'cf_orange_cat')!;

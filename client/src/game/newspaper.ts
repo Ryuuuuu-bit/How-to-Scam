@@ -70,7 +70,12 @@ function articleFor(log: DayLog, content: GameContent): DailyArticle {
       caption: 'แขกรับเชิญหลังจบรายการ',
       meme: null,
     }),
-    ...(log.liveCat && {
+    ...(log.liveCat === 'sale' && {
+      headline: 'หม้อทอดขายออกแล้ว เจ๊คอนเฟิร์ม “คนถามกี่ลิตรเขาซื้อจริง”',
+      body: 'กล้องจับหม้อทอดเต็มเฟรมจนปิดยอดได้ ส่วนส้มซ่าหลับอยู่ข้างกล้องจนจบไลฟ์',
+      image: 'method:fake_shop', caption: 'หม้อทอดใบสุดท้าย', meme: null,
+    }),
+    ...((log.liveCat === 'stay' || log.liveCat === 'lift') && {
       headline: log.liveCat === 'stay'
         ? 'รีวิวร้านเจ๊ “แมวน่ารักมากค่ะ ส่วนของที่ขายจำไม่ได้”'
         : 'เจ๊อุ้มแมวออก แฟนคลับออกตาม เหลือคนดูแปดคนเท่าเดิม',

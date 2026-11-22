@@ -3,6 +3,19 @@ import type { GameEvent } from '../../src/types/content';
 // เหตุการณ์ต่อเนื่อง (เลือกวันนี้ มีผลอีกหลายวัน) และตัวละครประจำที่กลับมาเรื่อยๆ
 export const storyEvents: GameEvent[] = [
   {
+    id: 'counter_live', category: 'silly', weight: 1, when: { methods: ['fake_shop'] },
+    title: { th: 'เจ๊จัดกล้องไลฟ์' },
+    body: { th: 'เจ๊ฝากถือกล้อง หม้อทอดอยู่ทางซ้าย ส่วนทางขวา… หางใครน่ะ?' },
+    choices: [
+      { text: { th: 'ถ่ายหม้อทอด' }, liveCat: 'sale', outcomes: [{
+        text: { th: 'ปิดยอดหม้อทอดได้แล้ว!' }, effects: [{ kind: 'add', stat: 'dirtyCash', value: 500 }],
+      }] },
+      { text: { th: 'ตามส้มซ่า' }, liveCat: 'stay', outcomes: [{
+        text: { th: 'คนดูฝากถาม “พรุ่งนี้น้องไลฟ์กี่โมงคะ”' }, effects: [{ kind: 'add', stat: 'fame', value: 4 }],
+      }] },
+    ],
+  },
+  {
     id: 'cf_orange_cat',
     category: 'silly',
     weight: 45,

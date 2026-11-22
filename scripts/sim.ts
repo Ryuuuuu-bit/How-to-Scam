@@ -127,7 +127,7 @@ for (let i = 0; i < runs; i++) {
   const style = styles[i % styles.length] ?? 'random';
   if (!ch) break;
   const r = lcg(i * 7919 + 1);
-  let s = newGame(`v3:soi:sim-${i}`, ch.id, content);
+  let s = newGame(`v3:soi:live:sim-${i}`, ch.id, content);
   for (let k = 0; k < 5000 && s.phase !== 'ended'; k++) s = step(s, bot(s, style, r), content);
   const key = `${ch.id}/${style}`;
   const row = (rows[key] ??= { n: 0, score: [], caught: 0, lvl: [], days: [] });

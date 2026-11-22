@@ -115,7 +115,7 @@ export function PlayScreen({
       <main
         className={`decision-panel relative z-10 ${state.phase === 'plan' ? 'is-planning' : ''}`}
       >
-        <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />
+        {!(state.phase === 'event' && state.pendingEvents[0] === 'counter_live') && <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />}
         <div className="play-heading mb-3 flex items-center gap-3">
           <Art
             id={characterArt(state.characterId, cosmetics)}

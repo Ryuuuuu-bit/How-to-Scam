@@ -106,7 +106,7 @@ export interface ChoiceRequirement {
 }
 
 export interface EventChoice {
-  liveCat?: 'lift' | 'stay';
+  liveCat?: 'lift' | 'stay' | 'sale';
   interview?: 'henchman' | 'cat';
   text: LocalizedText;
   requires?: ChoiceRequirement;

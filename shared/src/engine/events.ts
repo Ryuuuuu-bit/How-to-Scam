@@ -11,6 +11,8 @@ const inRange = (v: number, r?: readonly [number, number]) => !r || (v >= r[0] &
 
 export function isEventEligible(s: GameState, c: GameContent, ev: GameEvent): boolean {
   if (ev.chainOnly) return false;
+  if (ev.id === 'counter_live' && !s.seed.startsWith('v3:soi:live:')) return false;
+  if (ev.id === 'cf_orange_cat' && s.seed.startsWith('v3:soi:live:')) return false;
   if ((ev.once ?? true) && s.seenEvents.includes(ev.id)) return false;
   if (s.pendingEvents.includes(ev.id)) return false;
   return conditionMet(s, c, ev.when);
@@ -70,7 +72,12 @@ export function rollDailyEvents(s: GameState, c: GameContent, rng: Rng): void {
     s.pendingEvents.push(x.eventId);
     s.seenEvents.push(x.eventId);
   }
-  const count = Math.max(0, rng.weightedIndex(c.config.eventCountWeights) - due.length);
+  if (s.seed.startsWith('v3:soi:live:') && s.todayMethodId === 'fake_shop' &&
+      s.pendingEvents.length < 2 && !s.seenEvents.includes('counter_live')) {
+    s.pendingEvents.push('counter_live');
+    s.seenEvents.push('counter_live');
+  }
+  const count = Math.max(0, rng.weightedIndex(c.config.eventCountWeights) - s.pendingEvents.length);
   for (let i = 0; i < count; i++) {
     const pool = c.events.filter((ev) => isEventEligible(s, c, ev));
     if (pool.length === 0) break;
