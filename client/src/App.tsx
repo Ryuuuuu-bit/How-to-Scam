@@ -32,7 +32,8 @@ type Screen =
   | 'wardrobe';
 
 export function App() {
-  if (new URLSearchParams(window.location.search).get('preview') === 'origins') return <><OriginPreview /><AudioControls /></>;
+  const preview = new URLSearchParams(window.location.search).get('preview');
+  if (preview === 'origins' || preview === 'retirement' || preview === 'soinews') return <><OriginPreview page={preview} /><AudioControls /></>;
   if (new URLSearchParams(window.location.search).get('preview') === 'scenes') return <><ScenePreview /><AudioControls /></>;
   if (new URLSearchParams(window.location.search).get('preview') === 'live') {
     return <><main><LiveCounter seller onFinish={() => window.location.assign('/')} /></main><AudioControls /></>;

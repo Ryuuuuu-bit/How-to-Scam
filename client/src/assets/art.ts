@@ -120,5 +120,19 @@ if (ART['icon:henchman']?.src) ART['shop:henchman'] = ART['icon:henchman'];
 ART['shop:intern_nat'] = ART['char:gamer_kid'] ?? { emoji: '📋' };
 ART['shop:host_tuk'] = ART['shop:celebrity_promo'] ?? { emoji: '🎤' };
 
+// Illustrated sets used for the neighborhood broadcasts and retirement scenes.
+const neighborhoodSets = {
+  end_retire_radio: 'menu_studio', end_retire_crew: 'ev_auntie_neighbors_unite',
+  end_retire_kitchen: 'end_home_again', end_retire_repair: 'ev_phone_repair_victim',
+  end_retire_arcade: 'ev_gamer_sleep', end_retire_cat: 'ev_cat_keyboard',
+  end_retire_breakfast: 'escape_market', ev_soi_basin: 'ev_reporter_aunt',
+  ev_soi_lifter: 'ev_auntie_neighbors_unite', ev_soi_binder: 'ev_foundation_receipts',
+  ev_soi_rice: 'ev_flood_donations',
+};
+for (const [scene, set] of Object.entries(neighborhoodSets)) {
+  const art = ART['scene:' + set];
+  if (art) ART['scene:' + scene] = art;
+}
+
 /** URL ของฉากพื้นหลัง (ถ้ายังไม่มีภาพคืน undefined) */
 export const sceneUrl = (id: string): string | undefined => ART[`scene:${id}`]?.src;

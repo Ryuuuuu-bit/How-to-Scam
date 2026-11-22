@@ -6,6 +6,7 @@ import { invariant } from './errors';
 import { getEvent } from './lookup';
 import { perksOfKind } from './perks';
 import type { Rng } from './rng';
+import { careerSeedPrefix } from './opening';
 
 const inRange = (v: number, r?: readonly [number, number]) => !r || (v >= r[0] && v <= r[1]);
 
@@ -19,6 +20,7 @@ export function isEventEligible(s: GameState, c: GameContent, ev: GameEvent): bo
 }
 
 export function conditionMet(s: GameState, c: GameContent, w: EventCondition): boolean {
+  if (w.careerEdition && !s.seed.startsWith(careerSeedPrefix)) return false;
   if (w.neighborhoodEdition && !s.seed.startsWith('v3:soi:')) return false;
   if (w.recruit && !s.henchmen.some((h) => h.recruit === w.recruit)) return false;
   if (w.methods && (!s.todayMethodId || !w.methods.includes(s.todayMethodId))) return false;

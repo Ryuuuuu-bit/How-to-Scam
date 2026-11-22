@@ -1,4 +1,5 @@
-import type { EndReason, GameContent } from '../types/content';
+import type { EndReason, GameContent, RetirementLife } from '../types/content';
+import { careerSeedPrefix } from './opening';
 import type { GameState } from '../types/state';
 import type { Rng } from './rng';
 
@@ -14,11 +15,27 @@ export function computeScore(s: GameState, c: GameContent, reason: EndReason): n
   return Math.round(s.cleanCash * daysMult * style);
 }
 
+function retirementLife(s: GameState): RetirementLife {
+  if (s.flags.includes('soi_served_meals')) return 'kitchen';
+  if (s.henchmen.length >= 2) return 'crew';
+  if (s.fame >= 30 || s.history.some(d => d.interview)) return 'radio';
+  switch (s.characterId) {
+    case 'orange_cat': return 'cat';
+    case 'phone_tech': return 'repair';
+    case 'gamer_kid': return 'arcade';
+    case 'temple_kid': return 'kitchen';
+    case 'live_seller':
+    case 'fallen_star': return 'radio';
+    default: return 'breakfast';
+  }
+}
+
 export function pickEnding(s: GameState, c: GameContent, reason: EndReason): string {
   const sorted = [...c.endings].sort((a, b) => a.priority - b.priority);
   for (const e of sorted) {
     const w = e.when;
     if (w.reasons && !w.reasons.includes(reason)) continue;
+    if (w.retirementLife && (!s.seed.startsWith(careerSeedPrefix) || w.retirementLife !== retirementLife(s))) continue;
     if (w.karma && (s.karma < w.karma[0] || s.karma > w.karma[1])) continue;
     if (w.minCleanCash !== undefined && s.cleanCash < w.minCleanCash) continue;
     if (w.maxCleanCash !== undefined && s.cleanCash > w.maxCleanCash) continue;

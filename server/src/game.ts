@@ -6,7 +6,7 @@ import {
   dailyCharacter,
   InvalidActionError,
   isCharacterUnlocked,
-  originSeedPrefix,
+  careerSeedPrefix,
   replay,
   titleFor,
   xpForRun,
@@ -56,7 +56,7 @@ const RUN_TTL_MS = 48 * 60 * 60 * 1000;
 const MAX_RUNS_PER_HOUR = 60;
 
 export function newSeed(): string {
-  return originSeedPrefix + randomBytes(16).toString('hex');
+  return careerSeedPrefix + randomBytes(16).toString('hex');
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */

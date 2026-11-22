@@ -115,6 +115,7 @@ export interface EventChoice {
 }
 
 export interface EventCondition {
+  careerEdition?: boolean;
   neighborhoodEdition?: boolean;
   recruit?: string;
   /** แผนของวันนี้ต้องเป็นหนึ่งในนี้ */
@@ -285,6 +286,7 @@ export interface Ending {
   /** ลำดับความสำคัญ ตัวเลขน้อยตรวจก่อน */
   priority: number;
   when: {
+    retirementLife?: RetirementLife;
     reasons?: EndReason[];
     karma?: Range;
     minCleanCash?: number;
@@ -294,6 +296,8 @@ export interface Ending {
   title: LocalizedText;
   body: LocalizedText;
 }
+
+export type RetirementLife = 'radio' | 'crew' | 'kitchen' | 'repair' | 'arcade' | 'breakfast' | 'cat';
 
 /** เทศกาลตามปฏิทินไทย */
 export interface Festival {

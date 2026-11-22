@@ -1,7 +1,7 @@
 export * from './types/content';
 export * from './types/state';
 export { Rng, hashSeed } from './engine/rng';
-export { openingFor, originFor, origins, originStage, originSeedPrefix, originRewards, type Origin } from './engine/opening';
+export { openingFor, originFor, origins, originStage, originSeedPrefix, careerSeedPrefix, careerOrigins, originRewards, type Origin } from './engine/opening';
 export { InvalidActionError } from './engine/errors';
 export { newGame, step } from './engine/reducer';
 export { replay, toPublicView } from './engine/replay';

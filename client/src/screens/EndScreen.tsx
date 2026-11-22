@@ -7,7 +7,7 @@ import { awardRun } from '../game/meta';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, Panel } from '../components/ui';
-import { sceneUrl } from '../assets/art';
+import { EndingCard } from '../components/EndingCard';
 import { DailyNewspaper } from '../components/DailyNewspaper';
 import { ClosingEdition } from '../components/ClosingEdition';
 
@@ -47,11 +47,10 @@ export function EndScreen({
   useEffect(() => {
     audio.setDanger(false);
     if (state.end?.reason === 'caught') audio.sfx('sfx_jail', 'jail');
-    else audio.sfx('sfx_coins', 'end');
+    else if (!content.endings.find(e => e.id === state.end?.endingId)?.when.retirementLife) audio.sfx('sfx_coins', 'end');
   }, []);
   const end = state.end;
   if (!end) return null;
-  const ending = content.endings.find((e) => e.id === end.endingId);
   const signs = end.dangerSignIds
     .map((id) => content.dangerSigns.find((d) => d.id === id))
     .filter((d) => d !== undefined);
@@ -66,21 +65,7 @@ export function EndScreen({
         </span>
       </div>
 
-      {ending && (
-        <Panel tone="sun" className="anim-rise-in text-center">
-          {sceneUrl(`end_${ending.id}`) ? (
-            <img
-              src={sceneUrl(`end_${ending.id}`)}
-              alt=""
-              className="anim-scene-in aspect-[4/3] w-full rounded-2xl border-[3px] border-ink object-cover object-top"
-            />
-          ) : (
-            <Art id={`ending:${ending.id}`} size={96} className="mx-auto" />
-          )}
-          <h2 className="mt-2 text-2xl font-semibold">{lt(ending.title)}</h2>
-          <p className="mt-1">{lt(ending.body)}</p>
-        </Panel>
-      )}
+      <EndingCard state={state} />
 
       <Panel className="anim-rise-in text-center" tone="paper">
         <div className="text-sm text-ink-soft">{t('end.score')}</div>

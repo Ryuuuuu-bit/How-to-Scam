@@ -9,6 +9,7 @@ import { characterEvents } from './events/characters';
 import { cyberEvents } from './events/cyber';
 import { karmaEvents } from './events/karma';
 import { newsEvents } from './events/news';
+import { soiPressEvents } from './events/soiPress';
 import { seasonalEvents } from './events/seasonal';
 import { storyEvents } from './events/stories';
 import { luckyEvents } from './events/lucky';
@@ -37,6 +38,7 @@ export const content: GameContent = {
     ...seasonalEvents,
     ...newsEvents,
     ...cyberEvents,
+    ...soiPressEvents,
   ],
   characters,
   shopItems,

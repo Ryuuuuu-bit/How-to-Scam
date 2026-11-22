@@ -6,7 +6,7 @@ import { Button } from '../components/ui';
 import { originStories } from '../game/origins';
 
 export function OriginChat({ state, dispatch }: { state: GameState; dispatch: (action: Action) => void }) {
-  const origin = originFor(state.seed);
+  const origin = originFor(state.seed, state.characterId);
   const stage = originStage(state);
   useEffect(() => {
     if (!stage) return;

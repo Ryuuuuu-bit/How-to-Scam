@@ -22,6 +22,10 @@ const failedCard: Meme = {
   caption: 'เมื่อกี้ใครพูดว่า “รอบนี้ชัวร์” นะ',
 };
 const eventMemes: ReadonlyMap<string, Meme> = new Map([
+  ['soi_basin', { art: 'icon:news', caption: 'แชตหกสิบหน้า สวัสดีวันจันทร์ไปห้าสิบแปด' }],
+  ['soi_lifter', { art: 'shop:henchman', caption: 'ทีมพร้อม รถพร้อม เดี๋ยวถามยายอีกทีว่าตู้ไหน' }],
+  ['soi_binder', { art: 'shop:lucky_lawyer', caption: 'ช้อนสิบบาท โต๊ะหกร้อย คิดดี ๆ ก่อนวางแฟ้ม' }],
+  ['soi_rice', { art: 'icon:news', caption: 'ยอดขาดหนึ่งกล่อง ลองนับคนถือกล้องหรือยัง' }],
   ['runaway_rooster', { art: 'icon:news', caption: 'ไก่หลุดตัวเดียว ได้คาร์ดิโอกันทั้งซอย' }],
   ['cat_keyboard', { art: 'char:orange_cat', caption: 'แมวเหยียบไปทีเดียว หัวหน้าเรียกประชุมทั้งแก๊ง' }],
   ['deepfake_cat', { art: 'char:orange_cat', caption: 'แมวส้มฝากบอก คลิปนั้นมีคนตัดต่อ ปกติผมหล่อกว่านี้' }],
