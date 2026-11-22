@@ -1,4 +1,6 @@
 import type { DayLog, GameContent, GameState } from '@hts/shared';
+import { newspaperMeme } from './memes';
+import type { Meme } from './memes';
 
 export interface DailyArticle {
   day: number;
@@ -7,6 +9,7 @@ export interface DailyArticle {
   image: string;
   events: string[];
   caption: string;
+  meme: Meme | null;
 }
 
 const headlines: Record<string, string> = {
@@ -45,6 +48,7 @@ function articleFor(log: DayLog, content: GameContent): DailyArticle {
     events,
     image: method ? `newsphoto:${method.id}` : 'icon:rest',
     caption: method ? method.name.th : 'วันพักของตัวเอก',
+    meme: newspaperMeme(log),
   };
 }
 

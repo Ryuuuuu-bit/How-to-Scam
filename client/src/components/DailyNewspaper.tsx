@@ -4,6 +4,7 @@ import { content } from '@hts/shared/data';
 import { dailyArticles, markPaperRead, paperWasRead } from '../game/newspaper';
 import { Art } from './ui';
 import { PopupButton, PopupClose } from './PopupControls';
+import { MemeSticker } from './MemeSticker';
 
 export function DailyNewspaper({
   state,
@@ -94,6 +95,7 @@ export function DailyNewspaper({
             </figure>
             <h3 className="font-display text-2xl font-semibold leading-snug">{article.headline}</h3>
             <p className="mt-3 leading-relaxed">{article.body}</p>
+            {article.meme && <MemeSticker meme={article.meme} />}
             {article.events.length > 0 && (
               <div className="mt-4 border-t-2 border-ink pt-3">
                 <h4 className="font-semibold">เกาะติดเรื่องในเมือง</h4>

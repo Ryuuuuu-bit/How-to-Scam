@@ -9,6 +9,7 @@ import {
   saveCosmetics,
 } from '../src/game/cosmetics';
 import { dailyArticles, markPaperRead, paperWasRead } from '../src/game/newspaper';
+import { reactionMeme } from '../src/game/memes';
 
 beforeEach(() => {
   const data = new Map<string, string>();
@@ -85,5 +86,40 @@ describe('daily fictional newspaper', () => {
     expect(paperWasRead('a', 1)).toBe(true);
     expect(paperWasRead('b', 1)).toBe(false);
     expect(paperWasRead('a', 2)).toBe(false);
+  });
+});
+
+describe('contextual Thai memes', () => {
+  const state = newGame('meme-test', 'ex_insurance', content);
+
+  it('leaves routine outcomes alone and uses net money for unusual results', () => {
+    const resolved = { ...state, lastResults: [{ kind: 'resolve' as const, dirtyCash: 22_000 }] };
+    expect(reactionMeme(resolved, 1_200)).toBeNull();
+    expect(reactionMeme(resolved, null)).toBeNull();
+    expect(reactionMeme(resolved, -10)?.caption).toContain('สภาพ');
+    expect(reactionMeme(resolved, 20_000)?.caption).toContain('จึ้ง');
+  });
+
+  it('shows the siren reaction only on the initial escape step', () => {
+    const chase = {
+      ...state,
+      phase: 'escape' as const,
+      escape: { step: 'disguise' as const, bonus: 0 },
+    };
+    expect(reactionMeme(chase, null)?.art).toBe('icon:police');
+    expect(reactionMeme({ ...chase, escape: { step: 'route', bonus: 0 } }, null)).toBeNull();
+  });
+
+  it('uses the same event joke in the reaction and the completed newspaper', () => {
+    const planned = step(state, { t: 'choosePlan', methodId: null }, content);
+    const afterEvent = {
+      ...planned,
+      lastResults: [{ kind: 'event' as const, textKey: 'runaway_rooster:0:0' }],
+      history: planned.history.map((day) => ({ ...day, events: ['runaway_rooster'] })),
+    };
+    const meme = reactionMeme(afterEvent, null);
+    expect(meme?.caption).toContain('ตัวตึง');
+    expect(dailyArticles(afterEvent, content)).toEqual([]);
+    expect(dailyArticles({ ...afterEvent, day: 2 }, content)[0]?.meme).toEqual(meme);
   });
 });

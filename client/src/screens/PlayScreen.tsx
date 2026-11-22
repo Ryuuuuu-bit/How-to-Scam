@@ -18,6 +18,8 @@ import { Art } from '../components/ui';
 import { characterArt, loadCosmetics } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
 import { useAuth } from '../net/auth';
+import { MemeSticker } from '../components/MemeSticker';
+import { reactionMeme } from '../game/memes';
 
 export function PlayScreen({
   state,
@@ -58,6 +60,7 @@ export function PlayScreen({
     results.some(({ kind }) => kind === 'resolve')
       ? state.dirtyCash + state.cleanCash - beforeDecision.cash
       : null;
+  const meme = reactionMeme(state, net);
   const sounded = useRef({ tick, state });
   useEffect(() => {
     audio.setDanger(state.heat >= 75 || state.phase === 'escape');
@@ -145,6 +148,7 @@ export function PlayScreen({
             </ul>
           )}
         </div>
+        {meme && !showResults && <MemeSticker meme={meme} />}
         <div key={phaseKey}>
           {state.phase === 'plan' && <DayPlanner {...props} lastPlan={lastPlanFrom(actions)} />}
           {state.phase === 'invest' && <InvestPhase {...props} />}
