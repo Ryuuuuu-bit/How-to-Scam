@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { audio } from '../audio/audio';
+import { useState } from 'react';
 import { content } from '@hts/shared/data';
 import { isUnlocked, progressFor } from '../game/meta';
 import { useAuth } from '../net/auth';
@@ -16,7 +15,6 @@ export function CharacterSelect({
   const { user } = useAuth();
   const meta = progressFor(user);
   const [picked, setPicked] = useState(content.characters[0]?.id ?? '');
-  useEffect(() => audio.voice('vo_welcome'), []);
   return (
     <main className="character-screen mx-auto flex min-h-dvh flex-col px-4 py-6">
       <div className="eyebrow mb-3">THE CREW / เลือกตัวละครของคุณ</div>
@@ -34,10 +32,7 @@ export function CharacterSelect({
               type="button"
               disabled={!open}
               aria-pressed={active}
-              onClick={() => {
-                setPicked(c.id);
-                audio.voice(`char_${c.id}`);
-              }}
+              onClick={() => setPicked(c.id)}
               className={`character-card anim-rise-in flex items-center gap-3 rounded-3xl border-2 border-ink p-4 text-left transition ${active ? 'is-selected bg-sun shadow-pop' : 'bg-paper'} ${open ? '' : 'opacity-60'}`}
               style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
             >

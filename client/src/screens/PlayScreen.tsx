@@ -25,13 +25,11 @@ export function PlayScreen({
 }) {
   const [sheet, setSheet] = useState<ResultLine[] | null>(null);
   const soundedTick = useRef(tick);
-  const prevHeat = useRef(state.heat);
   useEffect(() => {
     audio.setDanger(state.heat >= 75 || state.phase === 'escape');
     if (soundedTick.current === tick) return;
     soundedTick.current = tick;
-    playCues(state, prevHeat.current);
-    prevHeat.current = state.heat;
+    playCues(state);
   }, [tick, state]);
   useEffect(() => () => audio.setDanger(false), []);
 
