@@ -7,6 +7,7 @@ import { SceneBackdrop } from '../components/SceneBackdrop';
 import { describeResult } from '../game/results';
 import type { ResultLine } from '../game/results';
 import { audio } from '../audio/audio';
+import { playCues } from '../audio/cues';
 import { lt, t } from '../i18n';
 import { content } from '@hts/shared/data';
 import { CallPhase, EscapePhase, EventPhase, InvestPhase, LaunderPhase, ShopPhase } from './phases';
@@ -24,16 +25,13 @@ export function PlayScreen({
 }) {
   const [sheet, setSheet] = useState<ResultLine[] | null>(null);
   const soundedTick = useRef(tick);
+  const prevHeat = useRef(state.heat);
   useEffect(() => {
     audio.setDanger(state.heat >= 75 || state.phase === 'escape');
     if (soundedTick.current === tick) return;
     soundedTick.current = tick;
-    const results = state.lastResults;
-    if (results.some((r) => r.kind === 'levelUp')) audio.play('level');
-    else if (results.some((r) => r.success === false) || state.phase === 'escape')
-      audio.play('bad');
-    else if (results.some((r) => (r.dirtyCash ?? 0) > 0 || (r.cleanCash ?? 0) > 0))
-      audio.play('cash');
+    playCues(state, prevHeat.current);
+    prevHeat.current = state.heat;
   }, [tick, state]);
   useEffect(() => () => audio.setDanger(false), []);
 

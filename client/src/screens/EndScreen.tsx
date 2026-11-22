@@ -44,7 +44,16 @@ export function EndScreen({
   const newAch = content.achievements.filter((a) => award.newAchievements.includes(a.id));
   useEffect(() => {
     audio.setDanger(false);
-    audio.play('end');
+    if (state.end?.reason === 'caught') {
+      audio.sfx('sfx_jail', 'end');
+      audio.voice('vo_caught', 0.6);
+    } else {
+      audio.sfx('sfx_coins', 'end');
+      if (state.end?.reason === 'retired') audio.voice('vo_retire', 0.4);
+    }
+    // ปิดท้ายด้วยประโยคเตือนภัยจริง
+    const tip = setTimeout(() => audio.voice('vo_tip'), 4_500);
+    return () => clearTimeout(tip);
   }, []);
   const end = state.end;
   if (!end) return null;

@@ -8,7 +8,7 @@ export function AudioControls() {
     const click = (event: MouseEvent) => {
       void audio.unlock().then(() => {
         if ((event.target as HTMLElement).closest('button:not(:disabled), a, input'))
-          audio.play('click');
+          audio.sfx('sfx_click', 'click');
       });
     };
     const keyboard = (event: KeyboardEvent) => {

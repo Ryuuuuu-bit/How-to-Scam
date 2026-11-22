@@ -32,6 +32,9 @@ class GameAudio {
   private nextNote = 0;
   private danger = false;
   private enabled = false;
+  /** ไฟล์เสียงจาก ElevenLabs ที่โหลดแล้ว (null = ไม่มีไฟล์) */
+  private buffers = new Map<string, Promise<AudioBuffer | null>>();
+  private voiceNode: AudioBufferSourceNode | null = null;
   update(settings: AudioSettings) {
     this.settings = settings;
     try {
@@ -153,6 +156,61 @@ class GameAudio {
       this.nextNote += this.danger ? 0.17 : 0.215;
     }
   }
+  private load(id: string): Promise<AudioBuffer | null> {
+    let p = this.buffers.get(id);
+    if (!p) {
+      const ctx = this.context;
+      p = ctx
+        ? fetch(`/audio/${id}.mp3`)
+            .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error('missing'))))
+            .then((b) => ctx.decodeAudioData(b))
+            .catch(() => null)
+        : Promise.resolve(null);
+      if (ctx) this.buffers.set(id, p);
+    }
+    return p;
+  }
+
+  /** เล่นไฟล์เสียง ถ้าไม่มีไฟล์ใช้เสียงสังเคราะห์ fallback แทน */
+  sfx(id: string, fallback?: Cue) {
+    const gain = this.effectsGain;
+    const ctx = this.context;
+    if (!ctx || !gain || ctx.state !== 'running') return;
+    void this.load(id).then((buf) => {
+      if (!buf) {
+        if (fallback) this.play(fallback);
+        return;
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(gain);
+      src.start();
+    });
+  }
+
+  /** เสียงพากย์: เล่นทีละประโยค ประโยคใหม่ตัดประโยคเก่า */
+  voice(id: string, delay = 0) {
+    const gain = this.effectsGain;
+    const ctx = this.context;
+    if (!ctx || !gain || ctx.state !== 'running' || this.settings.muted) return;
+    void this.load(id).then((buf) => {
+      if (!buf) return;
+      try {
+        this.voiceNode?.stop();
+      } catch {
+        /* เล่นจบไปแล้ว */
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      // เสียงพากย์ดังกว่าเอฟเฟกต์นิดหน่อย
+      const boost = ctx.createGain();
+      boost.gain.value = 2.2;
+      src.connect(boost).connect(gain);
+      src.start(ctx.currentTime + delay);
+      this.voiceNode = src;
+    });
+  }
+
   play(cue: Cue) {
     const gain = this.effectsGain;
     if (!this.context || !gain || this.context.state !== 'running') return;
