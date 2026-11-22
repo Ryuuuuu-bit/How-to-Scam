@@ -201,18 +201,36 @@ button {
   gap: 12px;
   max-width: 370px;
 }
-.menu-actions .game-button {
+.menu-actions > .game-button {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 20px;
   min-height: 56px;
 }
-.menu-actions .bg-paper {
+.menu-actions > .bg-paper {
   background: transparent;
   border: 1px solid #ffffff40;
   color: #eeeae2;
   box-shadow: none;
+}
+dialog[aria-labelledby="feedback-title"] .popup-close {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #32283a;
+}
+dialog[aria-labelledby="feedback-title"] .popup-close svg {
+  box-sizing: content-box;
+  width: 18px;
+  height: 18px;
+  padding: 6px;
+  border: 1px solid #ac9bad;
+  border-radius: 9px;
+  background: #f1e7ed;
+}
+dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
+  background: #ffe3ec;
 }
 .menu-facts {
   display: flex;
