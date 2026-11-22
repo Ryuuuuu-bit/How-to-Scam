@@ -4,8 +4,7 @@ import { t } from '../i18n';
 import { Art, Button } from '../components/ui';
 import { sceneUrl } from '../assets/art';
 import { useAuth } from '../net/auth';
-import { characterArt, loadCosmetics, menuScenes } from '../game/cosmetics';
-import { ShophouseDemo } from './ShophouseDemo';
+import { loadCosmetics, menuScenes } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
 import { HowToPlay } from './HowToPlay';
 import { ConfirmPopup } from '../components/PopupControls';
@@ -30,23 +29,11 @@ export function MainMenu({
   onWardrobe: () => void;
 }) {
   const [help, setHelp] = useState(false);
-  const [demo, setDemo] = useState(false);
-  const demoButton = useRef<HTMLButtonElement>(null);
   const [confirmNewRun, setConfirmNewRun] = useState(false);
   const helpButton = useRef<HTMLButtonElement>(null);
   const { user, status } = useAuth();
   const cosmetics = loadCosmetics(progressFor(user), user?.uid);
   const menuScene = menuScenes.find((s) => s.id === cosmetics.scene) ?? menuScenes[0];
-  if (demo)
-    return (
-      <ShophouseDemo
-        avatar={characterArt(saved?.state.characterId ?? 'ex_insurance', cosmetics)}
-        onBack={() => {
-          setDemo(false);
-          requestAnimationFrame(() => demoButton.current?.focus());
-        }}
-      />
-    );
   if (help) {
     return (
       <HowToPlay
@@ -99,9 +86,6 @@ export function MainMenu({
               }}
             >
               {t('menu.newRun')} <span aria-hidden>↗</span>
-            </Button>
-            <Button ref={demoButton} tone="mint" block onClick={() => setDemo(true)}>
-              ลองเดโม · เดินสำรวจตึกแถว <span aria-hidden>↗</span>
             </Button>
             {onDaily && (
               <Button tone="pink" block onClick={onDaily}>
