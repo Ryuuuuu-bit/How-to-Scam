@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { ART } from '../assets/art';
 import { renderGameIcon } from './GameIcon';
 
@@ -19,7 +19,7 @@ export function Button({
   className = '',
   children,
   ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & { tone?: Tone; block?: boolean }) {
+}: ComponentPropsWithRef<'button'> & { tone?: Tone; block?: boolean }) {
   return (
     <button
       type="button"

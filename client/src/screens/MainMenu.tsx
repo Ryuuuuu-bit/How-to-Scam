@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { Run } from '../game/useGame';
 import { t } from '../i18n';
 import { Art, Button } from '../components/ui';
@@ -6,6 +6,7 @@ import { sceneUrl } from '../assets/art';
 import { useAuth } from '../net/auth';
 import { loadCosmetics, menuScenes } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
+import { HowToPlay } from './HowToPlay';
 
 export function MainMenu({
   saved,
@@ -27,9 +28,20 @@ export function MainMenu({
   onWardrobe: () => void;
 }) {
   const [help, setHelp] = useState(false);
+  const helpButton = useRef<HTMLButtonElement>(null);
   const { user, status } = useAuth();
   const cosmetics = loadCosmetics(progressFor(user), user?.uid);
   const menuScene = menuScenes.find((s) => s.id === cosmetics.scene) ?? menuScenes[0];
+  if (help) {
+    return (
+      <HowToPlay
+        onBack={() => {
+          setHelp(false);
+          window.requestAnimationFrame(() => helpButton.current?.focus());
+        }}
+      />
+    );
+  }
   return (
     <main className="menu-shell">
       <header className="brand-bar">
@@ -119,16 +131,14 @@ export function MainMenu({
               </span>
               <span aria-hidden>↗</span>
             </Button>
-            <Button tone="paper" block onClick={() => setHelp(!help)} aria-expanded={help}>
-              วิธีเล่น <span aria-hidden>{help ? '−' : '+'}</span>
+            <Button ref={helpButton} tone="paper" block onClick={() => setHelp(true)}>
+              <span className="flex items-center gap-2">
+                <Art id="icon:news" size={25} className="shrink-0" />
+                วิธีเล่น
+              </span>
+              <span aria-hidden>↗</span>
             </Button>
           </div>
-          {help && (
-            <div className="how-to">
-              เลือกอาชีพ วางแผนในแต่ละวัน และบริหารเงินกับ Heat ให้สมดุล อยู่รอดให้ครบ 30 วัน หรือเกษียณเมื่อพร้อม
-              เงินสะอาดคือหัวใจของคะแนน และทุกการตัดสินใจอาจพาไปสู่ฉากจบที่ต่างกัน
-            </div>
-          )}
           <div className="menu-facts">
             <div>
               <b>30</b>

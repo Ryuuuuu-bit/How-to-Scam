@@ -315,17 +315,6 @@ button {
 .menu-footer p {
   max-width: 570px;
 }
-.how-to {
-  max-width: 370px;
-  color: #d8d6dc;
-  font-size: 13px;
-  line-height: 1.9;
-  margin-top: 16px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #ffffff05;
-}
 .scene-backdrop {
   background: #17191d;
 }

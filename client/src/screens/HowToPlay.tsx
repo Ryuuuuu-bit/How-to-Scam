@@ -1,0 +1,183 @@
+import { useEffect, useRef, useState } from 'react';
+import { content } from '@hts/shared/data';
+import { sceneUrl } from '../assets/art';
+import { Art, Button } from '../components/ui';
+import './how-to-play.css';
+
+const chapters = [
+  {
+    id: 'plan',
+    label: 'วางแผน',
+    title: 'เริ่มรอบ วางแผนวันแรก',
+    scene: 'plan',
+    sceneAlt: 'ตัวละครรวมตัวกันในห้องวางแผนเหนือถนนในเมือง',
+    marker: 'ก่อนกดเริ่มงาน',
+    note: 'ดูต้นทุน รายได้ และ Heat',
+    body: 'เลือกตัวละครตามจุดเด่นที่ชอบ แล้วเปรียบเทียบการ์ดแผนของวันนั้นก่อนตัดสินใจ',
+    tips: [
+      {
+        icon: 'icon:dirty',
+        title: 'เช็กเงินก่อนเริ่ม',
+        text: 'ปุ่มเริ่มงานแสดงต้นทุนรวมของแผนและของเสริมที่เลือก',
+      },
+      {
+        icon: 'icon:lock',
+        title: 'ดูสิ่งที่จะปลดล็อก',
+        text: 'เปิด “ปลดล็อกถัดไป” เพื่อดูว่าแผนไหนรอเลเวลแก๊งเพิ่ม',
+      },
+    ],
+  },
+  {
+    id: 'result',
+    label: 'อ่านผล',
+    title: 'ดูผล แล้วรับมือเรื่องวุ่น',
+    scene: 'ev_runaway_rooster',
+    sceneAlt: 'ฉากเหตุการณ์ไก่ชนหลุดที่เกิดขึ้นระหว่างวัน',
+    marker: 'หลังลงมือ',
+    note: 'รับเงิน · Heat เปลี่ยน · เหตุการณ์สุ่ม',
+    body: 'แถบผลในหน้าเล่นบอกว่าได้เงินเท่าไรและ Heat เปลี่ยนแค่ไหน ถ้าเจอเหตุการณ์สุ่ม ให้อ่านสถานการณ์ก่อนเลือกคำตอบ',
+    tips: [
+      {
+        icon: 'icon:dirty',
+        title: 'อ่านยอดสุทธิ',
+        text: 'เทียบเงินที่รับกับเงินสุทธิที่เปลี่ยน เพื่อดูผลหลังหักค่าใช้จ่ายของการตัดสินใจนั้น',
+      },
+      {
+        icon: 'icon:news',
+        title: 'อ่านข่าวที่มีผลกับเกม',
+        text: 'ข่าวสัปดาห์อาจเปลี่ยนรายได้หรือความเสี่ยง ส่วนหนังสือพิมพ์รายวันสรุปเรื่องที่เกิดขึ้นแล้ว',
+      },
+    ],
+  },
+  {
+    id: 'shop',
+    label: 'จบวัน',
+    title: 'จัดการเงินก่อนปิดวัน',
+    scene: 'shop',
+    sceneAlt: 'บรรยากาศร้านในเมืองที่ใช้เป็นฉากร้านอัปเกรด',
+    marker: 'ก่อนนอน',
+    note: 'เงินสะอาดมีผลต่อคะแนน',
+    body: 'เทียบโอกาสสำเร็จ ค่าหัก และ Heat บนการ์ดของช่วงจัดการเงิน จากนั้นเลือกว่าจะซื้ออัปเกรดหรือเก็บทรัพยากรไว้',
+    tips: [
+      {
+        icon: 'icon:clean',
+        title: 'อ่านเงินสองช่องแยกกัน',
+        text: 'HUD แสดงเงินสกปรกกับเงินสะอาดแยกกัน โดยเงินสะอาดช่วยเพิ่มคะแนนตอนจบรอบ',
+      },
+      {
+        icon: 'icon:day',
+        title: 'ไปต่อเมื่อพร้อม',
+        text: 'กด “นอน แล้วไปวันถัดไป” เมื่อจัดการร้านอัปเกรดเสร็จ',
+      },
+    ],
+  },
+  {
+    id: 'heat',
+    label: 'คุม Heat',
+    title: 'คุม Heat ให้อยู่รอด',
+    scene: 'escape',
+    sceneAlt: 'ฉากเหตุการณ์หนีตำรวจในเมือง',
+    marker: 'ระดับการถูกจับตา',
+    note: 'Heat 100 เปิดฉากหนีตำรวจ',
+    body: `ประคองรอบให้ถึงวันที่ ${content.config.maxDays} หรือเลือกเกษียณเมื่อพร้อม เส้นทางและการตัดสินใจระหว่างรอบมีผลต่อฉากจบ`,
+    tips: [
+      {
+        icon: 'icon:rest',
+        title: 'พักเพื่อให้ Heat ลด',
+        text: `ระหว่างวางแผน กด “พักวันนี้” เพื่อลด Heat ลง ${content.config.heatDecayQuietDay} หน่วย`,
+      },
+      {
+        icon: 'icon:police',
+        title: 'จับตาคำสั่งบนหน้าจอ',
+        text: 'ถ้าเข้าโหมดหนี ให้ดูตัวเลือกตามลำดับและเตรียมกดตามจังหวะเมื่อเกมขึ้นสัญญาณ',
+      },
+    ],
+  },
+] as const;
+
+export function HowToPlay({ onBack }: { onBack: () => void }) {
+  const [index, setIndex] = useState(0);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const chapter = chapters[index] ?? chapters[0];
+  const last = index === chapters.length - 1;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+    heading.current?.focus({ preventScroll: true });
+  }, [index]);
+
+  return (
+    <main className="tutorial-screen" data-chapter={chapter.id}>
+      <div className="tutorial-wrap">
+        <header className="tutorial-topbar">
+          <button className="tutorial-back" type="button" onClick={onBack}>
+            <span aria-hidden="true">←</span> กลับเมนู
+          </button>
+          <span
+            className="tutorial-progress"
+            aria-label={`บทที่ ${index + 1} จาก ${chapters.length}`}
+          >
+            บทที่ {index + 1}/{chapters.length}
+          </span>
+        </header>
+
+        <h1 className="tutorial-title">
+          วิธีเล่น <span>How to Scam</span>
+        </h1>
+        <nav className="tutorial-nav" aria-label="เลือกบทวิธีเล่น">
+          {chapters.map((item, i) => (
+            <button
+              type="button"
+              key={item.id}
+              aria-current={index === i ? 'step' : undefined}
+              onClick={() => setIndex(i)}
+            >
+              <span aria-hidden="true">{i + 1}</span> {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <article className="tutorial-case" key={chapter.id} aria-labelledby="tutorial-chapter">
+          <figure className="tutorial-visual">
+            <img src={sceneUrl(chapter.scene)} alt={chapter.sceneAlt} />
+            <figcaption>
+              <span>{chapter.marker}</span>
+              <strong>{chapter.note}</strong>
+            </figcaption>
+          </figure>
+          <div className="tutorial-copy">
+            <div>
+              <h2 id="tutorial-chapter" tabIndex={-1} ref={heading}>
+                {chapter.title}
+              </h2>
+              <p className="tutorial-summary">{chapter.body}</p>
+            </div>
+            <ul className="tutorial-tips">
+              {chapter.tips.map((tip) => (
+                <li key={tip.title}>
+                  <span className="tutorial-tip-icon">
+                    <Art id={tip.icon} size={28} />
+                  </span>
+                  <div>
+                    <h3>{tip.title}</h3>
+                    <p>{tip.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <footer className="tutorial-actions">
+              {index > 0 && (
+                <Button tone="paper" onClick={() => setIndex(index - 1)}>
+                  ย้อนบท
+                </Button>
+              )}
+              <Button tone="sun" onClick={last ? onBack : () => setIndex(index + 1)}>
+                {last ? 'อ่านจบ · กลับเมนู' : 'บทถัดไป'} <span aria-hidden="true">→</span>
+              </Button>
+            </footer>
+          </div>
+        </article>
+      </div>
+    </main>
+  );
+}
