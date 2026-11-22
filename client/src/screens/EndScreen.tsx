@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import type { GameState } from '@hts/shared';
+import { useEffect, useState } from 'react';
+import { audio } from '../audio/audio';
+import type { Action, GameState } from '@hts/shared';
+import { useSubmitRun } from '../game/submit';
 import { awardRun } from '../game/meta';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
@@ -8,15 +10,35 @@ import { sceneUrl } from '../assets/art';
 
 export function EndScreen({
   state,
+  runId,
+  actions,
   onAgain,
   onMenu,
 }: {
   state: GameState;
+  runId?: string | undefined;
+  actions: Action[];
   onAgain: () => void;
   onMenu: () => void;
 }) {
-  // ให้แต้มแก๊งครั้งเดียวต่อรอบ (meta กันนับซ้ำด้วย seed อยู่แล้ว)
-  const [award] = useState(() => awardRun(state));
+  const submit = useSubmitRun(runId, actions);
+  // รอบออฟไลน์: ให้แต้มแก๊งในเครื่อง (รอบออนไลน์ server เป็นคนให้)
+  const [localAward] = useState(() =>
+    runId ? { gained: 0, unlocked: [] as typeof content.characters } : awardRun(state),
+  );
+  const award =
+    submit.state.kind === 'ok'
+      ? {
+          gained: submit.state.result.xpGained,
+          unlocked: content.characters.filter((c) =>
+            submit.state.kind === 'ok' ? submit.state.result.unlocked.includes(c.id) : false,
+          ),
+        }
+      : localAward;
+  useEffect(() => {
+    audio.setDanger(false);
+    audio.play('end');
+  }, []);
   const end = state.end;
   if (!end) return null;
   const ending = content.endings.find((e) => e.id === end.endingId);
@@ -26,7 +48,8 @@ export function EndScreen({
   const days = end.reason === 'survived' ? content.config.maxDays : state.day;
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-4 px-4 py-6">
+    <main className="end-screen mx-auto flex min-h-dvh flex-col gap-4 px-4 py-6">
+      <div className="eyebrow text-center">CASE CLOSED / บทสรุปของคุณ</div>
       <div className="anim-rise-in text-center">
         <span className="font-display inline-block rounded-full border-2 border-ink bg-white px-3 py-0.5 text-sm">
           {t(`end.reason.${end.reason}`)}
@@ -56,6 +79,8 @@ export function EndScreen({
           {t('end.clean', { n: state.cleanCash })} · {t('end.days', { n: days })}
         </div>
       </Panel>
+
+      <SubmitBanner state={submit.state} onRetry={() => void submit.retry()} />
 
       {(award.gained > 0 || award.unlocked.length > 0) && (
         <div className="anim-rise-in flex flex-col gap-1 rounded-2xl border-[3px] border-ink bg-grape p-3 text-center text-white shadow-pop">
@@ -97,5 +122,37 @@ export function EndScreen({
         </Button>
       </div>
     </main>
+  );
+}
+
+function SubmitBanner({
+  state,
+  onRetry,
+}: {
+  state: ReturnType<typeof useSubmitRun>['state'];
+  onRetry: () => void;
+}) {
+  if (state.kind === 'offline') {
+    return <p className="text-center text-xs text-ink-soft">{t('submit.offline')}</p>;
+  }
+  if (state.kind === 'sending') {
+    return <p className="anim-pop text-center text-sm">{t('submit.sending')}</p>;
+  }
+  if (state.kind === 'error') {
+    return (
+      <div className="flex items-center justify-between gap-2 rounded-2xl border-2 border-ink bg-white p-2 text-sm">
+        <span className="text-danger">{t('submit.failed')}</span>
+        <Button tone="sun" className="px-3 py-1 text-sm" onClick={onRetry}>
+          {t('submit.retry')}
+        </Button>
+      </div>
+    );
+  }
+  const title = content.titles.find((x) => x.id === state.result.titleId);
+  return (
+    <div className="anim-rise-in rounded-2xl border-[3px] border-ink bg-mint p-3 text-center text-white shadow-pop">
+      <div className="font-display text-lg">🏆 {t('submit.ok', { n: state.result.rank })}</div>
+      {title && <div className="text-sm">{t('submit.title', { t: lt(title.name) })}</div>}
+    </div>
   );
 }

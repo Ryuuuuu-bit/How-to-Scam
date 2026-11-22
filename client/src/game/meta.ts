@@ -1,5 +1,5 @@
-import { xpForRun } from '@hts/shared';
-import type { Character, GameState } from '@hts/shared';
+import { isCharacterUnlocked, xpForRun } from '@hts/shared';
+import type { Character, GameState, UnlockProgress } from '@hts/shared';
 import { content } from '@hts/shared/data';
 
 // ความคืบหน้าข้ามรอบ (meta progression) เก็บในเครื่อง
@@ -34,9 +34,13 @@ function saveMeta(m: Meta): void {
   }
 }
 
-export function isUnlocked(ch: Character, m: Meta): boolean {
-  if (ch.unlockEnding) return m.endings.includes(ch.unlockEnding);
-  return m.xp >= (ch.unlockXp ?? 0);
+export function isUnlocked(ch: Character, m: UnlockProgress): boolean {
+  return isCharacterUnlocked(ch, m);
+}
+
+/** ความคืบหน้าที่ใช้ปลดล็อก: ล็อกอินอยู่ใช้ของ server ไม่งั้นใช้ของในเครื่อง */
+export function progressFor(user: UnlockProgress | null): UnlockProgress {
+  return user ? { xp: user.xp, endings: user.endings } : loadMeta();
 }
 
 /** ให้แต้มจากรอบที่จบแล้ว (ครั้งเดียวต่อ seed) คืนแต้มที่ได้และอาชีพที่เพิ่งปลดล็อก */

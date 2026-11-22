@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { content } from '@hts/shared/data';
-import { isUnlocked, loadMeta } from '../game/meta';
+import { isUnlocked, progressFor } from '../game/meta';
+import { useAuth } from '../net/auth';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, ScreenTitle } from '../components/ui';
 
@@ -11,15 +12,17 @@ export function CharacterSelect({
   onStart: (characterId: string) => void;
   onBack: () => void;
 }) {
-  const [meta] = useState(loadMeta);
+  const { user } = useAuth();
+  const meta = progressFor(user);
   const [picked, setPicked] = useState(content.characters[0]?.id ?? '');
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
+    <main className="character-screen mx-auto flex min-h-dvh flex-col px-4 py-6">
+      <div className="eyebrow mb-3">THE CREW / เลือกตัวละครของคุณ</div>
       <div className="flex items-start justify-between gap-2">
         <ScreenTitle title={t('character.title')} />
         <Chip className="mt-1 shrink-0">⭐ {t('character.xp', { n: meta.xp })}</Chip>
       </div>
-      <div className="flex flex-col gap-3 pb-28">
+      <div className="character-grid grid gap-4 pb-28">
         {content.characters.map((c, i) => {
           const open = isUnlocked(c, meta);
           const active = open && c.id === picked;
@@ -28,8 +31,9 @@ export function CharacterSelect({
               key={c.id}
               type="button"
               disabled={!open}
+              aria-pressed={active}
               onClick={() => setPicked(c.id)}
-              className={`anim-rise-in flex items-center gap-3 rounded-3xl border-[3px] border-ink p-3 text-left transition ${active ? 'bg-sun shadow-pop' : 'bg-paper'} ${open ? '' : 'opacity-60'}`}
+              className={`character-card anim-rise-in flex items-center gap-3 rounded-3xl border-2 border-ink p-4 text-left transition ${active ? 'is-selected bg-sun shadow-pop' : 'bg-paper'} ${open ? '' : 'opacity-60'}`}
               style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
             >
               <div className="relative shrink-0">
@@ -68,7 +72,7 @@ export function CharacterSelect({
           );
         })}
       </div>
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t-[3px] border-ink bg-cream/95 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)] backdrop-blur">
+      <div className="character-footer fixed inset-x-0 bottom-0 z-10 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)] backdrop-blur">
         <div className="mx-auto flex max-w-md gap-3">
           <Button tone="paper" onClick={onBack}>
             {t('character.back')}

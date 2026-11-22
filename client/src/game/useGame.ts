@@ -11,12 +11,15 @@ interface SaveData {
   seed: string;
   characterId: string;
   actions: Action[];
+  /** รอบที่ server ออก seed ให้ (ส่งคะแนนขึ้นกระดานได้) */
+  runId?: string;
 }
 
 export interface Run {
   seed: string;
   characterId: string;
   actions: Action[];
+  runId?: string;
   state: GameState;
 }
 
@@ -36,7 +39,12 @@ function writeSave(run: Run | null): void {
   try {
     if (!run || run.state.phase === 'ended') localStorage.removeItem(SAVE_KEY);
     else {
-      const data: SaveData = { seed: run.seed, characterId: run.characterId, actions: run.actions };
+      const data: SaveData = {
+        seed: run.seed,
+        characterId: run.characterId,
+        actions: run.actions,
+        ...(run.runId ? { runId: run.runId } : {}),
+      };
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     }
   } catch {
@@ -71,12 +79,14 @@ export function useGame() {
   /** นับจำนวน action เพื่อให้ UI รู้ว่ามีผลใหม่ให้แสดง */
   const [tick, setTick] = useState(0);
 
-  const start = useCallback((characterId: string) => {
-    const seed = randomSeed();
+  /** เริ่มรอบ: ถ้ามี seed จาก server (runId) คะแนนจะส่งขึ้นกระดานได้ */
+  const start = useCallback((characterId: string, server?: { runId: string; seed: string }) => {
+    const seed = server?.seed ?? randomSeed();
     const next: Run = {
       seed,
       characterId,
       actions: [],
+      ...(server ? { runId: server.runId } : {}),
       state: newGame(seed, characterId, content),
     };
     writeSave(next);

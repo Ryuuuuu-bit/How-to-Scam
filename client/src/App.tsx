@@ -2,25 +2,77 @@ import { useState } from 'react';
 import { loadSavedRun, useGame } from './game/useGame';
 import { CharacterSelect } from './screens/CharacterSelect';
 import { EndScreen } from './screens/EndScreen';
+import { LeaderboardScreen } from './screens/LeaderboardScreen';
+import { LoginScreen } from './screens/LoginScreen';
 import { MainMenu } from './screens/MainMenu';
 import { PlayScreen } from './screens/PlayScreen';
+import { ProfileSheet } from './screens/ProfileSheet';
 import { ResultSheet } from './components/ResultSheet';
 import { describeResult } from './game/results';
+import { AudioControls } from './components/AudioControls';
+import { api } from './net/api';
+import { AuthProvider, useAuth } from './net/auth';
+import { t } from './i18n';
 
-type Screen = 'menu' | 'character' | 'play';
+type Screen = 'menu' | 'character' | 'play' | 'leaderboard';
 
 export function App() {
+  return (
+    <AuthProvider>
+      <Gate />
+      <AudioControls />
+    </AuthProvider>
+  );
+}
+
+/** ต้องเข้าสู่ระบบ (Google/Guest) หรือเลือกเล่นออฟไลน์ก่อน */
+function Gate() {
+  const { status } = useAuth();
+  if (status === 'loading') {
+    return (
+      <main className="flex min-h-dvh items-center justify-center">
+        <p className="font-display anim-pop text-lg">{t('auth.loading')}</p>
+      </main>
+    );
+  }
+  if (status === 'signedOut') return <LoginScreen />;
+  return <GameScreens />;
+}
+
+function GameScreens() {
   const game = useGame();
+  const auth = useAuth();
   const [screen, setScreen] = useState<Screen>('menu');
   const [saved, setSaved] = useState(loadSavedRun);
+  const [profile, setProfile] = useState(false);
+  const [starting, setStarting] = useState(false);
+
+  /** ออนไลน์: ขอ seed จาก server เพื่อให้ส่งคะแนนได้ / ออฟไลน์: สุ่มเอง */
+  const startRun = async (characterId: string) => {
+    setStarting(true);
+    let server: { runId: string; seed: string } | undefined;
+    if (auth.status === 'ready') {
+      try {
+        server = await api.startRun(characterId);
+      } catch {
+        server = undefined;
+      }
+    }
+    game.start(characterId, server);
+    setStarting(false);
+    setScreen('play');
+  };
+
+  if (screen === 'leaderboard') {
+    return <LeaderboardScreen onBack={() => setScreen('menu')} />;
+  }
 
   if (screen === 'character') {
     return (
       <CharacterSelect
         onBack={() => setScreen('menu')}
         onStart={(id) => {
-          game.start(id);
-          setScreen('play');
+          if (!starting) void startRun(id);
         }}
       />
     );
@@ -38,6 +90,8 @@ export function App() {
         <>
           <EndScreen
             state={state}
+            runId={game.run.runId}
+            actions={game.run.actions}
             onMenu={() => {
               game.quit();
               setSaved(null);
@@ -53,20 +107,25 @@ export function App() {
   }
 
   return (
-    <MainMenu
-      saved={saved}
-      onNew={() => {
-        game.clearSave();
-        setSaved(null);
-        setScreen('character');
-      }}
-      onContinue={() => {
-        if (saved) {
-          game.resume(saved);
-          setScreen('play');
-        }
-      }}
-    />
+    <>
+      <MainMenu
+        saved={saved}
+        onNew={() => {
+          game.clearSave();
+          setSaved(null);
+          setScreen('character');
+        }}
+        onContinue={() => {
+          if (saved) {
+            game.resume(saved);
+            setScreen('play');
+          }
+        }}
+        onLeaderboard={auth.status === 'ready' ? () => setScreen('leaderboard') : undefined}
+        onProfile={auth.status === 'ready' ? () => setProfile(true) : undefined}
+      />
+      {profile && <ProfileSheet onClose={() => setProfile(false)} />}
+    </>
   );
 }
 
