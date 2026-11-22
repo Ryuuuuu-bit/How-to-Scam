@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { ResultLine } from '../game/results';
 import { t } from '../i18n';
 import { Art, Button } from './ui';
@@ -7,9 +8,20 @@ const toneBg = { good: 'bg-[#e6fbf5]', bad: 'bg-[#ffe9ea]', neutral: 'bg-white' 
 /** แผ่นสรุปผลที่เด้งขึ้นจากด้านล่างหลังทุกการตัดสินใจ */
 export function ResultSheet({ lines, onClose }: { lines: ResultLine[]; onClose: () => void }) {
   const good = lines.some((l) => l.tone === 'good' && l.art === 'icon:dirty');
+  const panel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    panel.current?.focus();
+    return () => {
+      document.body.style.overflow = overflow;
+      previous?.focus();
+    };
+  }, []);
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-ink/40 p-3"
+      className="result-overlay fixed inset-0 z-40 flex items-end justify-center p-3"
       onClick={onClose}
     >
       {good && (
@@ -22,7 +34,19 @@ export function ResultSheet({ lines, onClose }: { lines: ResultLine[]; onClose: 
         </div>
       )}
       <div
-        className="anim-rise-in w-full max-w-md rounded-3xl border-[3px] border-ink bg-paper p-4 shadow-pop pb-[max(env(safe-area-inset-bottom),16px)]"
+        ref={panel}
+        role="dialog"
+        aria-modal="true"
+        aria-label="ผลการตัดสินใจ"
+        tabIndex={-1}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') onClose();
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            panel.current?.querySelector('button')?.focus();
+          }
+        }}
+        className="result-panel anim-rise-in w-full max-w-md rounded-3xl border-2 border-ink bg-paper p-5 shadow-pop pb-[max(env(safe-area-inset-bottom),20px)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col gap-2">

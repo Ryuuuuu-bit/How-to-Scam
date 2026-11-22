@@ -132,8 +132,8 @@ export function Hud({ state }: { state: GameState }) {
   const date = dateOf(state, state.day);
   const fests = activeFestivals(state, content);
   return (
-    <header className="sticky top-0 z-20 border-b-[3px] border-ink bg-cream/95 px-3 pt-[max(env(safe-area-inset-top),8px)] pb-2 backdrop-blur">
-      <div className="mx-auto flex max-w-md flex-col gap-1.5">
+    <header className="game-hud sticky top-0 z-20 px-3 pt-[max(env(safe-area-inset-top),12px)] pb-3">
+      <div className="hud-inner mx-auto flex flex-col gap-2">
         <div className="font-display flex items-center justify-between text-sm">
           <span className="flex items-center gap-1">
             <Art id="icon:day" size={20} />

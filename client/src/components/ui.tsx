@@ -22,7 +22,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={`font-display rounded-2xl border-[3px] border-ink px-4 py-3 text-base font-medium shadow-pop transition active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0 disabled:active:shadow-pop ${toneClass[tone]} ${block ? 'w-full' : ''} ${className}`}
+      className={`game-button font-display rounded-2xl border-2 border-ink px-4 py-3 text-base font-medium shadow-pop transition active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0 disabled:active:shadow-pop ${toneClass[tone]} ${block ? 'w-full' : ''} ${className}`}
       {...rest}
     >
       {children}
@@ -41,7 +41,7 @@ export function Panel({
 }) {
   return (
     <div
-      className={`rounded-3xl border-[3px] border-ink p-4 shadow-pop ${toneClass[tone]} ${className}`}
+      className={`game-panel rounded-3xl border-2 border-ink p-4 shadow-pop ${toneClass[tone]} ${className}`}
     >
       {children}
     </div>
@@ -51,7 +51,7 @@ export function Panel({
 export function Chip({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border-2 border-ink bg-white px-2 py-0.5 text-xs font-semibold ${className}`}
+      className={`game-chip inline-flex items-center gap-1 rounded-full border border-ink/15 bg-white px-2 py-1 text-xs font-semibold ${className}`}
     >
       {children}
     </span>
@@ -94,7 +94,7 @@ export function Art({
 
 export function ScreenTitle({ title, hint }: { title: string; hint?: string }) {
   return (
-    <div className="mb-3 inline-block max-w-full -rotate-1 rounded-2xl border-[3px] border-ink bg-sun px-3 py-1.5 shadow-pop-sm">
+    <div className="screen-title mb-5 max-w-full">
       <h2 className="text-xl leading-tight font-semibold">{title}</h2>
       {hint && <p className="text-xs leading-snug">{hint}</p>}
     </div>
