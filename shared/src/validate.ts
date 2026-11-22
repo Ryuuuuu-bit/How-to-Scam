@@ -1,4 +1,5 @@
 import type { GameContent, Weakness } from './types/content';
+import { callerNameIndices, callerPortraits } from './engine/callerIdentity';
 
 /**
  * ตรวจความถูกต้องของข้อมูลเกม คืนรายการปัญหา (ว่าง = ผ่าน)
@@ -198,6 +199,27 @@ export function validateContent(c: GameContent): string[] {
   }
   for (const v of c.victims) {
     if (!weaknesses.includes(v.weakness)) errors.push(`victim ${v.id}: bad weakness`);
+  }
+  const portraitIds = new Set(c.victims.map(v => v.id));
+  for (const part of [...c.victimParts.names, ...c.victimParts.jobs]) {
+    for (const id of part.portraits ?? []) {
+      if (!portraitIds.has(id)) errors.push('unknown caller portrait: ' + id);
+    }
+  }
+  for (const job of c.victimParts.jobs) {
+    const [low, high] = job.age;
+    if (!Number.isInteger(low) || !Number.isInteger(high) || low < 0 || high > 120 || low > high) {
+      errors.push(`invalid caller age range for ${job.text.th}`);
+      continue;
+    }
+    for (let age = low; age <= high; age++) {
+      const portraits = callerPortraits(c, job, age);
+      if (!portraits.length) errors.push(`no portrait for ${job.text.th}, age ${age}`);
+      for (const portrait of portraits) {
+        if (!callerNameIndices(c.victimParts, portrait.id, age).length)
+          errors.push(`no name for ${portrait.id}, age ${age}`);
+      }
+    }
   }
 
   for (const d of c.dangerSigns) {

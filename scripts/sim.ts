@@ -4,12 +4,15 @@ import { content } from '../shared/data';
 import {
   choiceAvailable,
   currentOffer,
+  dreamSequence,
   escapeOf,
   launderSuccessPct,
   newGame,
+  originStage,
   ponziCrashPct,
   priceOf,
   step,
+  sketchSeedPrefix,
   unlockedMethods,
 } from '../shared/src';
 import type { Action, GameState } from '../shared/src';
@@ -25,6 +28,9 @@ function bot(s: GameState, style: Style, r: () => number): Action {
   const money = s.dirtyCash + s.cleanCash;
   switch (s.phase) {
     case 'plan': {
+      const stage = originStage(s);
+      if (stage === 'opening') return { t: 'replyOrigin', reply: style === 'careful' ? 'later' : 'help' };
+      if (stage === 'followup') return { t: 'readOrigin' };
       const restAt = style === 'careful' ? 60 : style === 'greedy' ? 88 : 75;
       if (s.heat > restAt) return { t: 'choosePlan', methodId: null };
       if (style === 'careful' && s.day >= 28 && s.cleanCash > 0) return { t: 'retire' };
@@ -105,7 +111,11 @@ function bot(s: GameState, style: Style, r: () => number): Action {
       if (e.step === 'route') return { t: 'escapeRoute', id: 'market' };
       if (e.step === 'event') return { t: 'escapeEvent', choiceIdx: 1 };
       if (e.step === 'bribe') return { t: 'escapeBribe', pay: false };
-      return { t: 'escapeQte', hits: 3 };
+      if (e.step === 'custody') {
+        const tryDream = !s.flags.includes('dream_escape') && !s.flags.includes('surrendered') && style !== 'greedy';
+        return { t: 'custodyVerdict', answer: tryDream ? dreamSequence(s) : null };
+      }
+      return { t: 'escapeQte', hits: 3, custody: true };
     }
     case 'ended':
       throw new Error('ended');
@@ -127,8 +137,9 @@ for (let i = 0; i < runs; i++) {
   const style = styles[i % styles.length] ?? 'random';
   if (!ch) break;
   const r = lcg(i * 7919 + 1);
-  let s = newGame(`v3:soi:live:sim-${i}`, ch.id, content);
+  let s = newGame(`${sketchSeedPrefix}sim-${i}`, ch.id, content);
   for (let k = 0; k < 5000 && s.phase !== 'ended'; k++) s = step(s, bot(s, style, r), content);
+  if (!s.end) throw Error(`Run ${i} did not finish (day ${s.day}, ${s.phase})`);
   const key = `${ch.id}/${style}`;
   const row = (rows[key] ??= { n: 0, score: [], caught: 0, lvl: [], days: [] });
   row.n++;

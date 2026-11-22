@@ -18,12 +18,14 @@ it.each([0, 1])('plays the counter once and records camera choice %i', choiceIdx
   next.pendingEvents = [];
   rollDailyEvents(next, content, rng);
   expect(next.pendingEvents).not.toContain('counter_live');
-  const event = content.events.find(e => e.id === 'counter_live')!;
+  const event = content.events.find(e => e.id === 'counter_live');
+  if (!event) throw Error('missing live event');
   expect(isEventEligible({ ...s, seed: 'v3:soi:older', pendingEvents: [], seenEvents: [] }, content, event)).toBe(false);
 });
 
 it.each(['lift', 'stay'] as const)('prints the matching live-sale ending for %s', (ending) => {
-  const event = content.events.find(e => e.id === 'cf_orange_cat')!;
+  const event = content.events.find(e => e.id === 'cf_orange_cat');
+  if (!event) throw Error('missing cat event');
   const planned = step(newGame('v3:soi:test', 'live_seller', content), { t: 'choosePlan', methodId: 'fake_shop' }, content);
   expect(isEventEligible(planned, content, event)).toBe(true);
   expect(isEventEligible({ ...planned, seed: 'v3:older' }, content, event)).toBe(false);
@@ -31,7 +33,8 @@ it.each(['lift', 'stay'] as const)('prints the matching live-sale ending for %s'
   const next = step({ ...planned, phase: 'event', pendingEvents: [event.id] },
     { t: 'eventChoice', choiceIdx: event.choices.findIndex(c => c.liveCat === ending) }, content);
   expect(dailyArticles(next, content)).toEqual([]);
-  const article = dailyArticles({ ...next, day: 2 }, content)[0]!;
+  const [article] = dailyArticles({ ...next, day: 2 }, content);
+  if (!article) throw Error('missing daily article');
   expect(article.headline).toContain(ending === 'stay' ? 'จำไม่ได้' : 'ออกตาม');
   expect(article.events.join(' ')).toContain('กลุ่มเตือนภัย');
 });

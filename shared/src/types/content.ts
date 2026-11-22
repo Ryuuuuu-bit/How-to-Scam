@@ -249,6 +249,7 @@ export interface ShopItem {
 export interface Victim {
   id: VictimId;
   age: number;
+  portraitAges: Range;
   weakness: Weakness;
   /** ตัวคูณรายได้ถ้าหลอกสำเร็จ */
   wealth: number;
@@ -259,8 +260,8 @@ export interface Victim {
 
 /** ชิ้นส่วนสำหรับสุ่มประกอบเหยื่อ */
 export interface VictimParts {
-  names: LocalizedText[];
-  jobs: { text: LocalizedText; wealth: number; age: Range }[];
+  names: (LocalizedText & { portraits: VictimId[]; ages?: Range })[];
+  jobs: { text: LocalizedText; wealth: number; age: Range; portraits?: VictimId[] }[];
   traits: Record<Weakness, LocalizedText[]>;
   /** ประโยคพิรุธ: เหยื่อหลอกกลับ / ตำรวจปลอมตัว / หลอกให้ระแวงเล่น (เหยื่อธรรมดา) */
   tells: Record<CallerTell, LocalizedText[]>;

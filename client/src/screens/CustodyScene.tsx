@@ -5,7 +5,7 @@ import { Art, Button } from '../components/ui';
 import './custody.css';
 import { audio } from '../audio/audio';
 
-const stamps = [{ icon: '🐟', name: 'ปลาทู' }, { icon: '🐾', name: 'อุ้งเท้า' }, { icon: '🌙', name: 'พระจันทร์' }];
+const stamps = [{ icon: '🐟', name: 'ปลาทู' }, { icon: '🐾', name: 'อุ้งเท้า' }, { icon: '🌙', name: 'พระจันทร์' }] as const;
 const contentKeep = content.config.caughtCleanKeepPct;
 const memorySeconds = 3;
 
@@ -64,7 +64,7 @@ export function CustodyScene({ state, dispatch }: { state: GameState; dispatch: 
           <Button tone="sun" block onClick={() => setPhoto(true)}>ถ่ายรูปติดแฟ้มคดี</Button>}
         <Button tone="paper" block onClick={() => dispatch({ t: 'custodyVerdict', answer: null })}>จบรอบในคุก</Button></>}
       {page === 'remember' && <><p role="timer">ไพ่จะคว่ำใน <strong>{secondsLeft} วินาที</strong></p>
-        <ol className="dream-stamps">{code.map((n,i) => <li key={i}><small>ใบที่ {i+1}</small><b>{stamps[n]!.icon}</b>{stamps[n]!.name}</li>)}</ol>
+        <ol className="dream-stamps">{code.map((n,i) => <li key={i}><small>ใบที่ {i+1}</small><b>{stamps[n].icon}</b>{stamps[n].name}</li>)}</ol>
         <Button tone="grape" block onClick={() => setPage('play')}>จำแล้ว · คว่ำไพ่</Button></>}
       {page === 'play' && <><p aria-live="polite">{answer.length === 3 ? 'ครบแล้ว ตรวจลำดับก่อนส่งคำตอบ' : 'เลือกภาพที่ ' + (answer.length+1) + ' จาก 3'}</p>
         <ol className="dream-stamps answer-slots" aria-label="คำตอบของคุณ">{code.map((_,i) => {

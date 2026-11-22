@@ -5,9 +5,11 @@ import { invariant } from './errors';
 import { karmaDelta } from './perks';
 import { hashSeed, Rng } from './rng';
 
-export function dreamSequence(s: GameState): number[] {
+const dreamSymbols = [0, 1, 2] as const;
+type DreamSymbol = (typeof dreamSymbols)[number];
+export function dreamSequence(s: GameState): [DreamSymbol, DreamSymbol, DreamSymbol] {
   const rng = new Rng(hashSeed(s.seed + ':dream:' + s.day + ':' + s.escapes));
-  return [rng.int(0, 2), rng.int(0, 2), rng.int(0, 2)];
+  return [rng.pick(dreamSymbols), rng.pick(dreamSymbols), rng.pick(dreamSymbols)];
 }
 
 /**

@@ -29,7 +29,7 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
       return {
         tone: r.success ? 'good' : 'bad',
         title: r.success ? t('result.callSuccess') : t('result.callFail'),
-        body: `${name ? lt(name) : ''}: "${pitch ? lt(pitch.text) : ''}"`,
+          body: `ปลายสายคือ${name ? lt(name) : 'ผู้รับสาย'} · คุณพูดว่า “${pitch ? lt(pitch.text) : ''}”`,
         art: `victim:${victimId}`,
       };
     }

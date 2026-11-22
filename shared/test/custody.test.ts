@@ -20,7 +20,7 @@ describe('custody scenes', () => {
     const good = step(jail, { t: 'custodyVerdict', answer }, content);
     expect([good.phase, good.dirtyCash, good.cleanCash, good.heat, good.escapes]).toEqual(['shop', 0, 400, 45, 1]);
     expect(good.flags).toContain('dream_escape');
-    answer[0] = (answer[0]! + 1) % 3;
+    answer[0] = answer[0] === 0 ? 1 : 0;
     expect(step(jail, { t: 'custodyVerdict', answer }, content).end?.reason).toBe('caught');
     expect(() => step({ ...jail, flags: good.flags }, { t: 'custodyVerdict', answer }, content)).toThrow();
   });

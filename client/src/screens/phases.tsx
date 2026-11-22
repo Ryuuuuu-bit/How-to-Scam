@@ -314,6 +314,7 @@ export function CallPhase({ state, dispatch }: PhaseProps) {
       <Panel tone="sun" className="anim-rise-in flex items-center gap-3">
         <Art id={`victim:${v.portrait}`} size={76} className="shrink-0" />
         <div>
+          <div className="text-xs font-semibold text-ink-soft">คนรับสาย</div>
           <div className="font-display text-lg font-semibold">{name ? lt(name) : ''}</div>
           <div className="text-sm">
             {t('call.age', { n: v.age })} · {job ? lt(job.text) : ''}

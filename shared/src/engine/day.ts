@@ -1,5 +1,6 @@
 import type { GameContent, GangLevel, ScamMethod } from '../types/content';
 import { openingFor } from './opening';
+import { callerNameIndices, callerPortraits } from './callerIdentity';
 import type { CallVictim, GameState } from '../types/state';
 import { activeFestivals, currentNews } from './calendar';
 import { addHenchman, clampHeat, HEAT_MAX, methodStateOf, modifierPct } from './effects';
@@ -169,14 +170,14 @@ function makeVictim(s: GameState, c: GameContent, rng: Rng): CallVictim {
   const job = parts.jobs[jobIdx];
   invariant(job, 'no victim jobs');
   const age = rng.range(job.age);
-  const portraits = c.victims.filter((v) => Math.abs(v.age - age) <= 20);
-  const portrait = rng.pick(portraits.length > 0 ? portraits : c.victims).id;
+  // One draw each for the portrait and the name preserves existing replay sequences.
+  const portrait = rng.pick(callerPortraits(c, job, age)).id;
   const wealthPct =
     perksOfKind(s, c, 'victimWealth').reduce((n, p) => n + p.pct, 0) +
     (currentNews(s, c)?.victimWealthPct ?? 0);
   return {
     portrait,
-    nameIdx: rng.int(0, parts.names.length - 1),
+    nameIdx: rng.pick(callerNameIndices(parts, portrait, age)),
     jobIdx,
     traitIdx: rng.int(0, parts.traits[weakness].length - 1),
     age,
