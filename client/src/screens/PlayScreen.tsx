@@ -10,7 +10,7 @@ import type { ResultLine } from '../game/results';
 import { audio } from '../audio/audio';
 import { playCues } from '../audio/cues';
 import { fmt, lt, t } from '../i18n';
-import { content } from '@hts/shared/data';
+import { content, soiSketches } from '@hts/shared/data';
 import { CallPhase, EventPhase, InvestPhase, LaunderPhase, ShopPhase } from './phases';
 import { EscapePhase } from './EscapePhase';
 import { DailyNewspaper } from '../components/DailyNewspaper';
@@ -36,7 +36,8 @@ export function PlayScreen({
   const cosmetics = loadCosmetics(progressFor(user), user?.uid);
   const [dismissedTick, setDismissedTick] = useState<number>();
   const [beforeDecision, setBeforeDecision] = useState<{ cash: number; actionCount: number }>();
-  const results = state.lastResults.filter((result) => result.kind !== 'news');
+  const results = state.lastResults.filter(result =>
+    result.kind !== 'news' && !(result.kind === 'event' && soiSketches.some(s => result.textKey?.startsWith(s.id + ':'))));
   const resultLines = results
     .map((result) => describeResult(result, state))
     .filter((line): line is ResultLine => line !== null);
@@ -92,6 +93,7 @@ export function PlayScreen({
         : state.phase;
   // ฉากเหตุการณ์/คอลเซ็นเตอร์/หนีตำรวจ เปิดภาพให้เห็นเยอะ หน้าที่เป็นรายการให้เห็นน้อยลง
   const tall = ['event', 'call', 'escape'].includes(state.phase);
+  const hasOwnScene = state.phase === 'event' && (state.pendingEvents[0] === 'counter_live' || soiSketches.some(s => s.id === state.pendingEvents[0]));
   return (
     <div className="play-shell relative min-h-dvh">
       <SceneBackdrop id={scene} />
@@ -115,7 +117,7 @@ export function PlayScreen({
       <main
         className={`decision-panel relative z-10 ${state.phase === 'plan' ? 'is-planning' : ''}`}
       >
-        {!(state.phase === 'event' && state.pendingEvents[0] === 'counter_live') && !(state.phase === 'escape' && (state.escape?.step === 'custody' || state.escape?.step === 'qte')) && <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />}
+        {!hasOwnScene && !(state.phase === 'escape' && (state.escape?.step === 'custody' || state.escape?.step === 'qte')) && <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />}
         <div className="play-heading mb-3 flex items-center gap-3">
           <Art
             id={characterArt(state.characterId, cosmetics)}

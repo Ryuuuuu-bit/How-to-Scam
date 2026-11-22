@@ -115,6 +115,7 @@ export interface EventChoice {
 }
 
 export interface EventCondition {
+  sketchEdition?: boolean;
   careerEdition?: boolean;
   neighborhoodEdition?: boolean;
   recruit?: string;

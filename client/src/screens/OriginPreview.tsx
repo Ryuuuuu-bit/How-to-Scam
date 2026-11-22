@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { careerSeedPrefix, newGame, step, type Action, type GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content, soiSketches } from '@hts/shared/data';
 import { sceneUrl } from '../assets/art';
 import { audio } from '../audio/audio';
 import { ClosingEdition } from '../components/ClosingEdition';
@@ -11,6 +11,7 @@ import { reactionMeme } from '../game/memes';
 import { describeResult } from '../game/results';
 import { OriginChat } from './OriginChat';
 import { EventPhase } from './phases';
+import { SketchCover } from './SoiSketchScene';
 
 const tabs = { origins: 'ภูมิหลังอาชีพ', retirement: 'ฉากเกษียณ', soinews: 'มีมข่าวปากซอย' };
 const seed = careerSeedPrefix + 'preview-0';
@@ -39,7 +40,8 @@ export function OriginPreview({ page }: { page: keyof typeof tabs }) {
   function play(action: Action) {
     if (!state) return;
     const next = step(state, action, content);
-    if (action.t === 'replyOrigin') setState({ ...next, day: 3 });
+    if (action.t === 'eventChoice' && soiSketches.some(s => s.id === state.pendingEvents[0])) setState(null);
+    else if (action.t === 'replyOrigin') setState({ ...next, day: 3 });
     else if (action.t === 'readOrigin') setState(step(next, { t: 'retire' }, content));
     else setState(next);
   }
@@ -58,12 +60,15 @@ export function OriginPreview({ page }: { page: keyof typeof tabs }) {
     </>}
     {!state && page === 'retirement' && retireExamples.map(([label, id, example]) =>
       <Button key={label} tone="sun" onClick={() => retire(id, example)}>{label}</Button>)}
+    {!state && page === 'soinews' && <div className="sketch-covers">
+      {soiSketches.map(sketch => <SketchCover key={sketch.id} sketch={sketch} onOpen={() => startNews(sketch.id)} />)}
+    </div>}
     {!state && page === 'soinews' && content.events.filter(e => e.when.careerEdition).map(e =>
       <Button key={e.id} tone="paper" onClick={() => startNews(e.id)}>{e.title.th}</Button>)}
     {state && <>
       {state.end ? <><EndingCard state={state} />{page === 'origins' && <ClosingEdition state={state} />}</>
         : page === 'origins' ? <OriginChat state={state} dispatch={play} />
-        : event ? <><img src={sceneUrl('ev_' + event)} alt="" className="aspect-video w-full rounded-2xl object-cover" /><EventPhase state={state} dispatch={play} /></>
+        : event ? <>{!soiSketches.some(s => s.id === event) && <img src={sceneUrl('ev_' + event)} alt="" className="aspect-video w-full rounded-2xl object-cover" />}<EventPhase state={state} dispatch={play} /></>
         : report && <><Panel>{describeResult(report, state)?.title}</Panel>{meme && <MemeSticker meme={meme} />}</>}
       <Button tone="paper" onClick={() => setState(null)}>กลับไปเลือกใหม่</Button>
     </>}

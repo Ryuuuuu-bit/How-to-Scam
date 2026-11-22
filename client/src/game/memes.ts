@@ -1,4 +1,5 @@
 import type { DayLog, GameState } from '@hts/shared';
+import { soiSketches } from '@hts/shared/data';
 
 export interface Meme {
   art: string;
@@ -47,6 +48,8 @@ export function reactionMeme(
 
 export function newspaperMeme(log: DayLog): Meme | null {
   for (const eventId of log.events) {
+    const sketch = soiSketches.find(s => s.id === eventId);
+    if (sketch) return { art: 'icon:news', caption: sketch.reader };
     const meme = newspaperComments.get(eventId) ?? eventMemes.get(eventId);
     if (meme) return meme;
   }
