@@ -36,12 +36,14 @@ export function LeaderboardScreen({
 
   useEffect(() => {
     if (!season) return;
+    let active = true;
     setRows(null);
     setError(false);
     api
       .leaderboard(board, season)
-      .then((r) => setRows(r.rows))
-      .catch(() => setError(true));
+      .then((r) => { if (active) setRows(r.rows); })
+      .catch(() => { if (active) setError(true); });
+    return () => { active = false; };
   }, [board, season]);
 
   const titleName = (id: string) => {
@@ -55,6 +57,7 @@ export function LeaderboardScreen({
       <div className="mb-2">
         {seasons.length > 0 && board !== 'daily' && (
           <select
+            aria-label="ซีซันกระดานคะแนน"
             value={season}
             onChange={(e) => setSeason(e.target.value)}
             className="font-display rounded-xl border-2 border-ink bg-white px-2 py-1 text-sm text-ink"
@@ -70,17 +73,18 @@ export function LeaderboardScreen({
       <div className="mb-3 grid grid-cols-4 gap-1.5">
         {BOARDS.map((b) => (
           <button
+            aria-pressed={b === board}
             key={b}
             type="button"
             onClick={() => setBoard(b)}
-            className={`font-display rounded-xl border-2 border-ink px-1 py-2 text-xs leading-tight text-ink ${b === board ? 'bg-sun shadow-pop-sm' : 'bg-paper'}`}
+            className={`font-display min-h-11 rounded-xl border-2 border-ink px-1 py-2 text-xs leading-tight text-ink ${b === board ? 'bg-sun shadow-pop-sm' : 'bg-paper'}`}
           >
             {t(`leaderboard.boards.${b}`)}
           </button>
         ))}
       </div>
       {error && <p className="text-center text-danger">{t('leaderboard.error')}</p>}
-      {!error && rows === null && <p className="text-center text-ink-soft">…</p>}
+      {!error && rows === null && <p role="status" className="text-center">กำลังโหลดอันดับ…</p>}
       {rows?.length === 0 && <p className="text-center text-ink-soft">{t('leaderboard.empty')}</p>}
       <ol className="flex flex-col gap-2 pb-24">
         {rows?.map((r) => {

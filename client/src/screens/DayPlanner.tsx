@@ -272,7 +272,7 @@ export function DayPlanner({
                       aria-label={`ลด ${lt(it.name)}`}
                       disabled={n === 0}
                       onClick={() => setCart({ ...cart, [it.id]: n - 1 })}
-                      className="h-8 w-8 rounded-full border-2 border-ink bg-paper font-bold disabled:opacity-30"
+                      className="h-11 w-11 rounded-full border-2 border-ink bg-paper font-bold disabled:opacity-30"
                     >
                       −
                     </button>
@@ -284,7 +284,7 @@ export function DayPlanner({
                         isBanned || n >= max || (it.kind === 'henchman' && crewCount >= crewLimit)
                       }
                       onClick={() => setCart({ ...cart, [it.id]: n + 1 })}
-                      className="h-8 w-8 rounded-full border-2 border-ink bg-sun font-bold disabled:opacity-30"
+                      className="h-11 w-11 rounded-full border-2 border-ink bg-sun font-bold disabled:opacity-30"
                     >
                       +
                     </button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GoogleButton } from '../net/GoogleButton';
 import { useAuth } from '../net/auth';
 import { t } from '../i18n';
@@ -11,22 +11,29 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState(user?.displayName ?? '');
   const [saving, setSaving] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('');
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const node = dialog.current;
+    node?.showModal();
+    return () => node?.close();
+  }, [user?.uid]);
   if (!user) return null;
   const logout = () => {
     auth.logout();
     onClose();
   };
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-ink/40 p-3"
-      onClick={onClose}
+    <dialog ref={dialog} aria-labelledby="profile-title" onCancel={onClose}
+      className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none bg-transparent p-3 backdrop:bg-black/60 open:flex open:items-end open:justify-center"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         className="anim-rise-in flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col gap-3 overflow-y-auto rounded-3xl border-[3px] border-ink bg-paper p-4 text-ink shadow-pop"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="popup-heading">
-          <h2 className="text-xl font-semibold">{t('profile.title')}</h2>
+          <h2 id="profile-title" className="text-xl font-semibold">{t('profile.title')}</h2>
           <PopupClose label="ปิดโปรไฟล์" onClick={onClose} />
         </header>
         <div className="flex items-center gap-3">
@@ -66,13 +73,18 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
               disabled={saving || name.trim().length < 2 || name.trim() === user.displayName}
               onClick={() => {
                 setSaving(true);
-                auth.rename(name.trim()).finally(() => setSaving(false));
+                setSaveStatus('');
+                auth.rename(name.trim())
+                  .then(() => setSaveStatus('บันทึกชื่อแล้ว'))
+                  .catch(() => setSaveStatus('บันทึกไม่สำเร็จ ลองอีกครั้งได้เลย'))
+                  .finally(() => setSaving(false));
               }}
             >
               {t('profile.save')}
             </PopupButton>
           </div>
         </label>
+        {saveStatus && <p role="status" className="text-sm">{saveStatus}</p>}
         {user.kind === 'guest' && auth.googleClientId && (
           <div className="rounded-2xl border-2 border-dashed border-ink p-3 text-center text-sm">
             <p className="mb-2">{t('profile.linkGoogle')}</p>
@@ -107,6 +119,6 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
           />
         )}
       </div>
-    </div>
+    </dialog>
   );
 }

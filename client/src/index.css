@@ -58,6 +58,8 @@ button {
 button:disabled {
   cursor: not-allowed;
 }
+textarea:focus-visible,
+select:focus-visible,
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -232,6 +234,32 @@ dialog[aria-labelledby="feedback-title"] .popup-close svg {
 dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
   background: #ffe3ec;
 }
+.feedback-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -20px -20px 20px;
+  padding: 16px 20px;
+  border-bottom: 2px solid #292534;
+  background: #e9fb77;
+}
+.feedback-heading h2 { flex: 1; }
+.feedback-types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.feedback-type {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 44px;
+  border: 1px solid #a69ba8;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.feedback-type input { accent-color: #51379b; }
+.feedback-type:has(:checked) { background: #eee7ff; border-color: #51379b; font-weight: bold; }
+.feedback-type:focus-within { outline: 2px solid #51379b; outline-offset: 2px; }
 .menu-facts {
   display: flex;
   margin-top: 30px;

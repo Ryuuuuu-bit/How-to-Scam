@@ -251,10 +251,11 @@ function QteStep({ state, dispatch }: Props) {
           )}
           {phase === 'run' && idx < total && (
             <button
-              key={idx}
+              autoFocus
               type="button"
               aria-label={t('escape.qteTap')}
               onPointerDown={tap}
+              onClick={(event) => { if (event.detail === 0) tap(); }}
               className="anim-pop absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] border-ink bg-danger text-2xl shadow-pop-sm"
               style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
             >
