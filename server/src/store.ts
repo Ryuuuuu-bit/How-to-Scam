@@ -2,6 +2,10 @@
 import type { SeasonInfo } from './season';
 
 export type Board = 'top' | 'longest' | 'fastest';
+export type RunMode = 'normal' | 'daily';
+
+/** ขอบเขตของกระดาน: ซีซั่นรายเดือน (รอบปกติ) หรือวัน (Daily Challenge) */
+export type Scope = { seasonId: string } | { dailyDate: string };
 
 export interface UserRec {
   id: string;
@@ -12,6 +16,7 @@ export interface UserRec {
   avatarUrl: string | null;
   xp: number;
   runsPlayed: number;
+  dailyPlays: number;
   endings: string[];
   createdAt: Date;
 }
@@ -21,6 +26,8 @@ export interface RunRec {
   userId: string;
   seed: string;
   characterId: string;
+  mode: string;
+  dailyDate: string | null;
   status: 'started' | 'submitted' | 'rejected';
   createdAt: Date;
 }
@@ -29,6 +36,8 @@ export interface ScoreInput {
   runId: string;
   userId: string;
   season: SeasonInfo;
+  mode: RunMode;
+  dailyDate: string | null;
   characterId: string;
   score: number;
   cleanCash: number;
@@ -38,6 +47,8 @@ export interface ScoreInput {
   titleId: string;
   actionCount: number;
   xpGained: number;
+  /** เหรียญใหม่ที่ปลดล็อกในรอบนี้ */
+  newAchievements: string[];
 }
 
 export interface BoardRow {
@@ -53,6 +64,14 @@ export interface BoardRow {
   createdAt: Date;
 }
 
+export interface NewRun {
+  userId: string;
+  characterId: string;
+  seed: string;
+  mode: RunMode;
+  dailyDate: string | null;
+}
+
 export interface Store {
   createGuest(displayName: string): Promise<UserRec>;
   findUser(id: string): Promise<UserRec | null>;
@@ -61,15 +80,19 @@ export interface Store {
   linkGoogle(userId: string, g: GoogleProfile): Promise<UserRec>;
   createGoogleUser(g: GoogleProfile): Promise<UserRec>;
   renameUser(userId: string, displayName: string): Promise<UserRec>;
-  createRun(userId: string, characterId: string, seed: string): Promise<RunRec>;
+  achievementsOf(userId: string): Promise<string[]>;
+  createRun(r: NewRun): Promise<RunRec>;
   findRun(id: string): Promise<RunRec | null>;
+  findDailyRun(userId: string, dailyDate: string): Promise<RunRec | null>;
   countRecentRuns(userId: string, since: Date): Promise<number>;
-  /** บันทึกคะแนน + อัปเดตแต้มแก๊งของผู้เล่น (ใน transaction เดียว) */
+  /** บันทึกคะแนน + อัปเดตแต้มแก๊งและเหรียญของผู้เล่น (ใน transaction เดียว) */
   saveScore(s: ScoreInput): Promise<UserRec>;
   rejectRun(runId: string, reason: string, actionCount: number): Promise<void>;
-  leaderboard(seasonId: string, board: Board, limit: number): Promise<BoardRow[]>;
-  /** อันดับของคะแนนนี้ในบอร์ด top (นับผู้เล่นที่ทำได้ดีกว่า) */
-  rankOf(seasonId: string, score: number): Promise<number>;
+  leaderboard(scope: Scope, board: Board, limit: number): Promise<BoardRow[]>;
+  /** อันดับของคะแนนนี้ในกระดานคะแนนสูงสุด (นับผู้เล่นที่ทำได้ดีกว่า) */
+  rankOf(scope: Scope, score: number): Promise<number>;
+  /** คะแนน Daily ของผู้เล่นในวันนั้น (ถ้ามี) */
+  dailyScore(userId: string, dailyDate: string): Promise<{ score: number; titleId: string } | null>;
   seasons(): Promise<{ id: string; players: number }[]>;
 }
 
@@ -79,3 +102,9 @@ export interface GoogleProfile {
   name: string;
   picture: string | null;
 }
+
+/** where ของคะแนนตามขอบเขต: กระดานรายเดือนนับเฉพาะรอบปกติ */
+export const scopeWhere = (scope: Scope) =>
+  'dailyDate' in scope
+    ? { mode: 'daily', dailyDate: scope.dailyDate }
+    : { mode: 'normal', seasonId: scope.seasonId };

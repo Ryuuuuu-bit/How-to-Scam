@@ -228,3 +228,66 @@ describe('ซีซั่น', () => {
     expect(seasonFor(new Date('2026-10-31T16:00:00Z')).id).toBe('2026-10');
   });
 });
+
+describe('Daily Challenge และเหรียญ', () => {
+  it('ทุกคนได้ seed และอาชีพเดียวกันในวันเดียวกัน และนับได้วันละรอบ', async () => {
+    const a = await guest();
+    const b = await guest();
+    const sa = (await api('/api/daily/start', { token: a.token, body: {} })).body as {
+      runId: string;
+      seed: string;
+      characterId: string;
+    };
+    const sb = (await api('/api/daily/start', { token: b.token, body: {} })).body as {
+      seed: string;
+      characterId: string;
+    };
+    expect(sa.seed).toBe(sb.seed);
+    expect(sa.characterId).toBe(sb.characterId);
+    // เริ่มซ้ำได้ seed เดิม (เล่นต่อ)
+    const again = (await api('/api/daily/start', { token: a.token, body: {} })).body as {
+      runId: string;
+    };
+    expect(again.runId).toBe(sa.runId);
+
+    const actions = play(sa.seed, sa.characterId);
+    const sub = await api(`/api/runs/${sa.runId}/submit`, { token: a.token, body: { actions } });
+    expect(sub.status).toBe(200);
+    expect(sub.body.mode).toBe('daily');
+    expect(sub.body.newAchievements).toContain('daily_player');
+    expect(sub.body.newAchievements).toContain('first_run');
+
+    const third = await api('/api/daily/start', { token: a.token, body: {} });
+    expect(third.status).toBe(409);
+    const info = (await api('/api/daily', { token: a.token })).body as { status: string };
+    expect(info.status).toBe('done');
+
+    const board = await api('/api/leaderboard?board=daily');
+    expect((board.body.rows as { userId: string }[]).some((r) => r.userId === a.user.uid)).toBe(
+      true,
+    );
+    // คะแนน Daily ไม่ปนกระดานรายเดือน
+    const monthly = await api('/api/leaderboard?board=top');
+    expect((monthly.body.rows as { userId: string }[]).some((r) => r.userId === a.user.uid)).toBe(
+      false,
+    );
+  });
+
+  it('เหรียญที่ได้แล้วไม่ได้ซ้ำ และดูได้จาก /api/me', async () => {
+    const g = await guest();
+    for (let i = 0; i < 2; i++) {
+      const { runId, seed } = (
+        await api('/api/runs', { token: g.token, body: { characterId: 'ex_insurance' } })
+      ).body as { runId: string; seed: string };
+      const sub = await api(`/api/runs/${runId}/submit`, {
+        token: g.token,
+        body: { actions: play(seed, 'ex_insurance') },
+      });
+      const got = sub.body.newAchievements as string[];
+      if (i === 0) expect(got).toContain('first_run');
+      else expect(got).not.toContain('first_run');
+    }
+    const me = await api('/api/me', { token: g.token });
+    expect(me.body.achievements).toContain('first_run');
+  });
+});

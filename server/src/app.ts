@@ -4,12 +4,13 @@ import type { NextFunction, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { z } from 'zod';
+import { bangkokDate, isDailyDate } from '@hts/shared';
 import type { GameContent } from '@hts/shared';
 import { attachUser, guestName, requireUser, signToken } from './auth';
 import type { GoogleVerifier } from './auth';
-import { HttpError, MAX_ACTIONS, startRun, submitRun } from './game';
+import { dailyInfo, HttpError, MAX_ACTIONS, startDaily, startRun, submitRun } from './game';
 import { isSeasonId, seasonFor } from './season';
-import type { Board, Store, UserRec } from './store';
+import type { Board, Scope, Store, UserRec } from './store';
 
 export interface AppDeps {
   store: Store;
@@ -32,6 +33,7 @@ export function publicUser(u: UserRec) {
     avatarUrl: u.avatarUrl,
     xp: u.xp,
     runsPlayed: u.runsPlayed,
+    dailyPlays: u.dailyPlays,
     endings: u.endings,
   };
 }
@@ -106,7 +108,10 @@ export function createApp(d: AppDeps) {
 
   app.get(
     '/api/me',
-    wrap(async (req) => ({ user: publicUser(requireUser(req)) })),
+    wrap(async (req) => {
+      const user = requireUser(req);
+      return { user: publicUser(user), achievements: await d.store.achievementsOf(user.id) };
+    }),
   );
 
   app.patch(
@@ -144,18 +149,37 @@ export function createApp(d: AppDeps) {
     }),
   );
 
+  // ---------- Daily Challenge ----------
+  app.get(
+    '/api/daily',
+    wrap(async (req) => dailyInfo(d.store, d.content, req.user)),
+  );
+
+  app.post(
+    '/api/daily/start',
+    limit(10, 20),
+    wrap(async (req) => startDaily(d.store, d.content, requireUser(req), d.jwtSecret)),
+  );
+
   // ---------- Leaderboard ----------
   app.get(
     '/api/leaderboard',
     wrap(async (req) => {
       const q = z
         .object({
-          board: z.enum(['top', 'longest', 'fastest']).default('top'),
+          board: z.enum(['top', 'longest', 'fastest', 'daily']).default('top'),
           season: z.string().optional(),
+          date: z.string().optional(),
         })
         .parse(req.query);
       const seasonId = q.season && isSeasonId(q.season) ? q.season : seasonFor(new Date()).id;
-      const rows = await d.store.leaderboard(seasonId, q.board as Board, 50);
+      if (q.board === 'daily') {
+        const date = q.date && isDailyDate(q.date) ? q.date : bangkokDate(new Date());
+        const scope: Scope = { dailyDate: date };
+        const rows = await d.store.leaderboard(scope, 'top', 50);
+        return { seasonId, date, board: q.board, rows };
+      }
+      const rows = await d.store.leaderboard({ seasonId }, q.board as Board, 50);
       return { seasonId, board: q.board, rows };
     }),
   );

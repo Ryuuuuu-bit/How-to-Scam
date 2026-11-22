@@ -30,12 +30,25 @@ model User {
   /// แต้มประสบการณ์แก๊ง (ใช้ปลดล็อกอาชีพ)
   xp          Int      @default(0)
   runsPlayed  Int      @default(0)
+  /// เคยเล่น Daily Challenge กี่ครั้ง
+  dailyPlays  Int      @default(0)
   /// ฉากจบที่เคยเห็น (ใช้ปลดล็อกตัวลับ)
   endings     String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   runs        Run[]
   scores      Score[]
+  achievements UserAchievement[]
+}
+
+/// เหรียญความสำเร็จที่ผู้เล่นได้แล้ว
+model UserAchievement {
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  @@id([userId, achievementId])
 }
 
 /// ซีซั่นรายเดือน id = "2026-11"
@@ -53,6 +66,10 @@ model Run {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   seed        String
   characterId String
+  /// "normal" หรือ "daily"
+  mode        String    @default("normal")
+  /// วันที่ของ Daily Challenge (เฉพาะ mode daily) — 1 คน 1 รอบต่อวัน
+  dailyDate   String?
   status      RunStatus @default(started)
   actionCount Int       @default(0)
   rejectReason String?
@@ -60,6 +77,7 @@ model Run {
   submittedAt DateTime?
   score       Score?
 
+  @@unique([userId, dailyDate])
   @@index([userId, createdAt])
 }
 
@@ -79,8 +97,11 @@ model Score {
   reason      String
   endingId    String
   titleId     String
+  mode        String   @default("normal")
+  dailyDate   String?
   createdAt   DateTime @default(now())
 
+  @@index([dailyDate, score])
   @@index([seasonId, score])
   @@index([seasonId, days])
   @@index([seasonId, reason, days])

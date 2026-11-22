@@ -1,6 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from './generated/prisma/client';
-import type { Board, BoardRow, GoogleProfile, RunRec, ScoreInput, Store, UserRec } from './store';
+import { scopeWhere } from './store';
+import type { Board, BoardRow, GoogleProfile, RunRec, ScoreInput, Store } from './store';
 
 export function createPrisma(databaseUrl: string): PrismaClient {
   return new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl }) });
@@ -8,10 +9,9 @@ export function createPrisma(databaseUrl: string): PrismaClient {
 
 /** Store ที่เก็บจริงใน Postgres ผ่าน Prisma */
 export function prismaStore(db: PrismaClient): Store {
-  const toUser = (u: UserRec): UserRec => u;
   return {
     async createGuest(displayName) {
-      return toUser(await db.user.create({ data: { displayName, kind: 'guest' } }));
+      return db.user.create({ data: { displayName, kind: 'guest' } });
     },
     async findUser(id) {
       return db.user.findUnique({ where: { id } });
@@ -45,11 +45,23 @@ export function prismaStore(db: PrismaClient): Store {
     async renameUser(userId, displayName) {
       return db.user.update({ where: { id: userId }, data: { displayName } });
     },
-    async createRun(userId, characterId, seed) {
-      return (await db.run.create({ data: { userId, characterId, seed } })) as RunRec;
+    async achievementsOf(userId) {
+      const rows = await db.userAchievement.findMany({
+        where: { userId },
+        select: { achievementId: true },
+      });
+      return rows.map((r) => r.achievementId);
+    },
+    async createRun(r) {
+      return (await db.run.create({ data: r })) as RunRec;
     },
     async findRun(id) {
       return (await db.run.findUnique({ where: { id } })) as RunRec | null;
+    },
+    async findDailyRun(userId, dailyDate) {
+      return (await db.run.findUnique({
+        where: { userId_dailyDate: { userId, dailyDate } },
+      })) as RunRec | null;
     },
     async countRecentRuns(userId, since) {
       return db.run.count({ where: { userId, createdAt: { gte: since } } });
@@ -70,6 +82,8 @@ export function prismaStore(db: PrismaClient): Store {
             runId: s.runId,
             userId: s.userId,
             seasonId: s.season.id,
+            mode: s.mode,
+            dailyDate: s.dailyDate,
             characterId: s.characterId,
             score: s.score,
             cleanCash: s.cleanCash,
@@ -79,12 +93,19 @@ export function prismaStore(db: PrismaClient): Store {
             titleId: s.titleId,
           },
         });
+        if (s.newAchievements.length > 0) {
+          await tx.userAchievement.createMany({
+            data: s.newAchievements.map((achievementId) => ({ userId: s.userId, achievementId })),
+            skipDuplicates: true,
+          });
+        }
         const u = await tx.user.findUniqueOrThrow({ where: { id: s.userId } });
         return tx.user.update({
           where: { id: s.userId },
           data: {
             xp: { increment: s.xpGained },
             runsPlayed: { increment: 1 },
+            ...(s.mode === 'daily' ? { dailyPlays: { increment: 1 } } : {}),
             endings: u.endings.includes(s.endingId) ? u.endings : [...u.endings, s.endingId],
           },
         });
@@ -96,8 +117,9 @@ export function prismaStore(db: PrismaClient): Store {
         data: { status: 'rejected', rejectReason: reason.slice(0, 200), actionCount },
       });
     },
-    async leaderboard(seasonId, board: Board, limit) {
-      const where = board === 'fastest' ? { seasonId, reason: 'caught' } : { seasonId };
+    async leaderboard(scope, board: Board, limit) {
+      const base = scopeWhere(scope);
+      const where = board === 'fastest' ? { ...base, reason: 'caught' } : base;
       const orderBy =
         board === 'top'
           ? [{ score: 'desc' as const }, { createdAt: 'asc' as const }]
@@ -132,15 +154,24 @@ export function prismaStore(db: PrismaClient): Store {
       }
       return out;
     },
-    async rankOf(seasonId, score) {
+    async rankOf(scope, score) {
       const better = await db.score.groupBy({
         by: ['userId'],
-        where: { seasonId, score: { gt: score } },
+        where: { ...scopeWhere(scope), score: { gt: score } },
       });
       return better.length + 1;
     },
+    async dailyScore(userId, dailyDate) {
+      return db.score.findFirst({
+        where: { userId, mode: 'daily', dailyDate },
+        select: { score: true, titleId: true },
+      });
+    },
     async seasons() {
-      const rows = await db.score.groupBy({ by: ['seasonId', 'userId'] });
+      const rows = await db.score.groupBy({
+        by: ['seasonId', 'userId'],
+        where: { mode: 'normal' },
+      });
       const count: Record<string, number> = {};
       for (const r of rows) count[r.seasonId] = (count[r.seasonId] ?? 0) + 1;
       return Object.entries(count)

@@ -1,6 +1,15 @@
-import { randomBytes } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { InvalidActionError, isCharacterUnlocked, replay, titleFor, xpForRun } from '@hts/shared';
+import {
+  achievementsFor,
+  bangkokDate,
+  dailyCharacter,
+  InvalidActionError,
+  isCharacterUnlocked,
+  replay,
+  titleFor,
+  xpForRun,
+} from '@hts/shared';
 import type { Action, GameContent } from '@hts/shared';
 import { seasonFor } from './season';
 import type { Store, UserRec } from './store';
@@ -45,8 +54,64 @@ export async function startRun(store: Store, c: GameContent, user: UserRec, char
   if (!isCharacterUnlocked(ch, user)) throw new HttpError(403, 'character_locked');
   const recent = await store.countRecentRuns(user.id, new Date(Date.now() - 60 * 60 * 1000));
   if (recent >= MAX_RUNS_PER_HOUR) throw new HttpError(429, 'too_many_runs');
-  const run = await store.createRun(user.id, characterId, newSeed());
-  return { runId: run.id, seed: run.seed, characterId };
+  const run = await store.createRun({
+    userId: user.id,
+    characterId,
+    seed: newSeed(),
+    mode: 'normal',
+    dailyDate: null,
+  });
+  return { runId: run.id, seed: run.seed, characterId, mode: 'normal' as const };
+}
+
+/** seed ของ Daily Challenge: ทุกคนได้ seed เดียวกันในวันนั้น แต่เดาล่วงหน้าไม่ได้ */
+export function dailySeed(date: string, secret: string): string {
+  return createHmac('sha256', secret).update(`daily:${date}`).digest('hex').slice(0, 32);
+}
+
+/** ข้อมูล Daily ของวันนี้ + ผู้เล่นคนนี้เล่นไปหรือยัง */
+export async function dailyInfo(
+  store: Store,
+  c: GameContent,
+  user: UserRec | undefined,
+  now = new Date(),
+) {
+  const date = bangkokDate(now);
+  const characterId = dailyCharacter(date, c).id;
+  let status: 'new' | 'started' | 'done' = 'new';
+  let result: { score: number; titleId: string; rank: number } | null = null;
+  if (user) {
+    const run = await store.findDailyRun(user.id, date);
+    if (run) status = run.status === 'started' ? 'started' : 'done';
+    const sc = await store.dailyScore(user.id, date);
+    if (sc) result = { ...sc, rank: await store.rankOf({ dailyDate: date }, sc.score) };
+  }
+  return { date, characterId, status, result };
+}
+
+/** เริ่ม (หรือเล่นต่อ) Daily Challenge — นับคะแนนได้วันละ 1 รอบ */
+export async function startDaily(
+  store: Store,
+  c: GameContent,
+  user: UserRec,
+  secret: string,
+  now = new Date(),
+) {
+  const date = bangkokDate(now);
+  const characterId = dailyCharacter(date, c).id;
+  const existing = await store.findDailyRun(user.id, date);
+  if (existing) {
+    if (existing.status !== 'started') throw new HttpError(409, 'daily_already_played');
+    return { runId: existing.id, seed: existing.seed, characterId, mode: 'daily' as const, date };
+  }
+  const run = await store.createRun({
+    userId: user.id,
+    characterId,
+    seed: dailySeed(date, secret),
+    mode: 'daily',
+    dailyDate: date,
+  });
+  return { runId: run.id, seed: run.seed, characterId, mode: 'daily' as const, date };
 }
 
 /**
@@ -89,7 +154,14 @@ export async function submitRun(
   }
 
   const season = seasonFor(now);
+  const mode = run.mode === 'daily' ? 'daily' : 'normal';
   const titleId = titleFor(state, c);
+  const had = await store.achievementsOf(user.id);
+  const newAchievements = achievementsFor(
+    state,
+    { runs: user.runsPlayed + 1, daily: mode === 'daily' || user.dailyPlays > 0 },
+    c,
+  ).filter((a) => !had.includes(a));
   const xpGained = xpForRun(state);
   const before = c.characters.filter((ch) => isCharacterUnlocked(ch, user)).map((ch) => ch.id);
   const days = state.end.reason === 'survived' ? c.config.maxDays : state.day;
@@ -97,6 +169,8 @@ export async function submitRun(
     runId: run.id,
     userId: user.id,
     season,
+    mode,
+    dailyDate: run.dailyDate,
     characterId: run.characterId,
     score: state.end.score,
     cleanCash: state.cleanCash,
@@ -106,11 +180,14 @@ export async function submitRun(
     titleId,
     actionCount: actions.length,
     xpGained,
+    newAchievements,
   });
   const unlocked = c.characters
     .filter((ch) => isCharacterUnlocked(ch, updated) && !before.includes(ch.id))
     .map((ch) => ch.id);
-  const rank = await store.rankOf(season.id, state.end.score);
+  const scope =
+    mode === 'daily' && run.dailyDate ? { dailyDate: run.dailyDate } : { seasonId: season.id };
+  const rank = await store.rankOf(scope, state.end.score);
   return {
     score: state.end.score,
     days,
@@ -120,7 +197,10 @@ export async function submitRun(
     xpGained,
     unlocked,
     seasonId: season.id,
+    mode,
+    dailyDate: run.dailyDate,
     rank,
+    newAchievements,
     user: updated,
   };
 }

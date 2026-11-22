@@ -1,15 +1,19 @@
 import { randomUUID } from 'node:crypto';
-import type { Board, BoardRow, RunRec, ScoreInput, Store, UserRec } from '../src/store';
+import type { Board, BoardRow, RunRec, Scope, ScoreInput, Store, UserRec } from '../src/store';
+
+type ScoreRow = ScoreInput & { createdAt: Date };
+
+const inScope = (s: ScoreRow, scope: Scope) =>
+  'dailyDate' in scope
+    ? s.mode === 'daily' && s.dailyDate === scope.dailyDate
+    : s.mode === 'normal' && s.season.id === scope.seasonId;
 
 /** Store ในหน่วยความจำ สำหรับ test (พฤติกรรมเดียวกับ prismaStore) */
-export function memoryStore(): Store & {
-  users: UserRec[];
-  runs: (RunRec & { reject?: string })[];
-  scores: (ScoreInput & { createdAt: Date })[];
-} {
+export function memoryStore() {
   const users: UserRec[] = [];
   const runs: (RunRec & { reject?: string })[] = [];
-  const scores: (ScoreInput & { createdAt: Date })[] = [];
+  const scores: ScoreRow[] = [];
+  const ach: { userId: string; id: string }[] = [];
   const mk = (p: Partial<UserRec>): UserRec => ({
     id: randomUUID(),
     kind: 'guest',
@@ -19,15 +23,18 @@ export function memoryStore(): Store & {
     avatarUrl: null,
     xp: 0,
     runsPlayed: 0,
+    dailyPlays: 0,
     endings: [],
     createdAt: new Date(),
     ...p,
   });
   const find = (id: string) => users.find((u) => u.id === id) ?? null;
-  return {
-    users,
-    runs,
-    scores,
+  const must = (id: string) => {
+    const u = find(id);
+    if (!u) throw new Error('no user');
+    return u;
+  };
+  const store: Store = {
     async createGuest(displayName) {
       const u = mk({ displayName });
       users.push(u);
@@ -40,8 +47,7 @@ export function memoryStore(): Store & {
       return users.find((u) => u.googleSub === sub) ?? null;
     },
     async linkGoogle(userId, g) {
-      const u = find(userId);
-      if (!u) throw new Error('no user');
+      const u = must(userId);
       Object.assign(u, {
         kind: 'google',
         googleSub: g.sub,
@@ -63,25 +69,26 @@ export function memoryStore(): Store & {
       return u;
     },
     async renameUser(userId, displayName) {
-      const u = find(userId);
-      if (!u) throw new Error('no user');
+      const u = must(userId);
       u.displayName = displayName;
       return u;
     },
-    async createRun(userId, characterId, seed) {
-      const r: RunRec = {
-        id: randomUUID(),
-        userId,
-        characterId,
-        seed,
-        status: 'started',
-        createdAt: new Date(),
-      };
-      runs.push(r);
-      return r;
+    async achievementsOf(userId) {
+      return ach.filter((a) => a.userId === userId).map((a) => a.id);
+    },
+    async createRun(r) {
+      if (r.dailyDate && runs.some((x) => x.userId === r.userId && x.dailyDate === r.dailyDate)) {
+        throw new Error('unique violation');
+      }
+      const run: RunRec = { id: randomUUID(), ...r, status: 'started', createdAt: new Date() };
+      runs.push(run);
+      return run;
     },
     async findRun(id) {
       return runs.find((r) => r.id === id) ?? null;
+    },
+    async findDailyRun(userId, dailyDate) {
+      return runs.find((r) => r.userId === userId && r.dailyDate === dailyDate) ?? null;
     },
     async countRecentRuns(userId, since) {
       return runs.filter((r) => r.userId === userId && r.createdAt >= since).length;
@@ -90,10 +97,11 @@ export function memoryStore(): Store & {
       const run = runs.find((r) => r.id === s.runId);
       if (run) run.status = 'submitted';
       scores.push({ ...s, createdAt: new Date() });
-      const u = find(s.userId);
-      if (!u) throw new Error('no user');
+      for (const id of s.newAchievements) ach.push({ userId: s.userId, id });
+      const u = must(s.userId);
       u.xp += s.xpGained;
       u.runsPlayed += 1;
+      if (s.mode === 'daily') u.dailyPlays += 1;
       if (!u.endings.includes(s.endingId)) u.endings.push(s.endingId);
       return u;
     },
@@ -104,9 +112,9 @@ export function memoryStore(): Store & {
         run.reject = reason;
       }
     },
-    async leaderboard(seasonId, board: Board, limit) {
+    async leaderboard(scope, board: Board, limit) {
       const rows = scores
-        .filter((s) => s.season.id === seasonId && (board !== 'fastest' || s.reason === 'caught'))
+        .filter((s) => inScope(s, scope) && (board !== 'fastest' || s.reason === 'caught'))
         .sort((a, b) =>
           board === 'top'
             ? b.score - a.score
@@ -136,17 +144,23 @@ export function memoryStore(): Store & {
       }
       return out;
     },
-    async rankOf(seasonId, score) {
+    async rankOf(scope, score) {
       return (
-        new Set(
-          scores.filter((s) => s.season.id === seasonId && s.score > score).map((s) => s.userId),
-        ).size + 1
+        new Set(scores.filter((s) => inScope(s, scope) && s.score > score).map((s) => s.userId))
+          .size + 1
       );
+    },
+    async dailyScore(userId, dailyDate) {
+      const s = scores.find(
+        (x) => x.userId === userId && x.mode === 'daily' && x.dailyDate === dailyDate,
+      );
+      return s ? { score: s.score, titleId: s.titleId } : null;
     },
     async seasons() {
       const m: Record<string, Set<string>> = {};
-      for (const s of scores) (m[s.season.id] ??= new Set()).add(s.userId);
+      for (const s of scores) if (s.mode === 'normal') (m[s.season.id] ??= new Set()).add(s.userId);
       return Object.entries(m).map(([id, set]) => ({ id, players: set.size }));
     },
   };
+  return Object.assign(store, { users, runs, scores });
 }
