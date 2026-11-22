@@ -129,6 +129,7 @@ export interface LastResult {
 }
 
 export interface GameState {
+  scoutedDay?: number;
   version: 2;
   seed: string;
   /** สถานะภายในของ RNG (uint32) */
@@ -194,6 +195,7 @@ export type Action =
   | { t: 'choosePlan'; methodId: MethodId | null }
   | { t: 'invest'; itemId: ShopItemId }
   | { t: 'acceptOffer' }
+  | { t: 'scoutNews' }
   | { t: 'confirmInvest' }
   | { t: 'callPitch'; pitchId: PitchId }
   | { t: 'callHangup' }

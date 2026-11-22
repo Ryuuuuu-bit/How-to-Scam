@@ -10,6 +10,8 @@ import { getMethod, getPitch, getShopItem } from './lookup';
 import { karmaDelta, perksOfKind, priceOf } from './perks';
 import type { Rng } from './rng';
 
+export const newsScout = { firstDay: 2, price: 350 } as const;
+
 /** จ่ายเงิน: ใช้เงินสกปรกก่อน ไม่พอค่อยใช้เงินสะอาด */
 export function spend(s: GameState, amount: number): void {
   invariant(s.dirtyCash + s.cleanCash >= amount, `not enough money for ${amount}`);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Action, GameState } from '@hts/shared';
-import { currentOffer, methodBlock, priceOf } from '@hts/shared';
+import { currentOffer, methodBlock, newsScout, priceOf } from '@hts/shared';
+import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, Chip, ScreenTitle } from '../components/ui';
@@ -140,6 +141,7 @@ export function DayPlanner({
           .filter(({ block }) => block !== 'level')
           .map(({ method: m, block }) => {
             const picked = methodId === m.id;
+            const estimate = planEstimate(state, m, picked ? cart : {});
             return (
               <button
                 key={m.id}
@@ -161,12 +163,12 @@ export function DayPlanner({
                 <div className="min-w-0 flex-1">
                   <div className="font-display font-semibold">{lt(m.name)}</div>
                   <div className="mt-1 flex flex-wrap gap-1">
-                    <Chip>{t('plan.cost', { n: m.cost })}</Chip>
+                    <Chip>{t('plan.cost', { n: picked ? total : m.cost })}</Chip>
                     <Chip className="text-clean">
-                      {t('plan.income', { min: m.income[0], max: m.income[1] })}
+                      {t('plan.income', { min: estimate.income[0], max: estimate.income[1] })}
                     </Chip>
                     <Chip className="text-danger">
-                      {t('plan.heat', { min: m.heat[0], max: m.heat[1] })}
+                      {t('plan.heat', { min: estimate.heat[0], max: estimate.heat[1] })}
                     </Chip>
                     <MethodChips state={state} m={m} />
                     {block === 'banned' && <Chip className="text-danger">{t('plan.banned')}</Chip>}
@@ -177,6 +179,11 @@ export function DayPlanner({
                     )}
                   </div>
                   {picked && <div className="mt-1 text-xs text-ink-soft">{lt(m.desc)}</div>}
+                  {picked && (
+                    <p className="mt-1 text-xs text-ink-soft">
+                      ประมาณการจากฐานงานและโบนัส ก่อนผลมินิเกม กลไกเฉพาะแผน และเหตุการณ์
+                    </p>
+                  )}
                 </div>
               </button>
             );
@@ -228,6 +235,7 @@ export function DayPlanner({
                   <Art id={`shop:${it.id}`} size={30} className="shrink-0" />
                   <div className="min-w-0 flex-1 text-sm leading-tight">
                     {lt(it.name)}
+                    <p className="my-1 text-xs leading-snug">{itemEffect(it)}</p>
                     <div className="text-[11px] text-ink-soft">
                       {isBanned ? t('planner.banned') : `฿${fmt(price)}`}
                       {price < it.price && !isBanned && (
@@ -238,7 +246,7 @@ export function DayPlanner({
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      aria-label="-"
+                      aria-label={`ลด ${lt(it.name)}`}
                       disabled={n === 0}
                       onClick={() => setCart({ ...cart, [it.id]: n - 1 })}
                       className="h-8 w-8 rounded-full border-2 border-ink bg-paper font-bold disabled:opacity-30"
@@ -248,7 +256,7 @@ export function DayPlanner({
                     <span className="font-display w-5 text-center">{n}</span>
                     <button
                       type="button"
-                      aria-label="+"
+                      aria-label={`เพิ่ม ${lt(it.name)}`}
                       disabled={isBanned || n >= max}
                       onClick={() => setCart({ ...cart, [it.id]: n + 1 })}
                       className="h-8 w-8 rounded-full border-2 border-ink bg-sun font-bold disabled:opacity-30"
@@ -260,6 +268,29 @@ export function DayPlanner({
               );
             })}
           </div>
+          {state.day >= newsScout.firstDay && (
+            <div className="mt-3 border-t border-ink/20 pt-2 text-sm">
+              <b>ทีมตรวจข่าว</b>
+              {state.scoutedDay === state.day ? (
+                <p role="status">
+                  {canAfford
+                    ? scoutHint(state, method.id, cartList)
+                    : 'ลดของในแผนให้พอกับงบเพื่ออ่านเบาะแส'}
+                </p>
+              ) : (
+                <>
+                  <p className="mb-2 text-xs">อ่านเบาะแสก่อนเริ่มงาน เปลี่ยนแผนแล้วตรวจใหม่ได้ตลอดวันนี้</p>
+                  <Button
+                    tone="paper"
+                    disabled={money(state) < newsScout.price}
+                    onClick={() => dispatch({ t: 'scoutNews' })}
+                  >
+                    จ่ายทันที ฿{fmt(newsScout.price)} · ดูเบาะแส
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
 

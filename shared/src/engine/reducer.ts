@@ -9,6 +9,7 @@ import {
   endDay,
   goToLaunder,
   invest,
+  newsScout,
   rollNews,
   spend,
 } from './day';
@@ -110,6 +111,12 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
   const rng = new Rng(s.rng);
 
   switch (action.t) {
+    case 'scoutNews':
+      expectPhase(s, 'plan');
+      invariant(s.day >= newsScout.firstDay && s.scoutedDay !== s.day, 'news scout unavailable');
+      spend(s, newsScout.price);
+      s.scoutedDay = s.day;
+      break;
     case 'choosePlan':
       expectPhase(s, 'plan');
       choosePlan(s, c, action.methodId);
