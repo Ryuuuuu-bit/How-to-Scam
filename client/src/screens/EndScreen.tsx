@@ -60,7 +60,7 @@ export function EndScreen({
     <main className="end-screen mx-auto flex min-h-dvh flex-col gap-4 px-4 py-6">
       <div className="eyebrow text-center">CASE CLOSED / บทสรุปของคุณ</div>
       <div className="anim-rise-in text-center">
-        <span className="font-display inline-block rounded-full border-2 border-ink bg-white px-3 py-0.5 text-sm">
+        <span className="font-display inline-block rounded-full border-2 border-ink bg-white px-3 py-0.5 text-sm text-ink">
           {t(`end.reason.${end.reason}`)}
         </span>
       </div>
@@ -76,6 +76,10 @@ export function EndScreen({
       </Panel>
 
       <SubmitBanner state={submit.state} onRetry={() => void submit.retry()} />
+      <div className="grid grid-cols-2 gap-3">
+        <Button tone="paper" onClick={onMenu}>{t('end.menu')}</Button>
+        <Button tone="pink" onClick={onAgain}>{t('end.again')}</Button>
+      </div>
       <ClosingEdition state={state} />
       <DailyNewspaper state={state} />
 
@@ -144,7 +148,7 @@ export function EndScreen({
         <p className="mb-2 text-sm text-ink-soft">{t('end.dangerHint')}</p>
         <div className="flex flex-col gap-3">
           {signs.map((d) => (
-            <div key={d.id} className="rounded-3xl border-[3px] border-ink bg-white p-4 shadow-pop">
+            <div key={d.id} className="rounded-3xl border-[3px] border-ink bg-white p-4 text-ink shadow-pop">
               <div className="mb-2 h-2 rounded-full bg-[repeating-linear-gradient(135deg,#ffd23f_0_10px,#2b2140_10px_20px)]" />
               <h4 className="font-display text-lg font-semibold">{lt(d.title)}</h4>
               <p className="mt-1 text-[15px] leading-relaxed">{lt(d.body)}</p>
@@ -153,14 +157,6 @@ export function EndScreen({
         </div>
       </section>
 
-      <div className="mt-2 grid grid-cols-2 gap-3 pb-[env(safe-area-inset-bottom)]">
-        <Button tone="paper" onClick={onMenu}>
-          {t('end.menu')}
-        </Button>
-        <Button tone="pink" onClick={onAgain}>
-          {t('end.again')}
-        </Button>
-      </div>
     </main>
   );
 }

@@ -89,6 +89,7 @@ export function MainMenu({
             >
               {t('menu.newRun')} <span aria-hidden>↗</span>
             </Button>
+            <div className="menu-modes">
             {onDaily && (
               <Button tone="pink" block onClick={onDaily}>
                 <span className="flex items-center gap-2">
@@ -103,6 +104,8 @@ export function MainMenu({
                 {onLeaderboard ? t('menu.leaderboard') : t('menu.leaderboardSoon')}
               </span>
             </Button>
+            </div>
+            <a className="practice-link" href="?preview=planner">ลองเล่น 1 วัน · ไม่ทับเซฟ</a>
             {user && onProfile && (
               <button
                 type="button"
@@ -121,6 +124,7 @@ export function MainMenu({
                 {t('auth.offlineBanner')}
               </p>
             )}
+            <div className="menu-utilities">
             {onAchievements && (
               <Button tone="paper" block onClick={onAchievements}>
                 <span className="flex items-center gap-2">
@@ -132,7 +136,7 @@ export function MainMenu({
             <Button tone="paper" block onClick={onWardrobe}>
               <span className="flex items-center gap-2">
                 <Art id="icon:wardrobe" size={25} className="shrink-0" />
-                ห้องแต่งตัวและฉากเมนู
+                ห้องแต่งตัว
               </span>
               <span aria-hidden>↗</span>
             </Button>
@@ -144,6 +148,7 @@ export function MainMenu({
               <span aria-hidden>↗</span>
             </Button>
             <Feedback connected={!!user} />
+            </div>
           </div>
           <div className="menu-facts">
             <div>

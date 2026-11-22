@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { PlannerPractice } from './screens/PlannerPractice';
 import { LiveCounter } from './screens/LiveCounter';
 import { ScenePreview } from './screens/ScenePreview';
 import { OriginPreview } from './screens/OriginPreview';
@@ -33,6 +34,7 @@ type Screen =
 
 export function App() {
   const preview = new URLSearchParams(window.location.search).get('preview');
+  if (preview === 'planner') return <AuthProvider><PlannerPractice /><AudioControls /></AuthProvider>;
   if (preview === 'origins' || preview === 'retirement' || preview === 'soinews') return <><OriginPreview page={preview} /><AudioControls /></>;
   if (new URLSearchParams(window.location.search).get('preview') === 'scenes') return <><ScenePreview /><AudioControls /></>;
   if (new URLSearchParams(window.location.search).get('preview') === 'live') {
@@ -69,6 +71,7 @@ function GameScreens() {
   const [saved, setSaved] = useState(loadSavedRun);
   const [profile, setProfile] = useState(false);
   const [starting, setStarting] = useState(false);
+  useEffect(() => { window.scrollTo({ top: 0 }); }, [screen]);
 
   /** ออนไลน์: ขอ seed จาก server เพื่อให้ส่งคะแนนได้ / ออฟไลน์: สุ่มเอง */
   const startRun = async (characterId: string) => {
@@ -168,8 +171,6 @@ function GameScreens() {
         onWardrobe={() => setScreen('wardrobe')}
         saved={saved}
         onNew={() => {
-          game.clearSave();
-          setSaved(null);
           setScreen('character');
         }}
         onContinue={() => {

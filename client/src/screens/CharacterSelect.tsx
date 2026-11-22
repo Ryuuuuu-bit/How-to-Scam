@@ -17,6 +17,8 @@ export function CharacterSelect({
   const meta = progressFor(user);
   const cosmetics = loadCosmetics(meta, user?.uid);
   const [picked, setPicked] = useState(content.characters[0]?.id ?? '');
+  const [showLocked, setShowLocked] = useState(false);
+  const unlocked = content.characters.filter(c => isUnlocked(c, meta));
   return (
     <main className="character-screen mx-auto flex min-h-dvh flex-col px-4 py-6">
       <div className="eyebrow mb-3">THE CREW / เลือกตัวละครของคุณ</div>
@@ -24,8 +26,12 @@ export function CharacterSelect({
         <ScreenTitle title={t('character.title')} />
         <Chip className="mt-1 shrink-0">⭐ {t('character.xp', { n: meta.xp })}</Chip>
       </div>
+      <div className="collection-filter" role="group" aria-label="แสดงอาชีพ">
+        <button aria-pressed={!showLocked} onClick={() => setShowLocked(false)}>เลือกเล่นได้ · {unlocked.length}</button>
+        <button aria-pressed={showLocked} onClick={() => setShowLocked(true)}>ทั้งหมด · {content.characters.length}</button>
+      </div>
       <div className="character-grid grid gap-4 pb-28">
-        {content.characters.map((c, i) => {
+        {(showLocked ? content.characters : unlocked).map((c, i) => {
           const open = isUnlocked(c, meta);
           const active = open && c.id === picked;
           return (

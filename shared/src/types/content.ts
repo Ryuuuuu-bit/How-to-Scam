@@ -42,6 +42,9 @@ export type MethodMechanic =
 
 export interface ScamMethod {
   id: MethodId;
+  /** An authored first shift for this job, queued once when there is room. */
+  debutEvent?: EventId;
+  cleanIncome?: boolean;
   level: GangLevel;
   mechanic: MethodMechanic;
   /** ต้นทุนต่อวัน (หักจากเงินสด) */
@@ -362,7 +365,7 @@ export interface GameConfig {
   escape: EscapeConfig;
   caughtCleanKeepPct: number;
   newsEveryDays: number;
-  score: { daysWeight: number; maxVarietyBonus: number; noEscapeBonus: number };
+  score: { daysWeight: number; maxVarietyBonus: number; varietyTarget: number; noEscapeBonus: number };
 }
 
 /** ฉายาอัตโนมัติ */

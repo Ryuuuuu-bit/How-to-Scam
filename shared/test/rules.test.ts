@@ -10,7 +10,7 @@ describe('ข้อมูลเกม', () => {
   });
 
   it('มีเนื้อหาครบตาม Phase 1', () => {
-    expect(content.methods).toHaveLength(7);
+    expect(content.methods).toHaveLength(10);
     expect(content.launderCards.length).toBeGreaterThanOrEqual(10);
     expect(content.events.length).toBeGreaterThanOrEqual(60);
     expect(content.characters.length).toBeGreaterThanOrEqual(11);

@@ -13,13 +13,13 @@ export interface ResultLine {
 export function describeResult(r: LastResult, s: GameState): ResultLine | null {
   switch (r.kind) {
     case 'resolve': {
-      const income = r.dirtyCash ?? 0;
+      const income = (r.dirtyCash ?? 0) + (r.cleanCash ?? 0);
       const heat = r.heat ?? 0;
       return {
         tone: income > 0 ? 'good' : 'bad',
-        title: income > 0 ? `${t('result.income')} +฿${fmt(income)}` : t('result.noIncome'),
+        title: income > 0 ? `${r.cleanCash ? t('hud.clean') : t('result.income')} +฿${fmt(income)}` : t('result.noIncome'),
         ...(heat > 0 ? { body: `${t('result.heatUp')} +${heat}` } : {}),
-        art: income > 0 ? 'icon:dirty' : 'icon:rest',
+        art: income > 0 ? (r.cleanCash ? 'icon:clean' : 'icon:dirty') : 'icon:rest',
       };
     }
     case 'call': {

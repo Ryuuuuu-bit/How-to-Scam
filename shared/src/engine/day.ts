@@ -364,7 +364,8 @@ function applyIncome(
   const income = Math.max(0, Math.round(baseIncome * mul));
   const heat = Math.max(0, Math.round(baseHeat * (1 + heatBonusPct(s, c, m.id) / 100)));
   const before = s.heat;
-  s.dirtyCash += income;
+  const wallet = m.cleanIncome ? 'cleanCash' : 'dirtyCash';
+  s[wallet] += income;
   s.heat += heat;
   clampHeat(s);
   s.fame += m.fame ?? 0;
@@ -374,7 +375,7 @@ function applyIncome(
     log.income = income;
     log.heatGained = s.heat - before;
   }
-  s.lastResults.push({ kind: 'resolve', dirtyCash: income, heat: s.heat - before });
+  s.lastResults.push({ kind: 'resolve', [wallet]: income, heat: s.heat - before });
   for (const h of s.henchmen) if (h.recruit === 'intern_nat') h.skill = Math.min(15, h.skill + 1);
 }
 

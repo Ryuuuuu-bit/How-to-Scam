@@ -80,6 +80,11 @@ export function rollDailyEvents(s: GameState, c: GameContent, rng: Rng): void {
     s.pendingEvents.push('counter_live');
     s.seenEvents.push('counter_live');
   }
+  const debut = c.methods.find(m => m.id === s.todayMethodId)?.debutEvent;
+  if (debut && s.pendingEvents.length < 2 && !s.seenEvents.includes(debut)) {
+    s.pendingEvents.push(debut);
+    s.seenEvents.push(debut);
+  }
   const count = Math.max(0, rng.weightedIndex(c.config.eventCountWeights) - s.pendingEvents.length);
   for (let i = 0; i < count; i++) {
     const pool = c.events.filter((ev) => isEventEligible(s, c, ev));

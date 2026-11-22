@@ -5,7 +5,7 @@ import { audio } from './audio';
 export function playCues(state: GameState, previous: GameState): void {
   const r = state.lastResults;
   const has = (k: string) => r.some((x) => x.kind === k);
-  const income = r.reduce((n, x) => n + (x.kind === 'resolve' ? (x.dirtyCash ?? 0) : 0), 0);
+  const income = r.reduce((n, x) => n + (x.kind === 'resolve' ? (x.cleanCash ?? 0) + (x.dirtyCash ?? 0) : 0), 0);
 
   if (state.phase === 'escape' && previous.phase !== 'escape')
     return audio.sfx('sfx_siren', 'siren');

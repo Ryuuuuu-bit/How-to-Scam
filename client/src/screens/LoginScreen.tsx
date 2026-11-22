@@ -38,7 +38,8 @@ export function LoginScreen() {
         </Button>
         <p className="-mt-1 text-xs text-ink-soft">{t('auth.guestHint')}</p>
         {auth.error && <p className="text-sm font-semibold text-danger">{t('auth.failed')}</p>}
-        <button type="button" className="text-xs underline" onClick={auth.playOffline}>
+        <a className="inline-flex min-h-11 items-center justify-center rounded-xl bg-ink px-3 text-sm font-semibold text-paper" href="?preview=planner">ลองเล่น 1 วันก่อน</a>
+        <button type="button" className="min-h-11 text-sm underline" onClick={auth.playOffline}>
           {t('auth.offline')}
         </button>
       </Panel>

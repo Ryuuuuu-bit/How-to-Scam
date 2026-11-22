@@ -6,7 +6,8 @@ import { OriginChat } from './OriginChat';
 import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
-import { Art, Button, Chip, ScreenTitle } from '../components/ui';
+import { Art, Button, ScreenTitle } from '../components/ui';
+import { jobSceneUrl } from '../assets/art';
 import { MethodChips, NewsCard, RetireButton } from './phases';
 
 /** แผนของเมื่อวาน (ดึงจาก action log) ใช้กับปุ่ม "ทำแบบเมื่อวาน" */
@@ -94,6 +95,8 @@ export function DayPlanner({
     lastPlan?.methodId && !methodBlockFor(state, lastPlan.methodId) ? lastPlan.methodId : null,
   );
   const [cart, setCart] = useState<Record<string, number>>({});
+  const [order, setOrder] = useState('featured');
+  const [itemGroup, setItemGroup] = useState<'daily' | 'henchman'>('daily');
   const skipKey = 'hts.opening.skipped';
   const [skipped, setSkipped] = useState(() => {
     try { return localStorage.getItem(skipKey) === state.seed; } catch { return false; }
@@ -105,6 +108,11 @@ export function DayPlanner({
     block: methodBlock(state, content, method),
   }));
   const locked = methods.filter(({ block }) => block === 'level');
+  const available = methods.filter(({ block }) => block !== 'level').sort((a, b) => {
+    if (order === 'cost') return a.method.cost - b.method.cost;
+    if (order === 'heat') return planEstimate(state, a.method, {}).heat[1] - planEstimate(state, b.method, {}).heat[1];
+    return Number(!!b.method.debutEvent) - Number(!!a.method.debutEvent);
+  });
 
   const method = content.methods.find((m) => m.id === methodId);
   const items = content.shopItems.filter(
@@ -119,6 +127,7 @@ export function DayPlanner({
   }, 0);
   const total = (method?.cost ?? 0) + cartCost;
   const canAfford = total <= money(state);
+  const preview = method && planEstimate(state, method, cart);
 
   const run = (mId: string | null, buy: string[], opening = false) => {
     dispatch({ t: 'choosePlan', methodId: mId, ...(opening && { opening: true as const }) });
@@ -176,18 +185,22 @@ export function DayPlanner({
 
   return (
     <>
-      <ScreenTitle title={t('phase.plan')} hint={t('planner.hint')} />
+      <ScreenTitle title={t('phase.plan')} hint="เลือกงานที่อยากลอง แล้วดูว่าเสี่ยงแค่ไหนก่อนลงมือ" />
       {yesterday?.opening && <aside className="mb-3 rounded-xl border-2 border-ink bg-sun p-3 text-ink">
         <small>ข่าวหน้าหนึ่งเช้านี้</small>
         <p className="font-display">{openingStories[yesterday.opening][yesterday.methodId ? 'workNews' : 'quietNews']}</p>
       </aside>}
       <NewsCard state={state} compact />
-      <div className="flex flex-col gap-2">
-        {methods
-          .filter(({ block }) => block !== 'level')
-          .map(({ method: m, block }) => {
+      <div className="job-toolbar">
+        <strong>งานที่เปิดวันนี้ <span>{available.length}</span></strong>
+        <select aria-label="เรียงแผนงาน" value={order} onChange={e => setOrder(e.target.value)}>
+          <option value="featured">งานแนะนำ</option><option value="cost">ทุนน้อยก่อน</option><option value="heat">Heat ต่ำก่อน</option>
+        </select>
+      </div>
+      <div className="job-grid">
+        {available.map(({ method: m, block }) => {
             const picked = methodId === m.id;
-            const estimate = planEstimate(state, m, picked ? cart : {});
+            const estimate = planEstimate(state, m, {});
             return (
               <button
                 key={m.id}
@@ -197,40 +210,22 @@ export function DayPlanner({
                 onClick={() => {
                   if (picked) return;
                   setMethodId(m.id);
-                  setCart({});
+                  setCart(current => Object.fromEntries(Object.entries(current).filter(([id]) => {
+                    const it = content.shopItems.find(item => item.id === id);
+                    return it && (!it.methodId || it.methodId === m.id);
+                  })));
                 }}
-                className={`flex items-start gap-3 rounded-2xl border-[3px] border-ink p-2.5 text-left text-ink transition disabled:opacity-50 ${picked ? 'bg-sun shadow-pop' : 'bg-paper'}`}
+                className="job-tile"
               >
-                <Art
-                  id={block === 'cooldown' ? 'icon:cooldown' : `method:${m.id}`}
-                  size={40}
-                  className="shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="font-display font-semibold">{lt(m.name)}</div>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    <Chip>{t('plan.cost', { n: picked ? total : m.cost })}</Chip>
-                    <Chip className="text-clean">
-                      {t('plan.income', { min: estimate.income[0], max: estimate.income[1] })}
-                    </Chip>
-                    <Chip className="text-danger">
-                      {t('plan.heat', { min: estimate.heat[0], max: estimate.heat[1] })}
-                    </Chip>
-                    <MethodChips state={state} m={m} />
-                    {block === 'banned' && <Chip className="text-danger">{t('plan.banned')}</Chip>}
-                    {block === 'cooldown' && (
-                      <Chip className="text-danger">
-                        {t('plan.cooldown', { n: state.methodState[m.id]?.cooldownUntil ?? 0 })}
-                      </Chip>
-                    )}
-                  </div>
-                  {picked && <div className="mt-1 text-xs text-ink-soft">{lt(m.desc)}</div>}
-                  {picked && (
-                    <p className="mt-1 text-xs text-ink-soft">
-                      ประมาณการจากฐานงานและโบนัส ก่อนผลมินิเกม กลไกเฉพาะแผน และเหตุการณ์
-                    </p>
-                  )}
-                </div>
+                <span className="job-photo"><img src={jobSceneUrl(m.id)} alt="" />
+                  <small>ทุน ฿{fmt(m.cost)}</small>{picked && <b aria-hidden="true">✓</b>}
+                </span>
+                <span className="job-copy"><strong>{lt(m.name)}</strong>
+                  <span>{m.cleanIncome ? 'เงินสะอาด' : 'รายได้'} ฿{fmt(estimate.income[0])}–{fmt(estimate.income[1])}</span>
+                  <small>{block === 'banned' ? t('plan.banned') : block === 'cooldown'
+                    ? t('plan.cooldown', { n: state.methodState[m.id]?.cooldownUntil ?? 0 })
+                    : `Heat ${estimate.heat[1] === 0 ? '0' : '+' + estimate.heat.join('–')}`}</small>
+                </span>
               </button>
             );
           })}
@@ -276,11 +271,18 @@ export function DayPlanner({
         </Button>
       )}
 
-      {method && (
-        <div className="mt-3 rounded-2xl border-2 border-ink bg-white p-2.5 text-ink">
-          <div className="mb-1.5 text-xs font-semibold">{t('planner.addons')}</div>
+      {method && preview && (
+        <section className="kit-panel" id="daily-kit" aria-label="รายละเอียดงานและของเสริม" tabIndex={-1}>
+          <div className="job-brief"><strong>{lt(method.name)}</strong><p>{lt(method.desc)}</p>
+            <div className="flex flex-wrap gap-1"><MethodChips state={state} m={method} /></div>
+          </div>
+          <div className="kit-heading"><h3>ของช่วยงานวันนี้</h3><span>ไม่ซื้อก็เริ่มได้</span></div>
+          <div className="kit-switch" role="group" aria-label="ประเภทของช่วยงาน">
+            <button type="button" aria-pressed={itemGroup === 'daily'} onClick={() => setItemGroup('daily')}>ของรายวัน</button>
+            <button type="button" aria-pressed={itemGroup === 'henchman'} onClick={() => setItemGroup('henchman')}>ทีมงาน · {crewCount}/{crewLimit}</button>
+          </div>
           <div className="flex flex-col gap-1.5">
-            {items.map((it) => {
+            {items.filter(it => it.kind === itemGroup).map((it) => {
               const owned =
                 it.kind === 'henchman'
                   ? state.henchmen.filter((h) => h.recruit === it.id).length
@@ -292,14 +294,15 @@ export function DayPlanner({
               return (
                 <div
                   key={it.id}
-                  className={`flex items-center gap-2 ${isBanned ? 'opacity-50' : ''}`}
+                  className={`kit-row flex items-center gap-2 ${isBanned ? 'opacity-50' : ''}`}
                 >
                   <Art id={`shop:${it.id}`} size={30} className="shrink-0" />
                   <div className="min-w-0 flex-1 text-sm leading-tight">
-                    {lt(it.name)}
+                    <strong>{lt(it.name)}</strong>
                     <p className="my-1 text-xs leading-snug">{itemEffect(it)}</p>
                     <div className="text-[11px] text-ink-soft">
                       {isBanned ? t('planner.banned') : `฿${fmt(price)}`}
+                      {!isBanned && total + price > money(state) && n < max && ' · งบไม่พอเพิ่ม'}
                       {price < it.price && !isBanned && (
                         <span className="ml-1 text-clean line-through">฿{fmt(it.price)}</span>
                       )}
@@ -320,7 +323,7 @@ export function DayPlanner({
                       type="button"
                       aria-label={`เพิ่ม ${lt(it.name)}`}
                       disabled={
-                        isBanned || n >= max || (it.kind === 'henchman' && crewCount >= crewLimit)
+                        isBanned || total + price > money(state) || n >= max || (it.kind === 'henchman' && crewCount >= crewLimit)
                       }
                       onClick={() => setCart({ ...cart, [it.id]: n + 1 })}
                       className="h-11 w-11 rounded-full border-2 border-ink bg-sun font-bold disabled:opacity-30"
@@ -355,7 +358,7 @@ export function DayPlanner({
               )}
             </div>
           )}
-        </div>
+        </section>
       )}
 
       <div className="mt-4">
@@ -378,6 +381,17 @@ export function DayPlanner({
       )}
       <RetireButton dispatch={dispatch} />
       <div className="planner-actions" role="group" aria-label="ยืนยันแผนวันนี้">
+        {method && preview && <details className="plan-receipt">
+          <summary>ทุนรวม ฿{fmt(total)} <b>{canAfford ? 'เหลือ' : 'ขาด'} ฿{fmt(Math.abs(money(state) - total))}</b></summary>
+          <p>ทุนงาน ฿{fmt(method.cost)} + ของช่วย ฿{fmt(cartCost)} · {method.cleanIncome ? 'เงินสะอาด' : 'รายได้'}ประมาณ ฿{fmt(preview.income[0])}–{fmt(preview.income[1])} · Heat {preview.heat[1] === 0 ? '0' : '+' + preview.heat.join('–')}</p>
+          <small>ก่อนผลเหตุการณ์ กลไกเฉพาะงาน และค่าแรงทีม</small>
+          <button type="button" className="receipt-link" onClick={e => {
+            e.currentTarget.closest('details')?.removeAttribute('open');
+            const kit = document.getElementById('daily-kit');
+            kit?.focus({ preventScroll: true });
+            kit?.scrollIntoView({ block: 'start' });
+          }}>ไปเลือกของช่วยงาน</button>
+        </details>}
         {method && !canAfford && (
           <p role="status" className="planner-budget text-sm text-[#ffabb3]">
             {t('plan.noMoney')}

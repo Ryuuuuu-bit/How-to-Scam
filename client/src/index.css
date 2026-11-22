@@ -995,3 +995,87 @@ h3,
 .anim-scene-in {
   animation: scene-in 0.6s ease-out both;
 }
+
+/* The job board shares the illustrated paper and dark ink of the rest of the game. */
+.job-toolbar, .kit-heading, .plan-receipt summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+}
+.job-toolbar { margin: 1rem 0 .65rem; }
+.job-toolbar strong { color: #faf8ee; font-size: 1.05rem; }
+.job-toolbar strong span { margin-inline-start: .25rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+.job-toolbar select {
+  min-height: 44px; max-width: 48%; padding: .35rem .6rem;
+  border: 1px solid #686b75; background: #262833; color: #fbf9ef; border-radius: .7rem;
+  font: inherit; font-size: .85rem;
+}
+.job-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .65rem; }
+.decision-panel button.job-tile {
+  display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+  background: #f8f4e9; border: 2px solid #363743; border-radius: 1rem;
+  text-align: start; box-shadow: 0 3px 0 #101018;
+}
+.decision-panel button.job-tile[aria-pressed="true"] { border-color: #e8fa71; background: #f5fcc5; box-shadow: 0 0 0 2px #e8fa71; }
+.job-photo { position: relative; width: 100%; height: clamp(64px, 15vw, 105px); background: #383046; overflow: hidden; }
+.job-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 43%; }
+.job-photo small, .job-photo b {
+  position: absolute; bottom: .35rem; left: .4rem; padding: .13rem .45rem; border-radius: .45rem;
+  color: white; background: #171921ef; font-weight: 700; font-size: .74rem;
+}
+.job-photo b { inset: .38rem .4rem auto auto; color: #202024; background: #e8fa71; }
+.job-copy { display: grid; gap: .18rem; padding: .6rem .65rem .7rem; line-height: 1.28; }
+.job-copy strong { font-size: clamp(.92rem, 2vw, 1.03rem); }
+.job-copy span { font-size: .8rem; color: #215e46; font-weight: 650; }
+.job-copy small { font-size: .75rem; color: #754330; }
+.kit-panel { margin-block: 1.1rem; padding: clamp(.75rem, 2vw, 1.1rem); border: 1px solid #f5eacd; border-radius: 1.1rem; background: #fff9eb; color: #26252c; }
+.job-brief { border-bottom: 1px solid #d7cebc; padding-block-end: .9rem; margin-block-end: .9rem; }
+.job-brief > strong { font-size: 1.1rem; }
+.job-brief p { margin: .2rem 0 .55rem; font-size: .88rem; line-height: 1.55; }
+.kit-heading h3 { font-weight: 800; font-size: 1.05rem; }
+.kit-heading > span { font-size: .78rem; color: #535246; }
+.kit-switch, .collection-filter { display: inline-flex; align-items: center; gap: .25rem; border-radius: .85rem; padding: 3px; }
+.kit-switch { margin: .65rem 0 .3rem; background: #e8e1d5; }
+.kit-switch button, .collection-filter button { min-height: 44px; padding: .45rem .85rem; border-radius: .65rem; font-size: .86rem; font-weight: 700; cursor: pointer; }
+.decision-panel .kit-switch button { border: 0; border-radius: .65rem; color: #414047; }
+.decision-panel .kit-switch button[aria-pressed="true"], .collection-filter button[aria-pressed="true"] { background: #282932; color: #fff9ed; }
+.kit-row { min-height: 68px; padding: .6rem 0; }
+.kit-row + .kit-row { border-top: 1px solid #ded8cc; }
+.kit-row strong { font-weight: 750; }
+.decision-panel .kit-row button:not(.game-button) { border-radius: 50%; }
+.plan-receipt { margin: 0 auto .35rem; max-width: 540px; border-bottom: 1px solid #ffffff26; color: #f4f1e8; font-variant-numeric: tabular-nums; }
+.plan-receipt summary { min-height: 44px; cursor: pointer; font-size: .88rem; }
+.plan-receipt summary b { margin-left: auto; color: #ceefb6; }
+.plan-receipt summary::after { content: '⌄'; font-size: 1rem; }
+.plan-receipt[open] summary::after { transform: rotate(180deg); }
+.plan-receipt p, .plan-receipt small { display: block; font-size: .79rem; line-height: 1.55; }
+.plan-receipt small { color: #c5c4cb; margin: .25rem 0 .5rem; }
+.decision-panel .plan-receipt .receipt-link { min-height: 44px; color: #e8fa71; background: transparent; border: 0; text-decoration: underline; }
+.menu-modes, .menu-utilities { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; }
+.menu-modes .game-button, .menu-utilities .game-button { min-width: 0; min-height: 50px; padding: .55rem .65rem; font-size: .9rem; text-align: start; }
+.menu-utilities .game-button { color: #eeebe2; background: #252630; border: 1px solid #4d4e58; box-shadow: none; }
+.menu-utilities .game-button > span[aria-hidden] { display: none; }
+.collection-filter { align-self: flex-start; background: #383944; margin: 0 0 1rem; color: #e9e7df; }
+.collection-filter button[aria-pressed="true"] { background: #e8fa71; color: #202125; }
+.collection-screen > :first-child, .character-screen > :first-child { padding-inline-end: 4.5rem; }
+.collection-progress { width: 100%; height: .5rem; margin: 0 0 1.1rem; accent-color: #dbea70; border-radius: 8px; overflow: hidden; border: 0; background-color: #454652; }
+.collection-progress::-webkit-progress-bar { background: #454652; }
+.collection-progress::-webkit-progress-value { background: #dbea70; }
+.collection-screen button.bg-paper, .collection-screen button.bg-sun { color: #24252c; }
+.collection-screen > p.text-ink-soft, .end-screen > p.text-ink-soft { color: #c4c3cc; }
+.game-hud, .planner-actions, .collection-progress, .end-screen { font-variant-numeric: tabular-nums; }
+:where(button, a, summary, select, input, textarea):focus-visible { outline: 3px solid #45c9be; outline-offset: 3px; }
+.practice-nav { display: flex; align-items: center; gap: .85rem; flex-wrap: wrap; margin: 0 auto; padding: .65rem max(1rem, calc((100% - 1100px)/2)); background: #272935; color: #faf5e8; }
+.practice-nav a, .practice-link { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: .2em; color: #e8fa71; }
+.practice-link { justify-content: center; }
+.practice-end { max-width: 34rem; margin: 10vh auto; padding: 1.5rem; display: grid; gap: 1rem; }
+@media (max-width: 767px) {
+  .decision-panel.is-planning { padding-bottom: calc(180px + env(safe-area-inset-bottom)); }
+  html:has(.is-planning) { scroll-padding-bottom: calc(180px + env(safe-area-inset-bottom)); }
+  .planner-actions { max-height: 46dvh; overflow-y: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+  .decision-panel button:not(.game-button):hover:not(:disabled) { transform: none; }
+}

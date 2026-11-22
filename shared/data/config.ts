@@ -45,5 +45,5 @@ export const config: GameConfig = {
   },
   caughtCleanKeepPct: 50,
   newsEveryDays: 7,
-  score: { daysWeight: 1, maxVarietyBonus: 0.5, noEscapeBonus: 0.2 },
+  score: { daysWeight: 1, maxVarietyBonus: 0.5, varietyTarget: 7, noEscapeBonus: 0.2 },
 };

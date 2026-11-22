@@ -8,8 +8,8 @@ export function computeScore(s: GameState, c: GameContent, reason: EndReason): n
   const { maxDays, score } = c.config;
   const days = reason === 'survived' ? maxDays : s.day;
   const daysMult = 1 + (score.daysWeight * days) / maxDays;
-  const total = c.methods.length;
-  const used = s.methodsUsed.length;
+  const total = score.varietyTarget;
+  const used = Math.min(total, s.methodsUsed.length);
   let style = 1 + (total > 1 ? (score.maxVarietyBonus * Math.max(0, used - 1)) / (total - 1) : 0);
   if (s.escapes === 0 && reason !== 'caught') style += score.noEscapeBonus;
   return Math.round(s.cleanCash * daysMult * style);

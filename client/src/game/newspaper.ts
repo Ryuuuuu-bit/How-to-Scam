@@ -14,6 +14,9 @@ export interface DailyArticle {
 }
 
 const headlines: Record<string, string> = {
+  soi_football: 'ลีกปากซอยคนดูแน่นสนาม ลุงข้างโต๊ะยืนยัน “ไม่ได้ลุ้นบอล ลุ้นเก้าอี้พลาสติกว่าจะหักไหม”',
+  mystery_stall: 'ร้านกล่องสุ่มขายดี ลูกค้ารีวิวห้าดาว “ของข้างในให้แฟน กล่องให้แมว คุ้มทั้งบ้าน”',
+  cat_dub: 'คลิปแมวพากย์ไทยดังยกซอย คนจ้างถามคิวต่อไป เจ้าตัวนอนทับตารางงาน',
   fake_shop: 'พัสดุถึงมือ เปิดกล่องเจอแต่อากาศ ลูกค้าถาม “สั่งหม้อทอดหรือสั่งลม?”',
   romance: 'รักแท้แพ้ยอดโอน คนคุยอ่านแล้วเงียบ แต่สลิปยังอยู่',
   call_center: 'สายเรียกเข้าปริศนา ทำชาวเมืองไม่กล้ารับแม้แต่สายแม่',
@@ -53,6 +56,7 @@ function articleFor(log: DayLog, content: GameContent): DailyArticle {
     image: method ? `newsphoto:${method.id}` : 'icon:rest',
     caption: method ? method.name.th : 'วันพักของตัวเอก',
     meme: newspaperMeme(log),
+    ...(method?.cleanIncome && { body: `ค่าพากย์วันนี้ ฿${money(log.income)} เข้ากระเป๋าเงินสะอาด ช่างเสียงเก็บไมค์แล้ว แต่นักแสดงยังนอนทับสายอยู่` }),
     ...(momShared && { headline: 'เปิดร้านวันแรก แม่ช่วยแชร์ให้แล้ว', caption: 'ร้านดังในกลุ่มไลน์ของแม่' }),
     ...(log.natFirstPay && { headline: 'นัทได้เงินเดือนครั้งแรก ขอใบรับรองให้แม่ดู', image: 'shop:intern_nat', caption: 'น้องนัท เด็กฝึกงาน' }),
     ...(log.opening && { headline: openingStories[log.opening][log.methodId ? 'workNews' : 'quietNews'] }),

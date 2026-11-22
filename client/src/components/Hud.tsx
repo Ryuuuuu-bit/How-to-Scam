@@ -99,6 +99,7 @@ export function HeatBar({ heat }: { heat: number }) {
       <div className="flex items-start gap-1.5">
         <Art id="icon:heat" size={26} className={hot ? 'anim-pop' : ''} />
         <div
+          role="meter" aria-label="ระดับการถูกจับตา" aria-valuemin={0} aria-valuemax={100} aria-valuenow={heat}
           className={`relative mt-0.5 h-5 flex-1 overflow-hidden rounded-full border-2 border-ink bg-white ${hot ? 'anim-heat-glow' : ''}`}
         >
           <div

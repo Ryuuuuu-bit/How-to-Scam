@@ -11,6 +11,7 @@ import { karmaEvents } from './events/karma';
 import { newsEvents } from './events/news';
 import { soiPressEvents } from './events/soiPress';
 import { sketchEvents } from './events/soiSketches';
+import { firstShift } from './events/firstShift';
 export { soiSketches, type SoiSketch } from './events/soiSketches';
 import { seasonalEvents } from './events/seasonal';
 import { storyEvents } from './events/stories';
@@ -42,6 +43,7 @@ export const content: GameContent = {
     ...cyberEvents,
     ...soiPressEvents,
     ...sketchEvents,
+    ...firstShift,
   ],
   characters,
   shopItems,

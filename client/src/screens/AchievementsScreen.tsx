@@ -9,15 +9,17 @@ export function AchievementsScreen({ onBack }: { onBack: () => void }) {
   const auth = useAuth();
   const owned = new Set(auth.user ? auth.achievements : loadMeta().achievements);
   const all = content.achievements;
+  const earned = all.filter(a => owned.has(a.id)).length;
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
+    <main className="collection-screen mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
       <ScreenTitle
         title={t('achievements.title')}
         hint={t('achievements.progress', {
-          n: all.filter((a) => owned.has(a.id)).length,
+          n: earned,
           m: all.length,
         })}
       />
+      <progress className="collection-progress" aria-label="เหรียญที่สะสมแล้ว" value={earned} max={all.length} />
       <div className="grid grid-cols-2 gap-2 pb-24">
         {all.map((a) => {
           const got = owned.has(a.id);

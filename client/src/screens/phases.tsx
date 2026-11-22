@@ -7,6 +7,7 @@ import {
   activeFestivals,
   choiceAvailable,
   currentNews,
+  currentOffer,
   launderSuccessPct,
   methodBlock,
   perksOfKind,
@@ -17,6 +18,7 @@ import { content, soiSketches } from '@hts/shared/data';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, Panel, ScreenTitle } from '../components/ui';
 import { ConfirmPopup } from '../components/PopupControls';
+import { itemEffect } from '../game/plannerPreview';
 
 interface PhaseProps {
   state: GameState;
@@ -211,6 +213,9 @@ function ItemRow({
   const it = content.shopItems.find((x) => x.id === itemId);
   if (!it) return null;
   const price = priceOf(state, content, it.id, it.price);
+  const reserved = state.phase === 'invest' ? content.methods.find(m => m.id === state.todayMethodId)?.cost ?? 0 : 0;
+  const offer = currentOffer(state, content);
+  const banned = offer?.kind === 'twist' && offer.ban?.includes(it.id);
   const maxed =
     owned >= it.maxStack ||
     (it.kind === 'henchman' &&
@@ -221,7 +226,7 @@ function ItemRow({
       <Art id={`shop:${it.id}`} size={44} className="shrink-0" />
       <div className="min-w-0 flex-1">
         <div className="font-display font-semibold">{lt(it.name)}</div>
-        <div className="text-xs text-ink-soft">{lt(it.desc)}</div>
+        <div className="text-xs text-ink-soft">{it.kind === 'daily' ? itemEffect(it) : lt(it.desc)}</div>
         <div className="mt-1 flex flex-wrap gap-1 text-xs font-semibold">
           <span>{t('invest.owned', { n: owned, max: it.maxStack })}</span>
           {only && (
@@ -235,10 +240,10 @@ function ItemRow({
       <Button
         tone="sun"
         className="shrink-0 px-3 py-2 text-sm"
-        disabled={maxed || money(state) < price}
+        disabled={maxed || banned || money(state) - reserved < price}
         onClick={onBuy}
       >
-        {maxed ? t('shop.maxed') : label(price)}
+        {banned ? t('planner.banned') : maxed ? t('shop.maxed') : label(price)}
       </Button>
     </Panel>
   );

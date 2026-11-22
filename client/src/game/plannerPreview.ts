@@ -32,7 +32,7 @@ export function itemEffect(it: ShopItem) {
     return `รายได้ +5–${it.incomePct}% ตราบที่ยังอยู่กับทีม · ค่าแรง ฿${it.wage}/คนทุกวัน · ภักดีต่ำอาจซัดทอด`;
   return (
     [
-      it.incomePct && `รายได้ +${it.incomePct}%`,
+      it.incomePct && `รายได้ ${it.incomePct > 0 ? '+' : '−'}${Math.abs(it.incomePct)}%`,
       it.heatPct && `Heat ที่เพิ่มจากงาน ${it.heatPct > 0 ? '+' : '−'}${Math.abs(it.heatPct)}%`,
     ]
       .filter(Boolean)

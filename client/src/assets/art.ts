@@ -136,3 +136,23 @@ for (const [scene, set] of Object.entries(neighborhoodSets)) {
 
 /** URL ของฉากพื้นหลัง (ถ้ายังไม่มีภาพคืน undefined) */
 export const sceneUrl = (id: string): string | undefined => ART[`scene:${id}`]?.src;
+
+const jobScenes: Record<string, string> = {
+  fake_shop: 'ev_live_freeze', romance: 'ev_romance_reverse', soi_football: 'ev_world_cup_strike',
+  mystery_stall: 'escape_market', cat_dub: 'ev_cat_keyboard', call_center: 'call',
+  foundation: 'ev_foundation_receipts', merit: 'ev_merit_speaker', gambling: 'ev_gambling_real_winner',
+  ponzi: 'ev_ponzi_seminar_question',
+};
+export const jobSceneUrl = (id: string) => sceneUrl(jobScenes[id] ?? 'plan');
+const newArt: Record<string, string> = {
+  'newsphoto:soi_football': 'scene:ev_world_cup_strike', 'newsphoto:mystery_stall': 'scene:escape_market',
+  'newsphoto:cat_dub': 'scene:ev_cat_keyboard',
+  'method:soi_football': 'scene:ev_world_cup_strike', 'method:mystery_stall': 'method:fake_shop',
+  'method:cat_dub': 'char:orange_cat', 'shop:scoreboard': 'icon:day', 'shop:display_rack': 'method:fake_shop',
+  'shop:studio_mic': 'shop:celebrity_promo', 'shop:soft_launch': 'shop:rename_page',
+  'scene:ev_soi_derby': 'scene:ev_world_cup_strike', 'scene:ev_soi_unboxing': 'scene:escape_market',
+  'scene:ev_soi_cat_voice': 'scene:ev_cat_keyboard',
+};
+for (const [id, source] of Object.entries(newArt)) {
+  if (ART[source]) ART[id] = ART[source];
+}

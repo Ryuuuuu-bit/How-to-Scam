@@ -56,6 +56,11 @@ export function validateContent(c: GameContent): string[] {
   );
 
   for (const m of c.methods) {
+    if (m.debutEvent) {
+      if (!c.events.some(ev => ev.id === m.debutEvent && ev.chainOnly))
+        errors.push(`method ${m.id}: debut must refer to a scripted event`);
+      scheduled.add(m.debutEvent);
+    }
     if (m.income[0] > m.income[1]) errors.push(`method ${m.id}: income range reversed`);
     if (m.heat[0] > m.heat[1]) errors.push(`method ${m.id}: heat range reversed`);
   }

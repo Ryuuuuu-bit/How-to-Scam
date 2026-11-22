@@ -5,6 +5,25 @@ import type { ShopItem } from '../src/types/content';
 // permanent = ร้านอัปเกรดท้ายวัน
 export const shopItems: ShopItem[] = [
   {
+    id: 'scoreboard', kind: 'daily', methodId: 'soi_football', price: 180, maxStack: 1,
+    incomePct: 18, heatPct: 15, name: { th: 'ป้ายสกอร์ไฟวิ่ง' },
+    desc: { th: 'คนมุงโต๊ะเยอะขึ้น รายได้ +18% แต่ Heat จากงาน +15%' },
+  },
+  {
+    id: 'display_rack', kind: 'daily', methodId: 'mystery_stall', price: 130, maxStack: 1,
+    incomePct: 16, heatPct: 12, name: { th: 'ชั้นโชว์กล่องรุ่นลิมิเต็ด' },
+    desc: { th: 'ตั้งแผงเด่นขึ้น รายได้ +16% แต่ Heat จากงาน +12%' },
+  },
+  {
+    id: 'studio_mic', kind: 'daily', methodId: 'cat_dub', price: 75, maxStack: 1,
+    incomePct: 22, name: { th: 'ไมค์หนีบเสียงใส' },
+    desc: { th: 'ค่าเช่าไมค์วันนี้แลกกับค่าพากย์เพิ่ม 22%' },
+  },
+  {
+    id: 'soft_launch', kind: 'daily', price: 90, maxStack: 1, incomePct: -8, heatPct: -35,
+    name: { th: 'ป้ายเปิดร้านรอบเล็ก' }, desc: { th: 'รับคิวน้อยลง รายได้ −8% แต่ Heat จากงาน −35%' },
+  },
+  {
     id: 'sim_pack',
     kind: 'daily',
     price: 300,

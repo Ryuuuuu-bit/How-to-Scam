@@ -42,6 +42,24 @@ export const methods: ScamMethod[] = [
     },
   },
   {
+    id: 'soi_football', level: 1, mechanic: 'none', cost: 700,
+    income: [200, 5_400], heat: [6, 12], karma: -2, debutEvent: 'soi_derby',
+    name: { th: 'เปิดโต๊ะบอลลีกปากซอย' },
+    desc: { th: 'ซอยสามยูไนเต็ดเจอหมูปิ้งซิตี้ คนดูเต็มขอบสนาม คืนนี้อาจได้ก้อนโต หรือได้เงินกลับมาไม่พอค่าตั้งโต๊ะ' },
+  },
+  {
+    id: 'mystery_stall', level: 1, mechanic: 'none', cost: 420,
+    income: [950, 2_450], heat: [2, 5], karma: -1, fame: 2, debutEvent: 'soi_unboxing',
+    name: { th: 'ตั้งแผงกล่องสุ่ม' },
+    desc: { th: 'หน้ากล่องเขียนว่า “ของใหญ่แน่นอน” ลูกค้าคนแรกขอแกะกลางตลาด ได้ชื่อเสียง +2 ทุกวันที่เปิดแผง' },
+  },
+  {
+    id: 'cat_dub', level: 1, mechanic: 'none', cost: 120,
+    income: [420, 820], heat: [0, 0], karma: 1, cleanIncome: true, debutEvent: 'soi_cat_voice',
+    name: { th: 'รับพากย์คลิปแมว' },
+    desc: { th: 'อัดเสียงพากย์ให้ส้มซ่า เจ้าของจ่ายเงินสะอาดเข้ากระเป๋า ได้กรรมดี +1 งานนี้ไม่มี Heat พื้นฐาน' },
+  },
+  {
     id: 'foundation',
     level: 2,
     mechanic: 'foundation',

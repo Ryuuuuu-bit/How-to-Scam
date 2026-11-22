@@ -19,7 +19,7 @@ export function WardrobeScreen({ onBack }: { onBack: () => void }) {
   const [selected, setSelected] = useState(() => loadCosmetics(progress, user?.uid));
   const [saved, setSaved] = useState(true);
   return (
-    <main className="mx-auto flex min-h-dvh max-w-4xl flex-col gap-4 px-4 py-6">
+    <main className="collection-screen mx-auto flex min-h-dvh max-w-4xl flex-col gap-4 px-4 py-6">
       <ScreenTitle
         title="ห้องแต่งตัว"
         hint={`สะสมแล้ว ${progress.xp.toLocaleString('th-TH')} XP · เปลี่ยนภาพได้โดยไม่กระทบค่าสถานะหรือคะแนน`}

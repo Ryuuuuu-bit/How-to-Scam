@@ -22,17 +22,21 @@ export function LeaderboardScreen({
   const [seasons, setSeasons] = useState<string[]>([]);
   const [rows, setRows] = useState<BoardRow[] | null>(null);
   const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
+    let active = true;
     api
       .seasons()
       .then((r) => {
+        if (!active) return;
         const ids = Array.from(new Set([r.current, ...r.seasons.map((s) => s.id)]));
         setSeasons(ids);
         setSeason((s) => s || r.current);
       })
-      .catch(() => setError(true));
-  }, []);
+      .catch(() => { if (active) setError(true); });
+    return () => { active = false; };
+  }, [retry]);
 
   useEffect(() => {
     if (!season) return;
@@ -44,7 +48,7 @@ export function LeaderboardScreen({
       .then((r) => { if (active) setRows(r.rows); })
       .catch(() => { if (active) setError(true); });
     return () => { active = false; };
-  }, [board, season]);
+  }, [board, season, retry]);
 
   const titleName = (id: string) => {
     const tt = content.titles.find((x) => x.id === id);
@@ -52,7 +56,7 @@ export function LeaderboardScreen({
   };
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
+    <main className="collection-screen mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
       <ScreenTitle title={t('leaderboard.title')} />
       <div className="mb-2">
         {seasons.length > 0 && board !== 'daily' && (
@@ -83,7 +87,10 @@ export function LeaderboardScreen({
           </button>
         ))}
       </div>
-      {error && <p className="text-center text-danger">{t('leaderboard.error')}</p>}
+      {error && <div className="grid justify-items-center gap-2" role="status">
+        <p>{t('leaderboard.error')}</p>
+        <Button tone="paper" onClick={() => { setError(false); setRetry(n => n + 1); }}>โหลดอันดับอีกครั้ง</Button>
+      </div>}
       {!error && rows === null && <p role="status" className="text-center">กำลังโหลดอันดับ…</p>}
       {rows?.length === 0 && <p className="text-center text-ink-soft">{t('leaderboard.empty')}</p>}
       <ol className="flex flex-col gap-2 pb-24">
