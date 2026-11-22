@@ -1,0 +1,143 @@
+.popup-button.game-button {
+  --popup-fill: #e9fb77;
+  --popup-surface: #f6ffa5;
+  --popup-edge: #242035;
+  --popup-shadow: #181324;
+  --popup-text: #262035;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 13px;
+  border: 2px solid var(--popup-edge);
+  border-radius: 12px;
+  background: linear-gradient(165deg, var(--popup-surface), var(--popup-fill) 70%);
+  box-shadow: 0 3px 0 var(--popup-shadow);
+  color: var(--popup-text);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.popup-button--secondary.game-button {
+  --popup-fill: #e9e0ee;
+  --popup-surface: #fffaf0;
+  --popup-edge: #75667e;
+  --popup-shadow: #66596d;
+}
+
+.popup-button--danger.game-button {
+  --popup-fill: #e97990;
+  --popup-surface: #ffa9ae;
+  --popup-edge: #4a283d;
+  --popup-shadow: #4a283d;
+}
+
+.popup-button--dark.game-button {
+  --popup-fill: #322d42;
+  --popup-surface: #454057;
+  --popup-edge: #8f809e;
+  --popup-shadow: #130f1b;
+  --popup-text: #fff3e7;
+}
+
+.popup-button.game-button:hover:not(:disabled) {
+  box-shadow: 0 5px 0 var(--popup-shadow);
+}
+
+.popup-button.game-button:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--popup-shadow);
+}
+
+.popup-button.game-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.popup-button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 23px;
+  height: 23px;
+  border-radius: 7px;
+  background: #32254416;
+  font-size: 1.05rem;
+}
+
+.popup-close.game-button {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid #88758b;
+  border-radius: 11px;
+  background: #eee4ee;
+  color: #402e48;
+  box-shadow: 0 2px 0 #6d5a72;
+}
+
+.popup-close.game-button:hover {
+  background: #ffe3ec;
+  box-shadow: 0 3px 0 #6d5a72;
+}
+
+.audio-panel .popup-close {
+  border-color: #8f809e;
+  background: #40354c;
+  color: #fff3e7;
+  box-shadow: 0 2px 0 #130f1b;
+}
+
+.audio-panel .popup-close:hover {
+  background: #514461;
+}
+
+.popup-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.popup-badge {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #d3adbe;
+  border-radius: 12px;
+  background: #ffe3ee;
+}
+
+.popup-action-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.confirm-popup {
+  margin: auto;
+  width: min(420px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: clamp(16px, 4vw, 24px);
+  border: 2px solid #392741;
+  border-radius: 20px;
+  background: #fbf3e2;
+  color: #302332;
+  box-shadow:
+    0 6px 0 #181324,
+    0 20px 60px #08040dc0;
+}
+
+.confirm-popup::backdrop {
+  background: #0e0a18ad;
+  backdrop-filter: blur(4px);
+}

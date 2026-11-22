@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Action, GameState, ScamMethod } from '@hts/shared';
 import {
   activeFestivals,
@@ -12,6 +13,7 @@ import {
 import { content } from '@hts/shared/data';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, Panel, ScreenTitle } from '../components/ui';
+import { ConfirmPopup } from '../components/PopupControls';
 
 interface PhaseProps {
   state: GameState;
@@ -167,15 +169,26 @@ export function PlanPhase({ state, dispatch }: PhaseProps) {
 }
 
 export function RetireButton({ dispatch }: { dispatch: PhaseProps['dispatch'] }) {
+  const [confirmRetire, setConfirmRetire] = useState(false);
   return (
-    <Button
-      tone="paper"
-      onClick={() => {
-        if (window.confirm(t('plan.retireConfirm'))) dispatch({ t: 'retire' });
-      }}
-    >
-      {t('plan.retire')}
-    </Button>
+    <>
+      <Button tone="paper" onClick={() => setConfirmRetire(true)}>
+        {t('plan.retire')}
+      </Button>
+      {confirmRetire && (
+        <ConfirmPopup
+          title={t('plan.retire')}
+          description={t('plan.retireConfirm')}
+          confirmLabel="ยืนยันเกษียณ"
+          icon="icon:medal"
+          onCancel={() => setConfirmRetire(false)}
+          onConfirm={() => {
+            setConfirmRetire(false);
+            dispatch({ t: 'retire' });
+          }}
+        />
+      )}
+    </>
   );
 }
 

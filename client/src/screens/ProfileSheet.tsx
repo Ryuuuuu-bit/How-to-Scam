@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { GoogleButton } from '../net/GoogleButton';
 import { useAuth } from '../net/auth';
 import { t } from '../i18n';
-import { Button } from '../components/ui';
+import { PopupButton, PopupClose, ConfirmPopup } from '../components/PopupControls';
 
 /** แผ่นโปรไฟล์: ชื่อ UID ผูก Google ออกจากระบบ */
 export function ProfileSheet({ onClose }: { onClose: () => void }) {
@@ -10,17 +10,25 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
   const user = auth.user;
   const [name, setName] = useState(user?.displayName ?? '');
   const [saving, setSaving] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   if (!user) return null;
+  const logout = () => {
+    auth.logout();
+    onClose();
+  };
   return (
     <div
       className="fixed inset-0 z-40 flex items-end justify-center bg-ink/40 p-3"
       onClick={onClose}
     >
       <div
-        className="anim-rise-in flex w-full max-w-md flex-col gap-3 rounded-3xl border-[3px] border-ink bg-paper p-4 text-ink shadow-pop"
+        className="anim-rise-in flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col gap-3 overflow-y-auto rounded-3xl border-[3px] border-ink bg-paper p-4 text-ink shadow-pop"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-semibold">{t('profile.title')}</h2>
+        <header className="popup-heading">
+          <h2 className="text-xl font-semibold">{t('profile.title')}</h2>
+          <PopupClose label="ปิดโปรไฟล์" onClick={onClose} />
+        </header>
         <div className="flex items-center gap-3">
           {user.avatarUrl ? (
             <img
@@ -53,9 +61,8 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
               onChange={(e) => setName(e.target.value)}
               className="min-w-0 flex-1 rounded-xl border-2 border-ink bg-white px-3 py-2 font-normal text-ink"
             />
-            <Button
-              tone="mint"
-              className="px-3 py-2 text-sm"
+            <PopupButton
+              icon="✓"
               disabled={saving || name.trim().length < 2 || name.trim() === user.displayName}
               onClick={() => {
                 setSaving(true);
@@ -63,7 +70,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
               }}
             >
               {t('profile.save')}
-            </Button>
+            </PopupButton>
           </div>
         </label>
         {user.kind === 'guest' && auth.googleClientId && (
@@ -77,21 +84,28 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
           </div>
         )}
         <div className="grid grid-cols-2 gap-3">
-          <Button
-            tone="paper"
+          <PopupButton
+            variant="secondary"
+            icon="↗"
             onClick={() => {
-              if (user.kind === 'google' || window.confirm(t('profile.logoutGuestWarn'))) {
-                auth.logout();
-                onClose();
-              }
+              if (user.kind === 'google') logout();
+              else setConfirmLogout(true);
             }}
           >
             {t('profile.logout')}
-          </Button>
-          <Button tone="pink" onClick={onClose}>
-            {t('profile.close')}
-          </Button>
+          </PopupButton>
+          <PopupButton onClick={onClose}>{t('profile.close')}</PopupButton>
         </div>
+        {confirmLogout && (
+          <ConfirmPopup
+            title={t('profile.logout')}
+            description={t('profile.logoutGuestWarn')}
+            confirmLabel="ยืนยันออกจากระบบ"
+            icon="icon:profile"
+            onCancel={() => setConfirmLogout(false)}
+            onConfirm={logout}
+          />
+        )}
       </div>
     </div>
   );

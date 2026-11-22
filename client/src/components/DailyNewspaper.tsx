@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { dailyArticles, markPaperRead, paperWasRead } from '../game/newspaper';
-import { Art, Button } from './ui';
+import { Art } from './ui';
+import { PopupButton, PopupClose } from './PopupControls';
 
 export function DailyNewspaper({
   state,
@@ -68,14 +69,7 @@ export function DailyNewspaper({
               เดลี่ต้มตุ๋น
             </h2>
           </div>
-          <button
-            type="button"
-            onClick={close}
-            aria-label="ปิดหนังสือพิมพ์"
-            className="rounded-full border-2 border-ink px-3 py-2"
-          >
-            ✕
-          </button>
+          <PopupClose label="ปิดหนังสือพิมพ์" onClick={close} />
         </div>
         {article && (
           <article className="py-4">
@@ -115,9 +109,9 @@ export function DailyNewspaper({
             </p>
           </article>
         )}
-        <Button block tone="sun" onClick={close}>
+        <PopupButton icon="✓" className="w-full" onClick={close}>
           อ่านแล้ว เล่นต่อ
-        </Button>
+        </PopupButton>
       </dialog>
     </>
   );

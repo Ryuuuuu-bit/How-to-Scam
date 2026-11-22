@@ -7,6 +7,7 @@ import { useAuth } from '../net/auth';
 import { loadCosmetics, menuScenes } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
 import { HowToPlay } from './HowToPlay';
+import { ConfirmPopup } from '../components/PopupControls';
 
 export function MainMenu({
   saved,
@@ -28,6 +29,7 @@ export function MainMenu({
   onWardrobe: () => void;
 }) {
   const [help, setHelp] = useState(false);
+  const [confirmNewRun, setConfirmNewRun] = useState(false);
   const helpButton = useRef<HTMLButtonElement>(null);
   const { user, status } = useAuth();
   const cosmetics = loadCosmetics(progressFor(user), user?.uid);
@@ -79,7 +81,8 @@ export function MainMenu({
               tone="sun"
               block
               onClick={() => {
-                if (!saved || window.confirm(t('menu.abandonConfirm'))) onNew();
+                if (saved) setConfirmNewRun(true);
+                else onNew();
               }}
             >
               {t('menu.newRun')} <span aria-hidden>↗</span>
@@ -168,6 +171,19 @@ export function MainMenu({
         <span>เรื่องแต่งทั้งหมด · ความเสี่ยงในเกมเท่านั้น</span>
         <p>{t('app.disclaimer')}</p>
       </footer>
+      {confirmNewRun && (
+        <ConfirmPopup
+          title={t('menu.newRun')}
+          description={t('menu.abandonConfirm')}
+          confirmLabel="ยืนยันเริ่มใหม่"
+          icon="icon:day"
+          onCancel={() => setConfirmNewRun(false)}
+          onConfirm={() => {
+            setConfirmNewRun(false);
+            onNew();
+          }}
+        />
+      )}
     </main>
   );
 }

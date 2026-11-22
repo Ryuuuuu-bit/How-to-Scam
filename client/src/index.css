@@ -525,12 +525,6 @@ button {
   justify-content: space-between;
   margin-bottom: 20px;
 }
-.audio-heading button {
-  width: 32px;
-  height: 32px;
-  background: #ffffff10;
-  border-radius: 8px;
-}
 .audio-panel label {
   display: flex;
   justify-content: space-between;
@@ -547,14 +541,6 @@ button {
   font-size: 11px;
   line-height: 1.7;
   margin-top: 14px;
-}
-.sound-mute {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ffffff30;
-  min-height: 42px;
-  margin-top: 12px;
-  font-size: 13px;
 }
 @media (min-width: 900px) {
   .play-shell .scene-backdrop {

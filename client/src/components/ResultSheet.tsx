@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { ResultLine } from '../game/results';
 import { t } from '../i18n';
-import { Art, Button } from './ui';
+import { Art } from './ui';
+import { PopupButton } from './PopupControls';
 
 const toneBg = { good: 'bg-[#e6fbf5]', bad: 'bg-[#ffe9ea]', neutral: 'bg-white' } as const;
 
@@ -64,9 +65,9 @@ export function ResultSheet({ lines, onClose }: { lines: ResultLine[]; onClose: 
             </div>
           ))}
         </div>
-        <Button tone="sun" block className="mt-3" onClick={onClose} autoFocus>
+        <PopupButton icon="→" className="mt-4 w-full" onClick={onClose} autoFocus>
           {t('result.continue')}
-        </Button>
+        </PopupButton>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { audio } from '../audio/audio';
 import { Art } from './ui';
+import { PopupButton, PopupClose } from './PopupControls';
 
 export function AudioControls() {
   const [settings, setSettings] = useState(audio.settings);
   const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const click = (event: MouseEvent) => {
       void audio.unlock().then(() => {
@@ -30,9 +32,14 @@ export function AudioControls() {
     setSettings(next);
     audio.update(next);
   };
+  const close = () => {
+    setOpen(false);
+    trigger.current?.focus();
+  };
   return (
     <aside className="audio-controls" aria-label="ตั้งค่าเสียง">
       <button
+        ref={trigger}
         className="audio-toggle"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
@@ -43,12 +50,16 @@ export function AudioControls() {
         <span>เสียง</span>
       </button>
       {open && (
-        <div className="audio-panel" id="sound-settings">
+        <div
+          className="audio-panel"
+          id="sound-settings"
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') close();
+          }}
+        >
           <div className="audio-heading">
             เสียงในเมือง
-            <button onClick={() => setOpen(false)} aria-label="ปิดตั้งค่าเสียง">
-              ×
-            </button>
+            <PopupClose label="ปิดตั้งค่าเสียง" onClick={close} />
           </div>
           <label htmlFor="music-volume">
             เพลงประกอบ <span>{Math.round(settings.music * 100)}%</span>
@@ -74,13 +85,15 @@ export function AudioControls() {
             value={settings.effects}
             onChange={(e) => update({ ...settings, effects: Number(e.target.value) })}
           />
-          <button
-            className="sound-mute"
+          <PopupButton
+            variant="dark"
+            icon={<Art id={settings.muted ? 'icon:volume' : 'icon:volume_off'} size={19} />}
+            className="mt-3 w-full"
             aria-pressed={settings.muted}
             onClick={() => update({ ...settings, muted: !settings.muted })}
           >
             {settings.muted ? 'เปิดเสียงทั้งหมด' : 'ปิดเสียงทั้งหมด'}
-          </button>
+          </PopupButton>
           <p>เพลงจะเริ่มเมื่อกดเล่น และพักเมื่อออกจากแท็บ</p>
         </div>
       )}
