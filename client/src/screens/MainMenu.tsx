@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Run } from '../game/useGame';
 import { t } from '../i18n';
-import { Button } from '../components/ui';
+import { Art, Button } from '../components/ui';
 import { sceneUrl } from '../assets/art';
 import { useAuth } from '../net/auth';
 import { loadCosmetics, menuScenes } from '../game/cosmetics';
@@ -74,11 +74,17 @@ export function MainMenu({
             </Button>
             {onDaily && (
               <Button tone="pink" block onClick={onDaily}>
-                🗓️ {t('menu.daily')}
+                <span className="flex items-center gap-2">
+                  <Art id="icon:day" size={25} className="shrink-0" />
+                  {t('menu.daily')}
+                </span>
               </Button>
             )}
             <Button tone="grape" block disabled={!onLeaderboard} onClick={onLeaderboard}>
-              🏆 {onLeaderboard ? t('menu.leaderboard') : t('menu.leaderboardSoon')}
+              <span className="flex items-center gap-2">
+                <Art id="icon:trophy" size={25} className="shrink-0" />
+                {onLeaderboard ? t('menu.leaderboard') : t('menu.leaderboardSoon')}
+              </span>
             </Button>
             {user && onProfile && (
               <button
@@ -86,8 +92,9 @@ export function MainMenu({
                 onClick={onProfile}
                 className="flex items-center justify-between gap-2 rounded-2xl border-2 border-ink bg-white px-3 py-2 text-left text-sm text-ink"
               >
-                <span className="truncate">
-                  👤 <b>{user.displayName}</b>
+                <span className="flex min-w-0 items-center gap-2">
+                  <Art id="icon:profile" size={22} className="shrink-0" />
+                  <b className="truncate">{user.displayName}</b>
                 </span>
                 <span className="font-mono text-xs text-ink-soft">UID {user.shortId}</span>
               </button>
@@ -99,11 +106,18 @@ export function MainMenu({
             )}
             {onAchievements && (
               <Button tone="paper" block onClick={onAchievements}>
-                🎖️ {t('menu.achievements')}
+                <span className="flex items-center gap-2">
+                  <Art id="icon:medal" size={25} className="shrink-0" />
+                  {t('menu.achievements')}
+                </span>
               </Button>
             )}
             <Button tone="paper" block onClick={onWardrobe}>
-              ห้องแต่งตัวและฉากเมนู <span aria-hidden>↗</span>
+              <span className="flex items-center gap-2">
+                <Art id="icon:wardrobe" size={25} className="shrink-0" />
+                ห้องแต่งตัวและฉากเมนู
+              </span>
+              <span aria-hidden>↗</span>
             </Button>
             <Button tone="paper" block onClick={() => setHelp(!help)} aria-expanded={help}>
               วิธีเล่น <span aria-hidden>{help ? '−' : '+'}</span>

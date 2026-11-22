@@ -517,10 +517,6 @@ button {
   font-size: 12px;
   box-shadow: 0 3px 0 #070a10;
 }
-.audio-toggle > span:first-child {
-  font-size: 20px;
-  line-height: 1;
-}
 .audio-panel {
   position: absolute;
   right: 0;
@@ -720,7 +716,7 @@ button {
   .hud-money > div {
     padding-block: 2px;
   }
-  .hud-money img {
+  .hud-money :is(img, svg) {
     width: 22px;
     height: 22px;
   }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { audio } from '../audio/audio';
+import { Art } from './ui';
 
 export function AudioControls() {
   const [settings, setSettings] = useState(audio.settings);
@@ -38,7 +39,7 @@ export function AudioControls() {
         aria-controls="sound-settings"
         aria-label="ตั้งค่าเสียงเพลงและเอฟเฟกต์"
       >
-        <span aria-hidden>{settings.muted ? '♪ ×' : '♫'}</span>
+        <Art id={settings.muted ? 'icon:volume_off' : 'icon:volume'} size={24} />
         <span>เสียง</span>
       </button>
       {open && (

@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { ART } from '../assets/art';
+import { renderGameIcon } from './GameIcon';
 
 type Tone = 'pink' | 'mint' | 'sun' | 'grape' | 'paper' | 'danger';
 
@@ -68,6 +69,8 @@ export function Art({
   size?: number;
   className?: string;
 }) {
+  const icon = renderGameIcon(id, size, className);
+  if (icon) return icon;
   const art = ART[id];
   if (art?.src) {
     return (
