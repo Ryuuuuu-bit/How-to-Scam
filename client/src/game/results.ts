@@ -107,6 +107,36 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
         art: r.kind === 'missionFail' ? 'icon:cooldown' : 'icon:clean',
       };
     }
+    case 'baited':
+      return {
+        tone: 'bad',
+        title: t('result.baited'),
+        body: t('result.baitedBody', { n: fmt(-(r.dirtyCash ?? 0)) }),
+        art: 'icon:baitback',
+      };
+    case 'sting':
+      return {
+        tone: 'bad',
+        title: t('result.sting'),
+        body: t('result.stingBody', { n: r.heat ?? 0 }),
+        art: 'icon:undercover',
+      };
+    case 'hangup':
+      return r.success
+        ? {
+            tone: 'good',
+            title: t('result.hangupTrap'),
+            body: t('result.hangupTrapBody', {
+              who: r.textKey === 'baiter' ? t('result.whoBaiter') : t('result.whoUndercover'),
+            }),
+            art: r.textKey === 'baiter' ? 'icon:baitback' : 'icon:undercover',
+          }
+        : {
+            tone: 'neutral',
+            title: t('result.hangupNormal'),
+            body: t('result.hangupNormalBody'),
+            art: 'icon:rest',
+          };
     case 'escape':
       return {
         tone: r.success ? 'good' : 'bad',

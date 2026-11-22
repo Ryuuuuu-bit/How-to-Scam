@@ -253,7 +253,12 @@ export interface VictimParts {
   names: LocalizedText[];
   jobs: { text: LocalizedText; wealth: number; age: Range }[];
   traits: Record<Weakness, LocalizedText[]>;
+  /** ประโยคพิรุธ: เหยื่อหลอกกลับ / ตำรวจปลอมตัว / หลอกให้ระแวงเล่น (เหยื่อธรรมดา) */
+  tells: Record<CallerTell, LocalizedText[]>;
 }
+
+export type CallerKind = 'normal' | 'baiter' | 'undercover';
+export type CallerTell = 'baiter' | 'undercover' | 'herring';
 
 export interface Pitch {
   id: PitchId;
@@ -319,7 +324,22 @@ export interface GameConfig {
   /** น้ำหนักจำนวนเหตุการณ์ต่อวัน [0 อย่าง, 1 อย่าง, 2 อย่าง] */
   eventCountWeights: readonly [number, number, number];
   launderOfferSize: number;
-  callCenter: { matchSuccessPct: number; missSuccessPct: number; failHeat: number };
+  callCenter: {
+    matchSuccessPct: number;
+    missSuccessPct: number;
+    failHeat: number;
+    /** โอกาสเจอคนหลอกกลับ */
+    baiterPct: number;
+    /** โอกาสเจอตำรวจปลอมตัว = base + perHeat10 × (Heat/10) */
+    undercoverBasePct: number;
+    undercoverPerHeat10: number;
+    /** เหยื่อธรรมดาที่พูดแปลกๆ ให้ระแวงเล่น */
+    herringPct: number;
+    /** โดนหลอกกลับ เสีย % ของเงินสกปรก (ขั้นต่ำ) */
+    baiterLossPct: number;
+    baiterLossMin: number;
+    undercoverHeat: number;
+  };
   romance: { bondIncomePct: number; maxBond: number; fleeAfterIdleDays: number };
   foundation: {
     viralPct: number;
@@ -365,6 +385,7 @@ export type AchievementRule =
   | { kind: 'seenEvent'; eventId: EventId }
   | { kind: 'characterWin'; characterId: CharacterId }
   | { kind: 'escapes'; min: number }
+  | { kind: 'flag'; flag: string }
   | { kind: 'dirtyHoarder'; min: number }
   | { kind: 'runs'; min: number }
   | { kind: 'daily' };
@@ -447,6 +468,9 @@ export interface EscapeConfig {
   qtePerHit: number;
   /** หนีรอดมาแล้วกี่ครั้ง ครั้งต่อไปยากขึ้น % ต่อครั้ง */
   repeatPenalty: number;
+  /** มอบตัว: เก็บเงินสะอาดได้ % และได้กรรมดี */
+  surrenderKeepPct: number;
+  surrenderKarma: number;
 }
 
 export interface GameContent {

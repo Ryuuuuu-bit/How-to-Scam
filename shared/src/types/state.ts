@@ -1,4 +1,6 @@
 import type {
+  CallerKind,
+  CallerTell,
   CardId,
   CharacterId,
   DangerSignId,
@@ -54,6 +56,10 @@ export interface CallVictim {
   age: number;
   weakness: Weakness;
   wealth: number;
+  /** คนจริงๆ ที่อยู่ปลายสาย (ไม่ส่งให้ UI รู้ก่อน — UI เห็นแค่ tell) */
+  kind?: CallerKind;
+  /** ประโยคพิรุธที่ได้ยิน */
+  tell?: { kind: CallerTell; idx: number };
 }
 
 export interface CallState {
@@ -111,7 +117,10 @@ export interface LastResult {
     | 'news'
     | 'offer'
     | 'missionDone'
-    | 'missionFail';
+    | 'missionFail'
+    | 'baited'
+    | 'sting'
+    | 'hangup';
   textKey?: string;
   dirtyCash?: number;
   cleanCash?: number;
@@ -187,6 +196,7 @@ export type Action =
   | { t: 'acceptOffer' }
   | { t: 'confirmInvest' }
   | { t: 'callPitch'; pitchId: PitchId }
+  | { t: 'callHangup' }
   | { t: 'eventChoice'; choiceIdx: number }
   | { t: 'launder'; cardId: CardId | null }
   | { t: 'buy'; itemId: ShopItemId }
@@ -196,6 +206,7 @@ export type Action =
   | { t: 'escapeEvent'; choiceIdx: number }
   | { t: 'escapeBribe'; pay: boolean }
   | { t: 'escapeQte'; hits: number }
+  | { t: 'escapeSurrender' }
   | { t: 'retire' };
 
 export type PublicGameState = Omit<GameState, 'karma' | 'rng'>;

@@ -6,6 +6,7 @@ import { config } from './config';
 import { dangerSigns } from './dangerSigns';
 import { endings } from './endings';
 import { characterEvents } from './events/characters';
+import { cyberEvents } from './events/cyber';
 import { karmaEvents } from './events/karma';
 import { newsEvents } from './events/news';
 import { seasonalEvents } from './events/seasonal';
@@ -35,6 +36,7 @@ export const content: GameContent = {
     ...storyEvents,
     ...seasonalEvents,
     ...newsEvents,
+    ...cyberEvents,
   ],
   characters,
   shopItems,

@@ -43,12 +43,20 @@ SHEETS = {
         "route--market", "icon--bribe", "icon--undercover", "icon--sting",
         "icon--baitback", "icon--fakenews", "icon--wardrobe", "icon--reform",
     ]),
+    "sheet-skins": (3, 2, [
+        "skin--ex_insurance_gold", "skin--gamer_kid_pro", "skin--temple_kid_fair",
+        "skin--live_seller_idol", "skin--phone_tech_hacker", "skin--orange_cat_boss",
+    ]),
+    "sheet-newsphotos": (4, 2, [
+        "newsphoto--fake_shop", "newsphoto--romance", "newsphoto--call_center", "newsphoto--foundation",
+        "newsphoto--merit", "newsphoto--gambling", "newsphoto--ponzi", "newsphoto--escape",
+    ]),
     "sheet-victims": (3, 2, [
         "victim--v_somsri", "victim--v_tong", "victim--v_boonma",
         "victim--v_praewa", "victim--v_kong", "victim--v_mali",
     ]),
 }
-SPRITE_MAX = {"sheet-characters": 360, "sheet-characters-2": 360, "sheet-victims": 256}
+SPRITE_MAX = {"sheet-characters": 360, "sheet-characters-2": 360, "sheet-victims": 256, "sheet-skins": 360, "sheet-newsphotos": 320}
 
 
 def remove_white_bg(img: Image.Image, tol: int = 38) -> Image.Image:

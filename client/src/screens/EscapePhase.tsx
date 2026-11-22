@@ -46,6 +46,15 @@ export function EscapePhase({ state, dispatch }: Props) {
       {e.step === 'event' && <EventStep state={state} dispatch={dispatch} />}
       {e.step === 'bribe' && <BribeStep state={state} dispatch={dispatch} />}
       {e.step === 'qte' && <QteStep state={state} dispatch={dispatch} />}
+      <button
+        type="button"
+        className="mx-auto mt-1 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-sm font-semibold text-ink shadow-pop-sm"
+        onClick={() => {
+          if (window.confirm(t('escape.surrenderConfirm'))) dispatch({ t: 'escapeSurrender' });
+        }}
+      >
+        🙇 {t('escape.surrender')}
+      </button>
     </div>
   );
 }

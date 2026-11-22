@@ -37,6 +37,8 @@ function ruleMet(r: AchievementRule, s: GameState, t: PlayerTotals, c: GameConte
       return s.seenEvents.includes(r.eventId);
     case 'characterWin':
       return s.characterId === r.characterId && end.reason === 'survived';
+    case 'flag':
+      return s.flags.includes(r.flag);
     case 'escapes':
       return s.escapes >= r.min;
     case 'dirtyHoarder':

@@ -255,6 +255,7 @@ export function CallPhase({ state, dispatch }: PhaseProps) {
   const reveal = perksOfKind(state, content, 'revealWeakness').some((p) =>
     p.weaknesses.includes(v.weakness),
   );
+  const tell = v.tell ? parts.tells[v.tell.kind][v.tell.idx] : undefined;
   return (
     <>
       <ScreenTitle title={t('phase.call')} hint={t('call.hint')} />
@@ -269,6 +270,11 @@ export function CallPhase({ state, dispatch }: PhaseProps) {
           {reveal && (
             <div className="mt-1 inline-block rounded-full border-2 border-ink bg-grape px-2 text-xs font-semibold text-white">
               🔮 {t('call.reveal', { w: t(`weakness.${v.weakness}`) })}
+            </div>
+          )}
+          {tell && (
+            <div className="mt-2 rounded-xl border-2 border-dashed border-ink bg-paper px-2 py-1 text-xs">
+              <span className="font-semibold text-danger">👂 {t('call.tell')}:</span> {lt(tell)}
             </div>
           )}
         </div>
@@ -289,6 +295,9 @@ export function CallPhase({ state, dispatch }: PhaseProps) {
             </button>
           );
         })}
+        <Button tone="paper" block onClick={() => dispatch({ t: 'callHangup' })}>
+          📵 {t('call.hangup')}
+        </Button>
       </div>
     </>
   );

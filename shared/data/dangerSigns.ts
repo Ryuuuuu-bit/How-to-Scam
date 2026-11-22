@@ -4,6 +4,14 @@ import type { DangerSign } from '../src/types/content';
 // ใช้สอนวิธีสังเกตมิจฉาชีพแบบที่เกิดขึ้นในรอบนั้น
 export const dangerSigns: DangerSign[] = [
   {
+    id: 'ds_recovery_scam',
+    triggers: { events: ['romance_reverse', 'baiter_stream', 'cyber_deal'] },
+    title: { th: 'แก๊งรับทวงเงินคืน และตำรวจปลอม' },
+    body: {
+      th: 'คนที่เคยโดนหลอกมักโดนซ้ำจากคนที่อ้างว่า "ช่วยตามเงินคืนได้" แล้วขอค่าดำเนินการก่อน หน่วยงานจริงไม่เรียกเก็บเงินเพื่อตามเงินคืน ถ้าโดนหลอกให้แจ้งธนาคารทันทีเพื่ออายัดบัญชี แล้วแจ้งความผ่านช่องทางทางการของตำรวจไซเบอร์ หรือโทรสายด่วนของตำรวจที่ประกาศอย่างเป็นทางการ',
+    },
+  },
+  {
     id: 'ds_fake_shop',
     triggers: { methods: ['fake_shop'], events: ['viral_fake_review', 'customer_mob'] },
     title: { th: 'ร้านออนไลน์ถูกเกินจริง' },

@@ -117,9 +117,18 @@ export function escapeQte(s: GameState, c: GameContent, rng: Rng, hits: number):
   return false;
 }
 
-/** โดนจับ: เงินสกปรกถูกยึดหมด เงินสะอาดเหลือตาม config (50%) */
+/** มอบตัว (ทำได้ทุกขั้นของโหมดหนี): จบรอบแบบโดนจับ แต่เก็บเงินได้มากกว่าและได้กรรมดี */
+export function escapeSurrender(s: GameState, c: GameContent): void {
+  if (!s.flags.includes('surrendered')) s.flags.push('surrendered');
+  s.karma += c.config.escape.surrenderKarma;
+}
+
+/** โดนจับ: เงินสกปรกถูกยึดหมด เงินสะอาดเหลือตาม config (50%, มอบตัว 80%) */
 export function applyCaught(s: GameState, c: GameContent): void {
   s.escape = null;
   s.dirtyCash = 0;
-  s.cleanCash = Math.round((s.cleanCash * c.config.caughtCleanKeepPct) / 100);
+  const keep = s.flags.includes('surrendered')
+    ? c.config.escape.surrenderKeepPct
+    : c.config.caughtCleanKeepPct;
+  s.cleanCash = Math.round((s.cleanCash * keep) / 100);
 }

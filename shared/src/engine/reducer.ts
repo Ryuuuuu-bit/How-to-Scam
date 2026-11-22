@@ -2,6 +2,7 @@ import type { EndReason, GameContent } from '../types/content';
 import type { Action, GameState } from '../types/state';
 import {
   buy,
+  callHangup,
   callPitch,
   choosePlan,
   confirmInvest,
@@ -20,6 +21,7 @@ import {
   escapeEvent,
   escapeQte,
   escapeRoute,
+  escapeSurrender,
 } from './escape';
 import { HEAT_MAX } from './effects';
 import { launder } from './launder';
@@ -128,6 +130,10 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       expectPhase(s, 'call');
       callPitch(s, c, rng, action.pitchId);
       break;
+    case 'callHangup':
+      expectPhase(s, 'call');
+      callHangup(s, c, rng);
+      break;
     case 'eventChoice':
       expectPhase(s, 'event');
       resolveEventChoice(s, c, rng, action.choiceIdx);
@@ -166,6 +172,11 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
     case 'escapeQte':
       expectPhase(s, 'escape');
       if (escapeQte(s, c, rng, action.hits)) finish(s, c, rng, 'caught');
+      break;
+    case 'escapeSurrender':
+      expectPhase(s, 'escape');
+      escapeSurrender(s, c);
+      finish(s, c, rng, 'caught');
       break;
     case 'retire':
       expectPhase(s, 'plan', 'shop');

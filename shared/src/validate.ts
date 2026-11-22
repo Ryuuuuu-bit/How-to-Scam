@@ -185,6 +185,9 @@ export function validateContent(c: GameContent): string[] {
   for (const w of weaknesses) {
     if ((c.victimParts.traits[w] ?? []).length === 0) errors.push(`no victim trait for ${w}`);
   }
+  for (const k of ['baiter', 'undercover', 'herring'] as const) {
+    if ((c.victimParts.tells[k] ?? []).length === 0) errors.push(`no caller tell for ${k}`);
+  }
   if (c.victimParts.names.length === 0 || c.victimParts.jobs.length === 0) {
     errors.push('victim parts need names and jobs');
   }

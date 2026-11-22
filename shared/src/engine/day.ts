@@ -193,6 +193,7 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
       c.pitches.filter((p) => p.weakness !== victim.weakness),
       2,
     );
+    rollCaller(s, c, rng, victim);
     s.call = { victim, pitchIds: rng.sample([match, ...others], 3).map((p) => p.id) };
     s.phase = 'call';
     return;
@@ -251,6 +252,36 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
 }
 
 /** มินิเกมคอลเซ็นเตอร์: เลือกมุก 1 ใน 3 */
+/** ปลายสายเป็นใครกันแน่: เหยื่อธรรมดา / คนหลอกกลับ / ตำรวจไซเบอร์ปลอมตัว */
+function rollCaller(s: GameState, c: GameContent, rng: Rng, v: CallVictim): void {
+  const cfg = c.config.callCenter;
+  const undercoverPct = cfg.undercoverBasePct + (cfg.undercoverPerHeat10 * s.heat) / 10;
+  const roll = rng.next() * 100;
+  v.kind =
+    roll < undercoverPct
+      ? 'undercover'
+      : roll < undercoverPct + cfg.baiterPct
+        ? 'baiter'
+        : 'normal';
+  const tells = c.victimParts.tells;
+  if (v.kind !== 'normal') {
+    v.tell = { kind: v.kind, idx: rng.int(0, tells[v.kind].length - 1) };
+  } else if (rng.chance(cfg.herringPct)) {
+    v.tell = { kind: 'herring', idx: rng.int(0, tells.herring.length - 1) };
+  }
+}
+
+/** วางสายใส่ — ไม่ได้เงิน ไม่เพิ่ม Heat; วางสายเหยื่อธรรมดาได้กรรมดีนิดหน่อย */
+export function callHangup(s: GameState, c: GameContent, rng: Rng): void {
+  invariant(s.call, 'no active call');
+  const kind = s.call.victim.kind ?? 'normal';
+  if (kind !== 'normal' && !s.flags.includes('sharp_ears')) s.flags.push('sharp_ears');
+  if (kind === 'normal') s.karma += 1;
+  s.lastResults.push({ kind: 'hangup', textKey: kind, success: kind !== 'normal' });
+  s.call = null;
+  afterResolve(s, c, rng);
+}
+
 export function callPitch(s: GameState, c: GameContent, rng: Rng, pitchId: string): void {
   invariant(s.call, 'no active call');
   invariant(s.call.pitchIds.includes(pitchId), `pitch ${pitchId} not offered`);
@@ -258,6 +289,10 @@ export function callPitch(s: GameState, c: GameContent, rng: Rng, pitchId: strin
   const pitch = getPitch(c, pitchId);
   const m = getMethod(c, s.todayMethodId ?? '');
   const { matchSuccessPct, missSuccessPct, failHeat } = c.config.callCenter;
+  if (victim.kind === 'baiter' || victim.kind === 'undercover') {
+    trapCall(s, c, rng, victim.kind);
+    return;
+  }
   const matched = pitch.weakness === victim.weakness;
   const success = rng.chance(matched ? matchSuccessPct : missSuccessPct);
   const base = success ? Math.round(rng.range(m.income) * victim.wealth) : 0;
@@ -269,6 +304,28 @@ export function callPitch(s: GameState, c: GameContent, rng: Rng, pitchId: strin
   });
   s.call = null;
   applyIncome(s, c, m, base, heat, rng);
+  afterResolve(s, c, rng);
+}
+
+/** โดนหลอกกลับ หรือโดนล่อซื้อ (มุกล้วนๆ) */
+function trapCall(s: GameState, c: GameContent, rng: Rng, kind: 'baiter' | 'undercover'): void {
+  const cfg = c.config.callCenter;
+  s.call = null;
+  if (kind === 'baiter') {
+    const loss = Math.min(
+      s.dirtyCash,
+      Math.max(cfg.baiterLossMin, Math.round((s.dirtyCash * cfg.baiterLossPct) / 100)),
+    );
+    s.dirtyCash -= loss;
+    s.fame += 5;
+    if (!s.flags.includes('met_baiter')) s.flags.push('met_baiter');
+    s.lastResults.push({ kind: 'baited', dirtyCash: -loss, success: false });
+  } else {
+    s.heat += cfg.undercoverHeat;
+    clampHeat(s);
+    if (!s.flags.includes('stung')) s.flags.push('stung');
+    s.lastResults.push({ kind: 'sting', heat: cfg.undercoverHeat, success: false });
+  }
   afterResolve(s, c, rng);
 }
 

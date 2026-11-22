@@ -4,6 +4,33 @@ import type { Ending } from '../src/types/content';
 // ทุกฉากจบตามด้วยการ์ดสัญญาณอันตราย (engine เลือกให้)
 export const endings: Ending[] = [
   {
+    id: 'surrendered',
+    priority: 1,
+    when: { reasons: ['caught'], flagsAll: ['surrendered'] },
+    title: { th: 'เดินเข้าไปมอบตัวเอง' },
+    body: {
+      th: 'คุณถอดแว่นดำ วางซิมทั้งกล่องบนโต๊ะร้อยเวร แล้วขอให้ช่วยคืนเงินเหยื่อให้มากที่สุด ร้อยเวรยื่นน้ำเปล่าให้หนึ่งแก้ว บอกว่า "นานๆ จะเจอแบบนี้ที"',
+    },
+  },
+  {
+    id: 'whistleblower',
+    priority: 2,
+    when: { flagsAll: ['informant', 'gang_busted'], karma: [5, 9999] },
+    title: { th: 'พยานปากเอก "ข้าวมันไก่"' },
+    body: {
+      th: 'แก๊งต่างประเทศโดนจับยกรัง เหยื่อหลายร้อยคนได้เงินคืน คุณได้ลดโทษ และได้งานใหม่เป็นวิทยากรเตือนภัยที่ต้องใส่หน้ากากไก่ขึ้นเวทีทุกครั้ง',
+    },
+  },
+  {
+    id: 'scam_hunter',
+    priority: 3,
+    when: { reasons: ['retired', 'survived'], flagsAll: ['met_baiter'], karma: [10, 9999] },
+    title: { th: 'ยูทูบเบอร์สายแกล้งมิจฉาชีพ' },
+    body: {
+      th: 'คนที่เคยหลอกคุณกลับกลายเป็นเพื่อนร่วมช่อง คุณรู้มุกทุกมุกเพราะเคยใช้เองมาก่อน ตอนนี้มีผู้ติดตามล้านคน และแม่ภูมิใจเป็นครั้งแรก',
+    },
+  },
+  {
     id: 'home_again',
     priority: 3,
     when: { reasons: ['retired', 'survived'], flagsAll: ['promised_family'], karma: [0, 9999] },
