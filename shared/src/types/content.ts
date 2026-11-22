@@ -106,6 +106,7 @@ export interface ChoiceRequirement {
 }
 
 export interface EventChoice {
+  interview?: 'henchman' | 'cat';
   text: LocalizedText;
   requires?: ChoiceRequirement;
   /** สุ่ม 1 ผลตามน้ำหนัก */

@@ -101,6 +101,8 @@ export function resolveEventChoice(
   applyEffects(s, c, outcome.effects, rng);
   s.pendingEvents.shift();
   s.history.at(-1)?.events.push(ev.id);
+  const log = s.history.at(-1);
+  if (log && choice.interview) log.interview = choice.interview;
   s.lastResults.push({
     kind: 'event',
     textKey: `${ev.id}:${choiceIdx}:${oi}`,

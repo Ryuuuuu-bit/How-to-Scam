@@ -49,6 +49,20 @@ function articleFor(log: DayLog, content: GameContent): DailyArticle {
     image: method ? `newsphoto:${method.id}` : 'icon:rest',
     caption: method ? method.name.th : 'วันพักของตัวเอก',
     meme: newspaperMeme(log),
+    ...(log.interview === 'henchman' && {
+      headline: 'โฆษกปากซอยยืนยัน ยังไม่ทราบว่าบริษัททำอะไร',
+      body: 'เมื่อวานคุณส่งลูกน้องออกกล้อง เขาขอให้สถานีขึ้นชื่อว่า “โฆษกประจำซอย” พอเจ๊ถามว่าบริษัททำอะไร เขาหันไปถามตากล้องอีกที คลิปดังข้ามคืน ทั้งแฟนคลับและสายตรวจกำลังตามหาเขา',
+      image: 'scene:ev_reporter_aunt',
+      caption: 'เจ๊ข่าวไวกับไมค์เจ้าปัญหา',
+      meme: null,
+    }),
+    ...(log.interview === 'cat' && {
+      headline: 'โฆษกส้มงับไมค์กลางรายการ ต้นสังกัดชี้แจงว่าถึงเวลางีบ',
+      body: 'เมื่อวานคุณอุ้มแมวส้มออกกล้อง เจ๊ถามเรื่องรายได้สามครั้ง แขกรับเชิญตอบด้วยการหาวสามที เช้านี้หน้าร้านมีปลาทูแขวนอยู่หนึ่งถุง พร้อมจดหมายขอลายอุ้งเท้า',
+      image: 'char:orange_cat',
+      caption: 'แขกรับเชิญหลังจบรายการ',
+      meme: null,
+    }),
   };
 }
 

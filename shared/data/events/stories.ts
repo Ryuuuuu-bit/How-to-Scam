@@ -239,6 +239,23 @@ export const storyEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        text: { th: 'ส่งลูกน้องที่อยากดังออกกล้อง' },
+        interview: 'henchman',
+        requires: { minHenchmen: 1 },
+        outcomes: [{
+          text: { th: 'ลูกน้องยืดอกรับไมค์ แต่สะดุดตรงคำถามว่าบริษัททำอะไร เจ๊วงคำตอบไว้ลงฉบับเช้า' },
+          effects: [{ kind: 'add', stat: 'fame', value: 12 }, { kind: 'add', stat: 'heat', value: 8 }],
+        }],
+      },
+      {
+        text: { th: 'อุ้มแมวส้มมาให้สัมภาษณ์แทน' },
+        interview: 'cat',
+        outcomes: [{
+          text: { th: 'แมวงับฟองน้ำหุ้มไมค์แล้วหลับ คนดูส่งรูปปลาทูเข้ารายการ เจ๊จองหน้าหนึ่งฉบับเช้าให้ทันที' },
+          effects: [{ kind: 'add', stat: 'fame', value: 4 }, { kind: 'add', stat: 'heat', value: -3 }],
+        }],
+      },
     ],
   },
   {

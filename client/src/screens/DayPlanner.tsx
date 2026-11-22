@@ -131,6 +131,9 @@ export function DayPlanner({
       const it = content.shopItems.find((x) => x.id === id);
       return sum + (it && !banned(id) ? priceOf(state, content, id, it.price) : 0);
     }, 0);
+  const priorCost = state.history.at(-1)?.repeatableCost;
+  const difference = priorCost === undefined ? 0 : repeatCost - priorCost;
+  const omitted = lastPlan?.items.filter(banned) ?? [];
 
   return (
     <>
@@ -204,16 +207,29 @@ export function DayPlanner({
           }
         >
           🔁 {t('planner.repeat')}{' '}
-          <span className="text-sm opacity-90">
+          <span className="block text-sm opacity-90">
             (
             {lastPlan.methodId
               ? lt(content.methods.find((m) => m.id === lastPlan.methodId)?.name ?? { th: '' })
               : t('planner.rest')}
-            {lastPlan.items.length > 0
-              ? ` + ${t('planner.items', { n: lastPlan.items.length })}`
+            {lastPlan.items.length > omitted.length
+              ? ` + ${t('planner.items', { n: lastPlan.items.length - omitted.length })}`
               : ''}
             {repeatCost > 0 ? ` · ฿${fmt(repeatCost)}` : ''})
           </span>
+          {difference !== 0 && (
+            <span className="block text-sm">
+              {difference > 0 ? 'แพงขึ้น' : 'ถูกลง'} ฿{fmt(Math.abs(difference))} จากแผนเมื่อวาน
+            </span>
+          )}
+          {omitted.length > 0 && (
+            <span className="block text-sm">
+              วันนี้งดใช้{' '}
+              {Array.from(new Set(omitted))
+                .map((id) => lt(content.shopItems.find((it) => it.id === id)?.name ?? { th: id }))
+                .join(' · ')}
+            </span>
+          )}
         </Button>
       )}
 

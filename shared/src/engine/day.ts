@@ -68,6 +68,7 @@ export function choosePlan(s: GameState, c: GameContent, methodId: string | null
   }
   s.todayMethodId = methodId;
   s.history.push({
+    repeatableCost: methodId ? getMethod(c, methodId).cost : 0,
     day: s.day,
     methodId,
     income: 0,
@@ -97,6 +98,8 @@ export function invest(s: GameState, c: GameContent, rng: Rng, itemId: string): 
   invariant(owned < item.maxStack, `${itemId} max per day reached`);
   spend(s, price);
   s.dailyItems[itemId] = owned + 1;
+  const log = s.history.at(-1);
+  if (log?.repeatableCost !== undefined) log.repeatableCost += price;
   if (item.heatNow) {
     s.heat -= item.heatNow;
     clampHeat(s);

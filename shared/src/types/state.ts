@@ -91,6 +91,8 @@ export interface MethodState {
 }
 
 export interface DayLog {
+  interview?: 'henchman' | 'cat';
+  repeatableCost?: number;
   day: number;
   methodId: MethodId | null;
   income: number;
