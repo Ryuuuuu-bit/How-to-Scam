@@ -17,6 +17,7 @@ export function isEventEligible(s: GameState, c: GameContent, ev: GameEvent): bo
 }
 
 export function conditionMet(s: GameState, c: GameContent, w: EventCondition): boolean {
+  if (w.recruit && !s.henchmen.some((h) => h.recruit === w.recruit)) return false;
   if (w.methods && (!s.todayMethodId || !w.methods.includes(s.todayMethodId))) return false;
   if (w.usedMethods && !w.usedMethods.some((m) => s.methodsUsed.includes(m))) return false;
   if (!inRange(s.heat, w.heat)) return false;

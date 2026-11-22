@@ -9,6 +9,7 @@ import { fmt, lt, t } from '../i18n';
 import { Art, Button, Panel } from '../components/ui';
 import { sceneUrl } from '../assets/art';
 import { DailyNewspaper } from '../components/DailyNewspaper';
+import { ClosingEdition } from '../components/ClosingEdition';
 
 export function EndScreen({
   state,
@@ -90,6 +91,7 @@ export function EndScreen({
       </Panel>
 
       <SubmitBanner state={submit.state} onRetry={() => void submit.retry()} />
+      <ClosingEdition state={state} />
       <DailyNewspaper state={state} />
 
       {newAch.length > 0 && (

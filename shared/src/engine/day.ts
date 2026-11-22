@@ -89,9 +89,18 @@ export function invest(s: GameState, c: GameContent, rng: Rng, itemId: string): 
   invariant(!offerBans(s, c, item.id), `${itemId} is banned today`);
   const price = priceOf(s, c, item.id, item.price);
   if (item.kind === 'henchman') {
-    invariant(s.henchmen.length < item.maxStack, 'henchman limit reached');
+    invariant(s.henchmen.length < getShopItem(c, 'henchman').maxStack, 'henchman limit reached');
+    const named = itemId === 'intern_nat' || itemId === 'host_tuk';
+    invariant(!named || !s.henchmen.some((h) => h.recruit === itemId), 'already hired');
     spend(s, price);
     addHenchman(s, rng, item.wage ?? 0, item.incomePct ?? 15);
+    const hire = s.henchmen.at(-1);
+    const log = s.history.at(-1);
+    if (named && hire) {
+      hire.recruit = itemId;
+      hire.skill = item.incomePct ?? 5;
+      if (log) (log.recruits ??= []).push(itemId);
+    }
     return;
   }
   const owned = s.dailyItems[itemId] ?? 0;
@@ -343,6 +352,10 @@ function applyIncome(
   rng: Rng,
 ): void {
   let mul = 1 + incomeBonusPct(s, c, m.id) / 100;
+  if (s.henchmen.some((h) => h.recruit === 'host_tuk')) {
+    s.fame += 2;
+    baseHeat += 1;
+  }
   for (const p of perksOfKind(s, c, 'chaos')) mul *= p.min + rng.next() * (p.max - p.min);
   const income = Math.max(0, Math.round(baseIncome * mul));
   const heat = Math.max(0, Math.round(baseHeat * (1 + heatBonusPct(s, c, m.id) / 100)));
@@ -358,6 +371,7 @@ function applyIncome(
     log.heatGained = s.heat - before;
   }
   s.lastResults.push({ kind: 'resolve', dirtyCash: income, heat: s.heat - before });
+  for (const h of s.henchmen) if (h.recruit === 'intern_nat') h.skill = Math.min(15, h.skill + 1);
 }
 
 /** วิธีที่ไม่ได้ทำวันนี้: เหยื่อหลอกรักเริ่มห่าง แชร์ลูกโซ่ขาดตอน มูลนิธิเงียบลง */

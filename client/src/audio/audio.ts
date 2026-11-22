@@ -1,4 +1,6 @@
 const effects = {
+  hire: [294, 370, 440],
+  paper: [523, 659, 587],
   click: [600, 850],
   cash: [660, 880, 1320],
   bad: [240, 180, 120],
@@ -144,35 +146,48 @@ class GameAudio {
   private schedule() {
     if (!this.context || !this.musicGain || this.context.state !== 'running') return;
     if (this.nextNote < this.context.currentTime) this.nextNote = this.context.currentTime + 0.02;
-    const bass = this.danger ? [38, 38, 41, 38, 34, 34, 37, 37] : [45, 45, 48, 45, 41, 41, 43, 40];
-    const melody = this.danger
-      ? [74, 0, 77, 0, 74, 80, 0, 77, 72, 0, 75, 0, 73, 0, 76, 0]
-      : [69, 0, 72, 76, 0, 75, 72, 0, 67, 0, 71, 74, 0, 72, 68, 0];
+    const bus = this.musicGain;
+    // Eight-bar street-cafe progression. Alternate phrases leave space between UI cues.
+    const chords = [
+      [50, 57, 60, 64],
+      [55, 59, 62, 65],
+      [48, 55, 59, 64],
+      [45, 52, 55, 60],
+      [50, 57, 60, 65],
+      [55, 59, 62, 64],
+      [48, 55, 59, 62],
+      [45, 52, 55, 61],
+    ];
+    const midi = (n: number) => 440 * 2 ** ((n - 69) / 12);
     while (this.nextNote < this.context.currentTime + 0.18) {
-      const i = this.beat++;
-      const midi = (n: number) => 440 * 2 ** ((n - 69) / 12);
-      if (i % 2 === 0)
-        this.tone(
-          midi(bass[Math.floor(i / 4) % bass.length] ?? 45),
-          this.nextNote,
-          0.22,
-          0.7,
-          'triangle',
-          this.musicGain,
-        );
-      const note = melody[i % melody.length] ?? 0;
-      if (note)
-        this.tone(
-          midi(note),
-          this.nextNote,
-          0.13,
-          0.22,
-          this.danger ? 'triangle' : 'sine',
-          this.musicGain,
-        );
-      if (i % 4 === 2)
-        this.tone(this.danger ? 180 : 110, this.nextNote, 0.045, 0.22, 'triangle', this.musicGain);
-      this.nextNote += this.danger ? 0.17 : 0.215;
+      const index = this.beat++,
+        bar = Math.floor(index / 8),
+        slot = index % 8;
+      const chord = chords[bar % 8] ?? [48, 55, 59, 64];
+      const root = chord[0] ?? 48;
+      const eighth = 30 / (this.danger ? 94 : 82);
+      const time = this.nextNote + (slot % 2 ? eighth * 0.12 : 0);
+      if (slot === 0 || slot === 4)
+        this.tone(midi(root - 12 + (slot === 4 ? 7 : 0)), time, 0.52, 0.46, 'sine', this.musicGain);
+      if (slot === 1 || (slot === 5 && bar % 2 === 0)) {
+        chord
+          .slice(1)
+          .forEach((n, k) => this.tone(midi(n), time + k * 0.018, 0.62, 0.14, 'triangle', bus));
+      }
+      const phrase = bar % 4;
+      if (
+        (phrase === 0 && (slot === 3 || slot === 6)) ||
+        (phrase === 1 && slot === 2) ||
+        (phrase === 2 && slot === 5)
+      ) {
+        const note = chord[((slot + Math.floor(bar / 8)) % 3) + 1] ?? 60;
+        this.tone(midi(note + 12), time, 0.46, 0.18, 'sine', this.musicGain);
+      }
+      if (slot === 2 || slot === 6)
+        this.tone(this.danger ? 170 : 140, time, 0.045, 0.14, 'triangle', this.musicGain);
+      if (this.danger && slot === 7)
+        this.tone(midi(root), time, 0.13, 0.19, 'triangle', this.musicGain);
+      this.nextNote += eighth;
     }
   }
   private load(id: string): Promise<AudioBuffer | null> {
@@ -247,8 +262,8 @@ class GameAudio {
           frequency,
           now + i * spacing,
           cue === 'click' ? 0.045 : 0.22,
-          cue === 'click' ? 0.28 : 0.55,
-          'triangle',
+          cue === 'click' ? 0.2 : 0.38,
+          cue === 'paper' || cue === 'hire' ? 'sine' : 'triangle',
           gain,
         );
     });

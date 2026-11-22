@@ -25,6 +25,7 @@ export type DayPhase =
   'plan' | 'invest' | 'call' | 'event' | 'launder' | 'shop' | 'escape' | 'ended';
 
 export interface Henchman {
+  recruit?: string;
   id: string;
   /** โบนัสรายได้ % */
   skill: number;
@@ -91,6 +92,7 @@ export interface MethodState {
 }
 
 export interface DayLog {
+  recruits?: string[];
   interview?: 'henchman' | 'cat';
   repeatableCost?: number;
   day: number;

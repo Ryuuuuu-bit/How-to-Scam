@@ -117,6 +117,8 @@ for (const [path, url] of Object.entries(files)) {
   ART[id] = { emoji: EMOJI[id]?.emoji ?? '', src: url };
 }
 if (ART['icon:henchman']?.src) ART['shop:henchman'] = ART['icon:henchman'];
+ART['shop:intern_nat'] = ART['char:gamer_kid'] ?? { emoji: '📋' };
+ART['shop:host_tuk'] = ART['shop:celebrity_promo'] ?? { emoji: '🎤' };
 
 /** URL ของฉากพื้นหลัง (ถ้ายังไม่มีภาพคืน undefined) */
 export const sceneUrl = (id: string): string | undefined => ART[`scene:${id}`]?.src;

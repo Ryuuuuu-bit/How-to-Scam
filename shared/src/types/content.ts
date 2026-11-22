@@ -114,6 +114,7 @@ export interface EventChoice {
 }
 
 export interface EventCondition {
+  recruit?: string;
   /** แผนของวันนี้ต้องเป็นหนึ่งในนี้ */
   methods?: MethodId[];
   /** เคยใช้วิธีนี้แล้วในรอบนี้ */

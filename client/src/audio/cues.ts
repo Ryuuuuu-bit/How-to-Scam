@@ -13,6 +13,7 @@ export function playCues(state: GameState, previous: GameState): void {
     return audio.sfx('sfx_phone_ring', 'phone');
   if (has('levelUp')) return audio.sfx('sfx_level_up', 'level');
   if (has('missionDone')) return audio.sfx('sfx_achievement', 'level');
+  if (state.nextHenchmanId > previous.nextHenchmanId) return audio.play('hire');
 
   const esc = r.find((x) => x.kind === 'escape');
   if (esc?.success) return audio.sfx('sfx_escape', 'escape');

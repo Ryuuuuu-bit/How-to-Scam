@@ -5,6 +5,7 @@ import { dailyArticles, markPaperRead, paperWasRead } from '../game/newspaper';
 import { Art } from './ui';
 import { PopupButton, PopupClose } from './PopupControls';
 import { MemeSticker } from './MemeSticker';
+import { audio } from '../audio/audio';
 
 export function DailyNewspaper({
   state,
@@ -38,7 +39,10 @@ export function DailyNewspaper({
       <button
         ref={trigger}
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+          audio.play('paper');
+        }}
         className={`flex min-h-10 items-center gap-2 border-2 border-ink bg-paper px-3 py-1.5 text-left text-sm font-semibold shadow-pop-sm ${preview ? 'flex-1 rounded-xl' : 'ml-auto rounded-full'}`}
       >
         <Art id="icon:news" size={24} className="shrink-0" />

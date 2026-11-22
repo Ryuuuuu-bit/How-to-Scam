@@ -2,6 +2,12 @@ import type { GameEvent } from '../../src/types/content';
 
 // เหตุการณ์ต่อเนื่อง (เลือกวันนี้ มีผลอีกหลายวัน) และตัวละครประจำที่กลับมาเรื่อยๆ
 export const storyEvents: GameEvent[] = [
+  {id:'nat_receipt',category:'silly',weight:28,when:{recruit:'intern_nat'},title:{th:'น้องนัทขอเบิกค่าเทปกาว'},body:{th:'เด็กฝึกงานยื่นใบเสร็จยาวถึงพื้น เขาซื้อเทปกาวมาซ่อมเครื่องพิมพ์ใบเสร็จที่หยุดพิมพ์ไม่ได้'},choices:[
+    {text:{th:'อนุมัติค่าซ่อมให้เด็ก'},outcomes:[{text:{th:'นัทแปะปุ่มหยุดสำเร็จ ทั้งโต๊ะปรบมือให้'},effects:[{kind:'add',stat:'dirtyCash',value:-100},{kind:'loyalty',value:6}]}]},
+    {text:{th:'เอาใบเสร็จไปประกวดว่าว'},outcomes:[{text:{th:'ว่าวใบเสร็จคว้ารางวัลขวัญใจตลาด'},effects:[{kind:'add',stat:'fame',value:4}]}]}]},
+  {id:'tuk_mic',category:'silly',weight:28,when:{recruit:'host_tuk'},title:{th:'พี่ตุ๊กลืมปิดไมค์'},body:{th:'เสียงซุบซิบเรื่องกับข้าวดังไปถึงหน้าปากซอย คนเริ่มเอาจานมาต่อคิว'},choices:[
+    {text:{th:'จัดรายการขอเพลงไปเลย'},outcomes:[{text:{th:'คนทั้งซอยร้องตาม รถสายตรวจก็จอดฟัง'},effects:[{kind:'add',stat:'fame',value:8},{kind:'add',stat:'heat',value:4}]}]},
+    {text:{th:'ส่งป้ายพักโฆษณาให้พี่ตุ๊ก'},outcomes:[{text:{th:'พี่ตุ๊กโค้งให้หม้อข้าวแล้วค่อยปิดไมค์'},effects:[{kind:'add',stat:'heat',value:-3}]}]}]},
   // ---- ลูกน้องตกหลุมรักเหยื่อ (3 ตอน) ----
   {
     id: 'henchman_love_1',

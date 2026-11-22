@@ -208,7 +208,10 @@ function ItemRow({
   const it = content.shopItems.find((x) => x.id === itemId);
   if (!it) return null;
   const price = priceOf(state, content, it.id, it.price);
-  const maxed = owned >= it.maxStack;
+  const maxed =
+    owned >= it.maxStack ||
+    (it.kind === 'henchman' &&
+      state.henchmen.length >= (content.shopItems.find((x) => x.id === 'henchman')?.maxStack ?? 3));
   const only = it.methodId ? content.methods.find((m) => m.id === it.methodId) : undefined;
   return (
     <Panel className="flex items-center gap-3 p-3">
@@ -258,7 +261,11 @@ export function InvestPhase({ state, dispatch }: PhaseProps) {
               state={state}
               itemId={it.id}
               owned={
-                it.kind === 'henchman' ? state.henchmen.length : (state.dailyItems[it.id] ?? 0)
+                it.kind === 'henchman'
+                  ? it.id === 'henchman'
+                    ? state.henchmen.length
+                    : state.henchmen.filter((h) => h.recruit === it.id).length
+                  : (state.dailyItems[it.id] ?? 0)
               }
               label={(n) =>
                 it.kind === 'henchman' ? t('invest.hire', { n }) : t('invest.buy', { n })

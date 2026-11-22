@@ -120,6 +120,10 @@ export function DayPlanner({
     dispatch({ t: 'confirmInvest' });
   };
   const cartList = Object.entries(cart).flatMap(([id, n]) => Array<string>(n).fill(id));
+  const crewLimit = content.shopItems.find((it) => it.id === 'henchman')?.maxStack ?? 3;
+  const crewCount =
+    state.henchmen.length +
+    items.reduce((n, it) => n + (it.kind === 'henchman' ? (cart[it.id] ?? 0) : 0), 0);
 
   const repeatOk =
     lastPlan !== null && (lastPlan.methodId === null || !methodBlockFor(state, lastPlan.methodId));
@@ -238,7 +242,10 @@ export function DayPlanner({
           <div className="mb-1.5 text-xs font-semibold">{t('planner.addons')}</div>
           <div className="flex flex-col gap-1.5">
             {items.map((it) => {
-              const owned = it.kind === 'henchman' ? state.henchmen.length : 0;
+              const owned =
+                it.kind === 'henchman'
+                  ? state.henchmen.filter((h) => h.recruit === it.id).length
+                  : 0;
               const n = cart[it.id] ?? 0;
               const price = priceOf(state, content, it.id, it.price);
               const max = it.kind === 'henchman' ? it.maxStack - owned : it.maxStack;
@@ -273,7 +280,9 @@ export function DayPlanner({
                     <button
                       type="button"
                       aria-label={`เพิ่ม ${lt(it.name)}`}
-                      disabled={isBanned || n >= max}
+                      disabled={
+                        isBanned || n >= max || (it.kind === 'henchman' && crewCount >= crewLimit)
+                      }
                       onClick={() => setCart({ ...cart, [it.id]: n + 1 })}
                       className="h-8 w-8 rounded-full border-2 border-ink bg-sun font-bold disabled:opacity-30"
                     >

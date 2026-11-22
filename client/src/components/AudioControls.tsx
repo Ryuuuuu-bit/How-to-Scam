@@ -11,7 +11,7 @@ export function AudioControls() {
     const click = (event: MouseEvent) => {
       void audio.unlock().then(() => {
         if ((event.target as HTMLElement).closest('button:not(:disabled), a, input'))
-          audio.sfx('sfx_click', 'click');
+          audio.play('click');
       });
     };
     const keyboard = (event: KeyboardEvent) => {
@@ -94,7 +94,7 @@ export function AudioControls() {
           >
             {settings.muted ? 'เปิดเสียงทั้งหมด' : 'ปิดเสียงทั้งหมด'}
           </PopupButton>
-          <p>เพลงจะเริ่มเมื่อกดเล่น และพักเมื่อออกจากแท็บ</p>
+          <p>เพลง “เย็นนี้ที่ปากซอย” · พักเมื่อออกจากแท็บ</p>
         </div>
       )}
     </aside>
