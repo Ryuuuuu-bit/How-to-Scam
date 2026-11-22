@@ -95,10 +95,10 @@ export function HeatBar({ heat }: { heat: number }) {
   const hot = heat >= 75;
   return (
     <div className={`relative ${rising ? 'anim-shake' : ''}`} key={rising ? bump : 'still'}>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-start gap-1.5">
         <Art id="icon:heat" size={26} className={hot ? 'anim-pop' : ''} />
         <div
-          className={`relative h-5 flex-1 overflow-hidden rounded-full border-2 border-ink bg-white ${hot ? 'anim-heat-glow' : ''}`}
+          className={`relative mt-0.5 h-5 flex-1 overflow-hidden rounded-full border-2 border-ink bg-white ${hot ? 'anim-heat-glow' : ''}`}
         >
           <div
             className="h-full rounded-full"
@@ -110,9 +110,17 @@ export function HeatBar({ heat }: { heat: number }) {
             }}
           />
           <span className="font-display absolute inset-0 flex items-center justify-center text-xs font-semibold">
-            {t('hud.heat')} {Math.round(shown)}/100
+            {t('hud.heat')} {Math.round(shown)}/100{hot ? ' · เสี่ยงสูง' : ''}
           </span>
         </div>
+        <details className="heat-help shrink-0">
+          <summary className="cursor-pointer text-xs text-[#f7f4eb]" aria-label="กติกา Heat">
+            ?
+          </summary>
+          <p className="mt-1 max-w-44 rounded-lg bg-paper p-2 text-xs text-ink">
+            Heat คือระดับการถูกจับตา เมื่อถึง 100 จะเข้าสู่ฉากหนีตำรวจ วันนี้พักได้เพื่อลด Heat
+          </p>
+        </details>
       </div>
       {floats
         .filter((f) => f.delta > 0)
@@ -134,11 +142,11 @@ export function Hud({ state }: { state: GameState }) {
   return (
     <header className="game-hud sticky top-0 z-20 px-3 pt-[max(env(safe-area-inset-top),12px)] pb-3">
       <div className="hud-inner mx-auto flex flex-col gap-2">
-        <div className="font-display flex items-center justify-between text-sm">
+        <div className="hud-meta font-display flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-1">
             <Art id="icon:day" size={20} />
             {t('hud.day', { day: state.day, max: content.config.maxDays })}
-            <span className="text-ink-soft">
+            <span className="hud-date text-ink-soft">
               · {date.date} {monthName(date.month)}
             </span>
           </span>
@@ -156,7 +164,7 @@ export function Hud({ state }: { state: GameState }) {
             )}
           </span>
         </div>
-        <div className="flex gap-1.5">
+        <div className="hud-money flex gap-1.5">
           <MoneyStat
             icon="icon:dirty"
             label={t('hud.dirty')}

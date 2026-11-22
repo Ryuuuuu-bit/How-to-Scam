@@ -21,9 +21,33 @@ interface PhaseProps {
 const money = (s: GameState) => s.dirtyCash + s.cleanCash;
 
 /** ข่าวประจำสัปดาห์ แสดงบนหน้าวางแผน */
-export function NewsCard({ state }: { state: GameState }) {
+export function NewsCard({ state, compact = false }: { state: GameState; compact?: boolean }) {
   const n = currentNews(state, content);
   if (!n) return null;
+  if (compact) {
+    const signed = (pct: number) => `${pct > 0 ? '+' : ''}${pct}%`;
+    const effects = n.modifiers.map(({ target, methodId, pct }) => {
+      const method = content.methods.find(({ id }) => id === methodId);
+      return `${target === 'income' ? 'รายได้' : 'Heat'} ${signed(pct)}${method ? ` · ${lt(method.name)}` : ''}`;
+    });
+    if (n.launderSuccessPct) {
+      const change = n.launderSuccessPct;
+      effects.push(`โอกาสฟอกสำเร็จ ${change > 0 ? '+' : ''}${change} จุดเปอร์เซ็นต์`);
+    }
+    if (n.victimWealthPct) effects.push(`เงินคู่สนทนา ${signed(n.victimWealthPct)}`);
+    if (!effects.length) return null;
+    return (
+      <div className="play-feedback mb-3 flex items-center gap-2 rounded-xl px-3 py-2 text-xs">
+        <Art id="icon:news" size={24} className="shrink-0" />
+        <div>
+          <span className="block text-[#d6d4dd]">
+            ผลข่าวสัปดาห์นี้ · {t('news.until', { n: state.news?.untilDay ?? 0 })}
+          </span>
+          <strong>{effects.join(' / ')}</strong>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="anim-rise-in mb-3 flex items-start gap-2 rounded-2xl border-[3px] border-ink bg-white p-2.5 text-ink shadow-pop-sm">
       <Art id="icon:news" size={40} className="shrink-0" />

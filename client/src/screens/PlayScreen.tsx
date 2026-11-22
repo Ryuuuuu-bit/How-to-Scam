@@ -9,7 +9,7 @@ import { describeResult } from '../game/results';
 import type { ResultLine } from '../game/results';
 import { audio } from '../audio/audio';
 import { playCues } from '../audio/cues';
-import { lt, t } from '../i18n';
+import { fmt, lt, t } from '../i18n';
 import { content } from '@hts/shared/data';
 import { CallPhase, EventPhase, InvestPhase, LaunderPhase, ShopPhase } from './phases';
 import { EscapePhase } from './EscapePhase';
@@ -33,10 +33,31 @@ export function PlayScreen({
   const { user } = useAuth();
   const cosmetics = loadCosmetics(progressFor(user), user?.uid);
   const [dismissedTick, setDismissedTick] = useState<number>();
-  const resultLines = state.lastResults
+  const [beforeDecision, setBeforeDecision] = useState<{ cash: number; actionCount: number }>();
+  const results = state.lastResults.filter((result) => result.kind !== 'news');
+  const resultLines = results
     .map((result) => describeResult(result, state))
     .filter((line): line is ResultLine => line !== null);
-  const showResults = dismissedTick !== tick && resultLines.length > 0;
+  const bigResult = results.some(({ kind }) =>
+    [
+      'escape',
+      'levelUp',
+      'missionDone',
+      'missionFail',
+      'sting',
+      'baited',
+      'exposed',
+      'ponziCrash',
+      'romanceFled',
+    ].includes(kind),
+  );
+  const showResults = bigResult && dismissedTick !== tick && resultLines.length > 0;
+  const net =
+    beforeDecision &&
+    actions.length > beforeDecision.actionCount &&
+    results.some(({ kind }) => kind === 'resolve')
+      ? state.dirtyCash + state.cleanCash - beforeDecision.cash
+      : null;
   const sounded = useRef({ tick, state });
   useEffect(() => {
     audio.setDanger(state.heat >= 75 || state.phase === 'escape');
@@ -46,12 +67,18 @@ export function PlayScreen({
   }, [tick, state]);
   useEffect(() => () => audio.setDanger(false), []);
 
-  // ทุกครั้งที่มี action ใหม่ ถ้ามีผลลัพธ์ก็เด้งแผ่นสรุปขึ้นมา
+  const phaseKey = `${state.day}-${state.phase}-${state.pendingEvents[0] ?? ''}-${state.escape?.step ?? ''}`;
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [tick]);
+    window.scrollTo({ top: 0 });
+  }, [phaseKey]);
 
-  const props = { state, dispatch };
+  const props = {
+    state,
+    dispatch: (action: Action) => {
+      setBeforeDecision({ cash: state.dirtyCash + state.cleanCash, actionCount: actions.length });
+      dispatch(action);
+    },
+  };
   const scene =
     state.phase === 'event' && state.pendingEvents[0]
       ? `ev_${state.pendingEvents[0]}`
@@ -83,23 +110,50 @@ export function PlayScreen({
         </div>
       </aside>
       <main
-        className="decision-panel relative z-10"
-        key={`${state.day}-${state.phase}-${state.pendingEvents[0] ?? ''}-${state.escape?.step ?? ''}`}
+        className={`decision-panel relative z-10 ${state.phase === 'plan' ? 'is-planning' : ''}`}
       >
         <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <Art id={characterArt(state.characterId, cosmetics)} size={64} />
-          <DailyNewspaper state={state} autoOpen={state.phase === 'plan' && !showResults} />
+        <div className="play-heading mb-3 flex items-center gap-3">
+          <Art
+            id={characterArt(state.characterId, cosmetics)}
+            size={60}
+            className="play-portrait shrink-0"
+          />
+          <DailyNewspaper
+            key={`${state.seed}-${state.day}`}
+            state={state}
+            preview={state.phase === 'plan'}
+          />
         </div>
-        {state.phase === 'plan' && (
-          <DayPlanner {...props} lastPlan={lastPlanFrom(actions)} key={state.day} />
-        )}
-        {state.phase === 'invest' && <InvestPhase {...props} />}
-        {state.phase === 'call' && <CallPhase {...props} />}
-        {state.phase === 'event' && <EventPhase {...props} />}
-        {state.phase === 'launder' && <LaunderPhase {...props} />}
-        {state.phase === 'shop' && <ShopPhase {...props} />}
-        {state.phase === 'escape' && <EscapePhase {...props} />}
+        <div role="status" aria-atomic="true">
+          {!bigResult && resultLines.length > 0 && (
+            <ul className="play-feedback mb-3 grid gap-2 rounded-xl px-3 py-2 text-sm">
+              {resultLines.map((line, i) => (
+                <li key={`${i}-${line.title}`} className="flex items-center gap-2">
+                  {line.art && <Art id={line.art} size={26} className="shrink-0" />}
+                  <div>
+                    <strong>{line.title}</strong>
+                    {line.body && <p className="text-xs text-[#d6d4dd]">{line.body}</p>}
+                  </div>
+                </li>
+              ))}
+              {net !== null && (
+                <li className="text-xs text-[#d6d4dd]">
+                  เงินเปลี่ยนสุทธิจากจังหวะนี้ {net > 0 ? '+' : net < 0 ? '−' : ''}฿{fmt(Math.abs(net))}
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
+        <div key={phaseKey}>
+          {state.phase === 'plan' && <DayPlanner {...props} lastPlan={lastPlanFrom(actions)} />}
+          {state.phase === 'invest' && <InvestPhase {...props} />}
+          {state.phase === 'call' && <CallPhase {...props} />}
+          {state.phase === 'event' && <EventPhase {...props} />}
+          {state.phase === 'launder' && <LaunderPhase {...props} />}
+          {state.phase === 'shop' && <ShopPhase {...props} />}
+          {state.phase === 'escape' && <EscapePhase {...props} />}
+        </div>
       </main>
       {showResults && <ResultSheet lines={resultLines} onClose={() => setDismissedTick(tick)} />}
     </div>

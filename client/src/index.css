@@ -60,7 +60,8 @@ button:disabled {
 }
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+summary:focus-visible {
   outline: 3px solid #f77fa8;
   outline-offset: 5px;
 }
@@ -344,6 +345,29 @@ button {
 .hud-inner {
   max-width: 1100px;
 }
+.heat-help {
+  position: relative;
+}
+.heat-help > summary {
+  display: grid;
+  place-items: center;
+  list-style: none;
+  width: 32px;
+  min-height: 24px;
+  border: 1px solid #ffffff45;
+  border-radius: 8px;
+  font-weight: 700;
+}
+.heat-help > summary::-webkit-details-marker {
+  display: none;
+}
+.heat-help > p {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  width: 176px;
+  box-shadow: var(--shadow-pop-sm);
+}
 .game-hud .font-display {
   color: #eae7de;
 }
@@ -374,6 +398,23 @@ button {
   max-width: 540px;
   padding: 0 20px 40px;
   margin: 0 auto;
+}
+.play-feedback {
+  background: #242631;
+  border: 1px solid #ffffff2e;
+  color: #f7f4eb;
+}
+.planner-actions {
+  margin-top: 12px;
+}
+.planner-actions-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.planner-budget {
+  margin: 0 0 6px;
+  text-align: center;
 }
 .decision-panel button:not(.game-button) {
   color: #23252b;
@@ -625,10 +666,64 @@ button {
   }
   .game-hud {
     padding-right: 12px;
-    padding-top: 60px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: 6px;
+  }
+  .hud-inner {
+    gap: 4px;
+  }
+  .hud-meta {
+    min-height: 40px;
+    padding-right: 76px;
+  }
+  .play-shell ~ .audio-controls {
+    top: max(8px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+  }
+  .decision-panel.is-planning {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
+  .is-planning .scene-spacer {
+    height: clamp(28px, 7dvh, 65px);
+  }
+  .play-portrait {
+    width: 42px;
+    height: 42px;
+  }
+  .planner-actions {
+    position: fixed;
+    bottom: 0;
+    inset-inline: 0;
+    margin: 0;
+    background: #191c23f7;
+    border-top: 1px solid var(--line);
+    padding: 8px max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+  .planner-actions-inner {
+    max-width: 500px;
+    margin-inline: auto;
+  }
+  .planner-actions .game-button {
+    min-height: 48px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  html:has(.is-planning) {
+    scroll-padding-block: 138px 108px;
   }
 }
 @media (max-width: 600px) {
+  .hud-date {
+    display: none;
+  }
+  .hud-money > div {
+    padding-block: 2px;
+  }
+  .hud-money img {
+    width: 22px;
+    height: 22px;
+  }
   .menu-shell {
     padding: 0 22px;
   }

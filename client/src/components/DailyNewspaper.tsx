@@ -6,17 +6,14 @@ import { Art, Button } from './ui';
 
 export function DailyNewspaper({
   state,
-  autoOpen = false,
+  preview = false,
 }: {
   state: GameState;
-  autoOpen?: boolean;
+  preview?: boolean;
 }) {
   const articles = dailyArticles(state, content);
   const latest = articles.at(-1);
-  const [opened, setOpened] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  const open =
-    opened || (autoOpen && !!latest && !dismissed && !paperWasRead(state.seed, latest.day));
+  const [open, setOpen] = useState(false);
   const [day, setDay] = useState(latest?.day ?? 0);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -28,21 +25,32 @@ export function DailyNewspaper({
   }, [open]);
   const close = () => {
     if (latest) markPaperRead(state.seed, latest.day);
-    setOpened(false);
-    setDismissed(true);
+    setOpen(false);
     dialog.current?.close();
     trigger.current?.focus();
   };
+  if (!latest) return null;
+
   return (
     <>
       <button
         ref={trigger}
         type="button"
-        disabled={!latest}
-        onClick={() => setOpened(true)}
-        className="rounded-full border-2 border-ink bg-paper px-3 py-1.5 text-sm font-semibold shadow-pop-sm disabled:opacity-50"
+        onClick={() => setOpen(true)}
+        className={`flex min-h-10 items-center gap-2 border-2 border-ink bg-paper px-3 py-1.5 text-left text-sm font-semibold shadow-pop-sm ${preview ? 'flex-1 rounded-xl' : 'ml-auto rounded-full'}`}
       >
-        📰 {latest ? `ข่าววันที่ ${latest.day}` : 'ข่าวเริ่มหลังจบวันแรก'}
+        <Art id="icon:news" size={24} className="shrink-0" />
+        <span className="min-w-0">
+          {preview && (
+            <span className="block text-[11px] text-ink-soft">
+              ข่าววันที่ {latest.day}
+              {paperWasRead(state.seed, latest.day) ? '' : ' · ฉบับใหม่'}
+            </span>
+          )}
+          <span className="line-clamp-2 leading-snug">
+            {preview ? latest.headline : `ข่าววันที่ ${latest.day}`}
+          </span>
+        </span>
       </button>
       <dialog
         ref={dialog}

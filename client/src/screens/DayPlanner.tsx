@@ -93,6 +93,11 @@ export function DayPlanner({
   const [cart, setCart] = useState<Record<string, number>>({});
   const offer = currentOffer(state, content);
   const banned = (id: string) => offer?.kind === 'twist' && (offer.ban?.includes(id) ?? false);
+  const methods = content.methods.map((method) => ({
+    method,
+    block: methodBlock(state, content, method),
+  }));
+  const locked = methods.filter(({ block }) => block === 'level');
 
   const method = content.methods.find((m) => m.id === methodId);
   const items = content.shopItems.filter(
@@ -129,14 +134,60 @@ export function DayPlanner({
   return (
     <>
       <ScreenTitle title={t('phase.plan')} hint={t('planner.hint')} />
-      <NewsCard state={state} />
-      <OfferCard state={state} dispatch={dispatch} />
+      <NewsCard state={state} compact />
+      <div className="flex flex-col gap-2">
+        {methods
+          .filter(({ block }) => block !== 'level')
+          .map(({ method: m, block }) => {
+            const picked = methodId === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={picked}
+                disabled={block !== null}
+                onClick={() => {
+                  if (picked) return;
+                  setMethodId(m.id);
+                  setCart({});
+                }}
+                className={`flex items-start gap-3 rounded-2xl border-[3px] border-ink p-2.5 text-left text-ink transition disabled:opacity-50 ${picked ? 'bg-sun shadow-pop' : 'bg-paper'}`}
+              >
+                <Art
+                  id={block === 'cooldown' ? 'icon:cooldown' : `method:${m.id}`}
+                  size={40}
+                  className="shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="font-display font-semibold">{lt(m.name)}</div>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <Chip>{t('plan.cost', { n: m.cost })}</Chip>
+                    <Chip className="text-clean">
+                      {t('plan.income', { min: m.income[0], max: m.income[1] })}
+                    </Chip>
+                    <Chip className="text-danger">
+                      {t('plan.heat', { min: m.heat[0], max: m.heat[1] })}
+                    </Chip>
+                    <MethodChips state={state} m={m} />
+                    {block === 'banned' && <Chip className="text-danger">{t('plan.banned')}</Chip>}
+                    {block === 'cooldown' && (
+                      <Chip className="text-danger">
+                        {t('plan.cooldown', { n: state.methodState[m.id]?.cooldownUntil ?? 0 })}
+                      </Chip>
+                    )}
+                  </div>
+                  {picked && <div className="mt-1 text-xs text-ink-soft">{lt(m.desc)}</div>}
+                </div>
+              </button>
+            );
+          })}
+      </div>
 
       {repeatOk && lastPlan && (
         <Button
           tone="mint"
           block
-          className="mb-3 text-left"
+          className="mt-3 text-left"
           disabled={repeatCost > money(state)}
           onClick={() =>
             run(
@@ -158,62 +209,6 @@ export function DayPlanner({
           </span>
         </Button>
       )}
-
-      <div className="flex flex-col gap-2">
-        {content.methods.map((m) => {
-          const block = methodBlock(state, content, m);
-          if (block === 'level') {
-            return (
-              <div
-                key={m.id}
-                className="flex items-center gap-2 rounded-2xl border-2 border-ink/40 bg-paper/70 p-2 text-sm text-ink-soft"
-              >
-                <Art id="icon:lock" size={28} />
-                {lt(m.name)} · {t('plan.locked', { level: m.level })}
-              </div>
-            );
-          }
-          const picked = methodId === m.id;
-          return (
-            <button
-              key={m.id}
-              type="button"
-              disabled={block !== null}
-              onClick={() => {
-                setMethodId(m.id);
-                setCart({});
-              }}
-              className={`flex items-start gap-3 rounded-2xl border-[3px] border-ink p-2.5 text-left text-ink transition disabled:opacity-50 ${picked ? 'bg-sun shadow-pop' : 'bg-paper'}`}
-            >
-              <Art
-                id={block === 'cooldown' ? 'icon:cooldown' : `method:${m.id}`}
-                size={44}
-                className="shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="font-display font-semibold">{lt(m.name)}</div>
-                {picked && <div className="text-xs text-ink-soft">{lt(m.desc)}</div>}
-                <div className="mt-1 flex flex-wrap gap-1">
-                  <Chip>{t('plan.cost', { n: m.cost })}</Chip>
-                  <Chip className="text-clean">
-                    {t('plan.income', { min: m.income[0], max: m.income[1] })}
-                  </Chip>
-                  <Chip className="text-danger">
-                    {t('plan.heat', { min: m.heat[0], max: m.heat[1] })}
-                  </Chip>
-                  <MethodChips state={state} m={m} />
-                  {block === 'banned' && <Chip className="text-danger">{t('plan.banned')}</Chip>}
-                  {block === 'cooldown' && (
-                    <Chip className="text-danger">
-                      {t('plan.cooldown', { n: state.methodState[m.id]?.cooldownUntil ?? 0 })}
-                    </Chip>
-                  )}
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
 
       {method && (
         <div className="mt-3 rounded-2xl border-2 border-ink bg-white p-2.5 text-ink">
@@ -268,23 +263,44 @@ export function DayPlanner({
         </div>
       )}
 
-      <Button
-        tone="pink"
-        block
-        className="mt-3 text-lg"
-        disabled={!method || !canAfford}
-        onClick={() => run(methodId, cartList)}
-      >
-        {method ? `${t('invest.go')} · ฿${fmt(total)}` : t('planner.pick')}
-      </Button>
-      {method && !canAfford && (
-        <p className="mt-1 text-center text-xs text-danger">{t('plan.noMoney')}</p>
+      <div className="mt-4">
+        <OfferCard state={state} dispatch={dispatch} />
+      </div>
+      {locked.length > 0 && (
+        <details className="mb-3 rounded-xl bg-paper px-3 text-sm text-ink">
+          <summary className="cursor-pointer py-2.5 font-semibold">
+            ปลดล็อกถัดไป · {locked.length} แผน
+          </summary>
+          <ul className="space-y-2 pb-3">
+            {locked.map(({ method: m }) => (
+              <li key={m.id} className="flex items-center gap-2">
+                <Art id="icon:lock" size={20} />
+                {lt(m.name)} · {t('plan.locked', { level: m.level })}
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <Button tone="mint" onClick={() => run(null, [])}>
-          {t('plan.rest', { n: content.config.heatDecayQuietDay })}
-        </Button>
-        <RetireButton dispatch={dispatch} />
+      <RetireButton dispatch={dispatch} />
+      <div className="planner-actions" role="group" aria-label="ยืนยันแผนวันนี้">
+        {method && !canAfford && (
+          <p role="status" className="planner-budget text-sm text-[#ffabb3]">
+            {t('plan.noMoney')}
+          </p>
+        )}
+        <div className="planner-actions-inner">
+          <Button
+            tone="pink"
+            block
+            disabled={!method || !canAfford}
+            onClick={() => run(methodId, cartList)}
+          >
+            {method ? `${t('invest.go')} · ต้นทุน ฿${fmt(total)}` : t('planner.pick')}
+          </Button>
+          <Button tone="mint" onClick={() => run(null, [])}>
+            {t('plan.rest', { n: content.config.heatDecayQuietDay })}
+          </Button>
+        </div>
       </div>
     </>
   );
