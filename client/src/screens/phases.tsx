@@ -21,11 +21,11 @@ interface PhaseProps {
 const money = (s: GameState) => s.dirtyCash + s.cleanCash;
 
 /** ข่าวประจำสัปดาห์ แสดงบนหน้าวางแผน */
-function NewsCard({ state }: { state: GameState }) {
+export function NewsCard({ state }: { state: GameState }) {
   const n = currentNews(state, content);
   if (!n) return null;
   return (
-    <div className="anim-rise-in mb-3 flex items-start gap-2 rounded-2xl border-[3px] border-ink bg-white p-2.5 shadow-pop-sm">
+    <div className="anim-rise-in mb-3 flex items-start gap-2 rounded-2xl border-[3px] border-ink bg-white p-2.5 text-ink shadow-pop-sm">
       <Art id="icon:news" size={40} className="shrink-0" />
       <div className="min-w-0">
         <div className="text-[11px] font-semibold text-ink-soft">
@@ -39,7 +39,7 @@ function NewsCard({ state }: { state: GameState }) {
 }
 
 /** ป้ายสถานะเฉพาะของแต่ละวิธีโกง */
-function MethodChips({ state, m }: { state: GameState; m: ScamMethod }) {
+export function MethodChips({ state, m }: { state: GameState; m: ScamMethod }) {
   const ms = state.methodState[m.id];
   const chips: { text: string; cls: string }[] = [];
   if (m.mechanic === 'romance' && state.romance.bond > 0) {
@@ -142,7 +142,7 @@ export function PlanPhase({ state, dispatch }: PhaseProps) {
   );
 }
 
-function RetireButton({ dispatch }: { dispatch: PhaseProps['dispatch'] }) {
+export function RetireButton({ dispatch }: { dispatch: PhaseProps['dispatch'] }) {
   return (
     <Button
       tone="paper"

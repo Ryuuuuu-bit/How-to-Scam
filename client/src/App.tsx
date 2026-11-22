@@ -130,7 +130,14 @@ function GameScreens() {
         </>
       );
     }
-    return <PlayScreen state={state} tick={game.tick} dispatch={game.dispatch} />;
+    return (
+      <PlayScreen
+        state={state}
+        tick={game.tick}
+        dispatch={game.dispatch}
+        actions={game.run.actions}
+      />
+    );
   }
 
   return (

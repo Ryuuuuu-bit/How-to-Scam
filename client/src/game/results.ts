@@ -90,6 +90,23 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
         art: 'icon:news',
       };
     }
+    case 'offer':
+    case 'missionDone':
+    case 'missionFail': {
+      const o = content.offers.find((x) => x.id === r.textKey);
+      if (!o) return null;
+      const title =
+        r.kind === 'offer'
+          ? t('offer.accepted', { name: lt(o.name) })
+          : r.kind === 'missionDone'
+            ? t('offer.missionDone', { name: lt(o.name) })
+            : t('offer.missionFail', { name: lt(o.name) });
+      return {
+        tone: r.kind === 'missionFail' ? 'bad' : 'good',
+        title,
+        art: r.kind === 'missionFail' ? 'icon:cooldown' : 'icon:clean',
+      };
+    }
     case 'escape':
       return {
         tone: r.success ? 'good' : 'bad',

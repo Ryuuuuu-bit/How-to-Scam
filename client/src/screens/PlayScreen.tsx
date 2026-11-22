@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Action, GameState } from '@hts/shared';
 import { Hud } from '../components/Hud';
+import { DayPlanner, lastPlanFrom } from './DayPlanner';
 import { ResultSheet } from '../components/ResultSheet';
 import { SceneBackdrop } from '../components/SceneBackdrop';
 import { describeResult } from '../game/results';
@@ -8,24 +9,18 @@ import type { ResultLine } from '../game/results';
 import { audio } from '../audio/audio';
 import { lt, t } from '../i18n';
 import { content } from '@hts/shared/data';
-import {
-  CallPhase,
-  EscapePhase,
-  EventPhase,
-  InvestPhase,
-  LaunderPhase,
-  PlanPhase,
-  ShopPhase,
-} from './phases';
+import { CallPhase, EscapePhase, EventPhase, InvestPhase, LaunderPhase, ShopPhase } from './phases';
 
 export function PlayScreen({
   state,
   tick,
   dispatch,
+  actions = [],
 }: {
   state: GameState;
   tick: number;
   dispatch: (a: Action) => void;
+  actions?: Action[];
 }) {
   const [sheet, setSheet] = useState<ResultLine[] | null>(null);
   const soundedTick = useRef(tick);
@@ -83,7 +78,9 @@ export function PlayScreen({
         key={`${state.day}-${state.phase}-${state.pendingEvents[0] ?? ''}`}
       >
         <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />
-        {state.phase === 'plan' && <PlanPhase {...props} />}
+        {state.phase === 'plan' && (
+          <DayPlanner {...props} lastPlan={lastPlanFrom(actions)} key={state.day} />
+        )}
         {state.phase === 'invest' && <InvestPhase {...props} />}
         {state.phase === 'call' && <CallPhase {...props} />}
         {state.phase === 'event' && <EventPhase {...props} />}
