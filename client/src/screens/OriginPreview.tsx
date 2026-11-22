@@ -16,7 +16,7 @@ const tabs = { origins: 'ภูมิหลังอาชีพ', retirement: '
 const seed = careerSeedPrefix + 'preview-0';
 const retireExamples = [
   ['เปิดไมค์หลังเลิกไลฟ์', 'live_seller'], ['วางมือพร้อมลูกน้องสองคน', 'ex_insurance', 'crew'],
-  ['แวะช่วยพี่บุ๋นตักข้าว', 'ex_banker', 'kitchen'], ['กลับไปเปิดโต๊ะซ่อม', 'phone_tech'],
+  ['ช่วยตักกะเพราที่ครัวชุมชน', 'ex_banker', 'kitchen'], ['กลับไปเปิดโต๊ะซ่อม', 'phone_tech'],
   ['รับช่วงร้านเกมท้ายซอย', 'gamer_kid'], ['หาที่นอนให้ส้มซ่า', 'orange_cat'],
   ['เริ่มต้นใหม่ตอนสาย ๆ', 'ex_insurance'],
 ] as const;

@@ -125,9 +125,9 @@ const neighborhoodSets = {
   end_retire_radio: 'menu_studio', end_retire_crew: 'ev_auntie_neighbors_unite',
   end_retire_kitchen: 'end_home_again', end_retire_repair: 'ev_phone_repair_victim',
   end_retire_arcade: 'ev_gamer_sleep', end_retire_cat: 'ev_cat_keyboard',
-  end_retire_breakfast: 'escape_market', ev_soi_basin: 'ev_reporter_aunt',
-  ev_soi_lifter: 'ev_auntie_neighbors_unite', ev_soi_binder: 'ev_foundation_receipts',
-  ev_soi_rice: 'ev_flood_donations',
+  end_retire_breakfast: 'escape_market', ev_soi_basin: 'escape_market',
+  ev_soi_lifter: 'menu', ev_soi_binder: 'ev_cat_keyboard',
+  ev_soi_rice: 'end_home_again',
 };
 for (const [scene, set] of Object.entries(neighborhoodSets)) {
   const art = ART['scene:' + set];
