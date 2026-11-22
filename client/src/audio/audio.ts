@@ -1,4 +1,21 @@
-type Cue = 'click' | 'cash' | 'bad' | 'level' | 'end';
+const effects = {
+  click: [600, 850],
+  cash: [660, 880, 1320],
+  bad: [240, 180, 120],
+  level: [523, 659, 784, 1047],
+  end: [784, 659, 523, 392],
+  phone: [440, 660, 0, 440, 660],
+  hangup: [200, 380, 0, 380],
+  siren: [460, 720, 460, 720],
+  jail: [130, 82, 220],
+  escape: [330, 494, 740, 988],
+  wash: [587, 880, 1175],
+  event: [196, 392, 523],
+  news: [392, 523, 659, 523, 784],
+} as const;
+type Cue = keyof typeof effects;
+
+const recordedEffects = new Set(['sfx_click', 'sfx_cash', 'sfx_coins']);
 export interface AudioSettings {
   muted: boolean;
   music: number;
@@ -127,8 +144,10 @@ class GameAudio {
   private schedule() {
     if (!this.context || !this.musicGain || this.context.state !== 'running') return;
     if (this.nextNote < this.context.currentTime) this.nextNote = this.context.currentTime + 0.02;
-    const bass = [45, 45, 48, 45, 41, 41, 43, 40];
-    const melody = [69, 0, 72, 76, 0, 75, 72, 0, 67, 0, 71, 74, 0, 72, 68, 0];
+    const bass = this.danger ? [38, 38, 41, 38, 34, 34, 37, 37] : [45, 45, 48, 45, 41, 41, 43, 40];
+    const melody = this.danger
+      ? [74, 0, 77, 0, 74, 80, 0, 77, 72, 0, 75, 0, 73, 0, 76, 0]
+      : [69, 0, 72, 76, 0, 75, 72, 0, 67, 0, 71, 74, 0, 72, 68, 0];
     while (this.nextNote < this.context.currentTime + 0.18) {
       const i = this.beat++;
       const midi = (n: number) => 440 * 2 ** ((n - 69) / 12);
@@ -144,11 +163,11 @@ class GameAudio {
       const note = melody[i % melody.length] ?? 0;
       if (note)
         this.tone(
-          midi(note + (this.danger ? 12 : 0)),
+          midi(note),
           this.nextNote,
           0.13,
           0.22,
-          'sine',
+          this.danger ? 'triangle' : 'sine',
           this.musicGain,
         );
       if (i % 4 === 2)
@@ -175,8 +194,13 @@ class GameAudio {
   sfx(id: string, fallback?: Cue) {
     const gain = this.effectsGain;
     const ctx = this.context;
-    if (!ctx || !gain || ctx.state !== 'running') return;
+    if (!ctx || !gain || ctx.state !== 'running' || this.settings.muted) return;
+    if (!recordedEffects.has(id)) {
+      if (fallback) this.play(fallback);
+      return;
+    }
     void this.load(id).then((buf) => {
+      if (ctx.state !== 'running' || this.settings.muted) return;
       if (!buf) {
         if (fallback) this.play(fallback);
         return;
@@ -185,6 +209,7 @@ class GameAudio {
       src.buffer = buf;
       src.connect(gain);
       src.start();
+      src.onended = () => src.disconnect();
     });
   }
 
@@ -213,25 +238,20 @@ class GameAudio {
 
   play(cue: Cue) {
     const gain = this.effectsGain;
-    if (!this.context || !gain || this.context.state !== 'running') return;
-    const notes: Record<Cue, number[]> = {
-      click: [600, 850],
-      cash: [660, 880, 1320],
-      bad: [240, 180, 120],
-      level: [523, 659, 784, 1047],
-      end: [784, 659, 523, 392],
-    };
+    if (!this.context || !gain || this.context.state !== 'running' || this.settings.muted) return;
     const now = this.context.currentTime;
-    notes[cue].forEach((frequency, i) =>
-      this.tone(
-        frequency,
-        now + i * (cue === 'click' ? 0.025 : 0.095),
-        cue === 'click' ? 0.045 : 0.22,
-        cue === 'click' ? 0.28 : 0.55,
-        'triangle',
-        gain,
-      ),
-    );
+    const spacing = cue === 'click' ? 0.025 : cue === 'siren' ? 0.17 : 0.095;
+    effects[cue].forEach((frequency, i) => {
+      if (frequency)
+        this.tone(
+          frequency,
+          now + i * spacing,
+          cue === 'click' ? 0.045 : 0.22,
+          cue === 'click' ? 0.28 : 0.55,
+          'triangle',
+          gain,
+        );
+    });
   }
 }
 export const audio = new GameAudio();

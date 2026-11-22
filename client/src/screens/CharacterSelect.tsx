@@ -4,6 +4,7 @@ import { isUnlocked, progressFor } from '../game/meta';
 import { useAuth } from '../net/auth';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, ScreenTitle } from '../components/ui';
+import { characterArt, loadCosmetics } from '../game/cosmetics';
 
 export function CharacterSelect({
   onStart,
@@ -14,6 +15,7 @@ export function CharacterSelect({
 }) {
   const { user } = useAuth();
   const meta = progressFor(user);
+  const cosmetics = loadCosmetics(meta, user?.uid);
   const [picked, setPicked] = useState(content.characters[0]?.id ?? '');
   return (
     <main className="character-screen mx-auto flex min-h-dvh flex-col px-4 py-6">
@@ -38,7 +40,7 @@ export function CharacterSelect({
             >
               <div className="relative shrink-0">
                 <Art
-                  id={`char:${c.id}`}
+                  id={characterArt(c.id, cosmetics)}
                   size={84}
                   className={open ? '' : 'brightness-0 opacity-40'}
                 />

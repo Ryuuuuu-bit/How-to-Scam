@@ -4,6 +4,8 @@ import { t } from '../i18n';
 import { Button } from '../components/ui';
 import { sceneUrl } from '../assets/art';
 import { useAuth } from '../net/auth';
+import { loadCosmetics, menuScenes } from '../game/cosmetics';
+import { progressFor } from '../game/meta';
 
 export function MainMenu({
   saved,
@@ -13,6 +15,7 @@ export function MainMenu({
   onProfile,
   onDaily,
   onAchievements,
+  onWardrobe,
 }: {
   saved: Run | null;
   onNew: () => void;
@@ -21,9 +24,12 @@ export function MainMenu({
   onProfile?: (() => void) | undefined;
   onDaily?: (() => void) | undefined;
   onAchievements?: (() => void) | undefined;
+  onWardrobe: () => void;
 }) {
   const [help, setHelp] = useState(false);
   const { user, status } = useAuth();
+  const cosmetics = loadCosmetics(progressFor(user), user?.uid);
+  const menuScene = menuScenes.find((s) => s.id === cosmetics.scene) ?? menuScenes[0];
   return (
     <main className="menu-shell">
       <header className="brand-bar">
@@ -96,6 +102,9 @@ export function MainMenu({
                 🎖️ {t('menu.achievements')}
               </Button>
             )}
+            <Button tone="paper" block onClick={onWardrobe}>
+              ห้องแต่งตัวและฉากเมนู <span aria-hidden>↗</span>
+            </Button>
             <Button tone="paper" block onClick={() => setHelp(!help)} aria-expanded={help}>
               วิธีเล่น <span aria-hidden>{help ? '−' : '+'}</span>
             </Button>
@@ -122,7 +131,7 @@ export function MainMenu({
           </div>
         </section>
         <section className="menu-art" aria-label="ภาพเมืองและตัวละคร How to Scam">
-          <img src={sceneUrl('menu')} alt="แก๊งตัวละคร Chibi ในย่านเมืองยามเย็น" />
+          <img src={sceneUrl(menuScene.scene)} alt={menuScene.name} />
           <div className="art-stamp">
             แฟ้มคดี #001 <span>เริ่มต้นใหม่ได้เสมอ</span>
           </div>

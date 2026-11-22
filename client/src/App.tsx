@@ -15,9 +15,17 @@ import { AudioControls } from './components/AudioControls';
 import { api } from './net/api';
 import { AuthProvider, useAuth } from './net/auth';
 import { t } from './i18n';
+import { WardrobeScreen } from './screens/WardrobeScreen';
 
 type Screen =
-  'menu' | 'character' | 'play' | 'leaderboard' | 'dailyBoard' | 'daily' | 'achievements';
+  | 'menu'
+  | 'character'
+  | 'play'
+  | 'leaderboard'
+  | 'dailyBoard'
+  | 'daily'
+  | 'achievements'
+  | 'wardrobe';
 
 export function App() {
   return (
@@ -78,6 +86,8 @@ function GameScreens() {
   if (screen === 'achievements') {
     return <AchievementsScreen onBack={() => setScreen('menu')} />;
   }
+
+  if (screen === 'wardrobe') return <WardrobeScreen onBack={() => setScreen('menu')} />;
 
   if (screen === 'daily') {
     return (
@@ -143,6 +153,7 @@ function GameScreens() {
   return (
     <>
       <MainMenu
+        onWardrobe={() => setScreen('wardrobe')}
         saved={saved}
         onNew={() => {
           game.clearSave();

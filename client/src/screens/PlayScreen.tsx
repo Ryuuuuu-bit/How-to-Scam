@@ -13,6 +13,11 @@ import { lt, t } from '../i18n';
 import { content } from '@hts/shared/data';
 import { CallPhase, EventPhase, InvestPhase, LaunderPhase, ShopPhase } from './phases';
 import { EscapePhase } from './EscapePhase';
+import { DailyNewspaper } from '../components/DailyNewspaper';
+import { Art } from '../components/ui';
+import { characterArt, loadCosmetics } from '../game/cosmetics';
+import { progressFor } from '../game/meta';
+import { useAuth } from '../net/auth';
 
 export function PlayScreen({
   state,
@@ -25,22 +30,24 @@ export function PlayScreen({
   dispatch: (a: Action) => void;
   actions?: Action[];
 }) {
-  const [sheet, setSheet] = useState<ResultLine[] | null>(null);
-  const soundedTick = useRef(tick);
+  const { user } = useAuth();
+  const cosmetics = loadCosmetics(progressFor(user), user?.uid);
+  const [dismissedTick, setDismissedTick] = useState<number>();
+  const resultLines = state.lastResults
+    .map((result) => describeResult(result, state))
+    .filter((line): line is ResultLine => line !== null);
+  const showResults = dismissedTick !== tick && resultLines.length > 0;
+  const sounded = useRef({ tick, state });
   useEffect(() => {
     audio.setDanger(state.heat >= 75 || state.phase === 'escape');
-    if (soundedTick.current === tick) return;
-    soundedTick.current = tick;
-    playCues(state);
+    if (sounded.current.tick === tick) return;
+    playCues(state, sounded.current.state);
+    sounded.current = { tick, state };
   }, [tick, state]);
   useEffect(() => () => audio.setDanger(false), []);
 
   // ทุกครั้งที่มี action ใหม่ ถ้ามีผลลัพธ์ก็เด้งแผ่นสรุปขึ้นมา
   useEffect(() => {
-    const lines = state.lastResults
-      .map((r) => describeResult(r, state))
-      .filter((l): l is ResultLine => l !== null);
-    setSheet(lines.length > 0 ? lines : null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [tick]);
 
@@ -80,6 +87,10 @@ export function PlayScreen({
         key={`${state.day}-${state.phase}-${state.pendingEvents[0] ?? ''}-${state.escape?.step ?? ''}`}
       >
         <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <Art id={characterArt(state.characterId, cosmetics)} size={64} />
+          <DailyNewspaper state={state} autoOpen={state.phase === 'plan' && !showResults} />
+        </div>
         {state.phase === 'plan' && (
           <DayPlanner {...props} lastPlan={lastPlanFrom(actions)} key={state.day} />
         )}
@@ -90,7 +101,7 @@ export function PlayScreen({
         {state.phase === 'shop' && <ShopPhase {...props} />}
         {state.phase === 'escape' && <EscapePhase {...props} />}
       </main>
-      {sheet && <ResultSheet lines={sheet} onClose={() => setSheet(null)} />}
+      {showResults && <ResultSheet lines={resultLines} onClose={() => setDismissedTick(tick)} />}
     </div>
   );
 }

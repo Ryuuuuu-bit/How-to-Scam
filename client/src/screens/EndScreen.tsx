@@ -8,6 +8,7 @@ import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, Panel } from '../components/ui';
 import { sceneUrl } from '../assets/art';
+import { DailyNewspaper } from '../components/DailyNewspaper';
 
 export function EndScreen({
   state,
@@ -44,7 +45,7 @@ export function EndScreen({
   const newAch = content.achievements.filter((a) => award.newAchievements.includes(a.id));
   useEffect(() => {
     audio.setDanger(false);
-    if (state.end?.reason === 'caught') audio.sfx('sfx_jail', 'end');
+    if (state.end?.reason === 'caught') audio.sfx('sfx_jail', 'jail');
     else audio.sfx('sfx_coins', 'end');
   }, []);
   const end = state.end;
@@ -89,6 +90,7 @@ export function EndScreen({
       </Panel>
 
       <SubmitBanner state={submit.state} onRetry={() => void submit.retry()} />
+      <DailyNewspaper state={state} />
 
       {newAch.length > 0 && (
         <div className="anim-rise-in rounded-2xl border-[3px] border-ink bg-sun p-3 text-center text-ink shadow-pop">
