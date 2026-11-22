@@ -15,9 +15,7 @@ import { CallPhase, EventPhase, InvestPhase, LaunderPhase, ShopPhase } from './p
 import { EscapePhase } from './EscapePhase';
 import { DailyNewspaper } from '../components/DailyNewspaper';
 import { Art } from '../components/ui';
-import { characterArt, loadCosmetics } from '../game/cosmetics';
-import { progressFor } from '../game/meta';
-import { useAuth } from '../net/auth';
+import { usePlayerPortrait } from '../game/usePlayerPortrait';
 import { MemeSticker } from '../components/MemeSticker';
 import { reactionMeme } from '../game/memes';
 
@@ -32,8 +30,7 @@ export function PlayScreen({
   dispatch: (a: Action) => void;
   actions?: Action[];
 }) {
-  const { user } = useAuth();
-  const cosmetics = loadCosmetics(progressFor(user), user?.uid);
+  const portrait = usePlayerPortrait(state.characterId);
   const [dismissedTick, setDismissedTick] = useState<number>();
   const [beforeDecision, setBeforeDecision] = useState<{ cash: number; actionCount: number }>();
   const results = state.lastResults.filter(result =>
@@ -106,7 +103,8 @@ export function PlayScreen({
           วันนี้จะเอายังไงดี?
         </p>
         <div className="phase-track" aria-label="ลำดับของวัน">
-          {(['plan', 'invest', 'event', 'launder', 'shop'] as const).map((phase, i) => (
+          {(['plan', state.phase === 'call' ? 'call' : 'invest', 'event', 'launder', 'shop',
+            ...(state.phase === 'escape' ? ['escape'] as const : [])] as const).map((phase, i) => (
             <span key={phase} aria-current={state.phase === phase ? 'step' : undefined}>
               <b>0{i + 1}</b>
               {t(`phase.${phase}`)}
@@ -120,7 +118,7 @@ export function PlayScreen({
         {!hasOwnScene && !(state.phase === 'escape' && (state.escape?.step === 'custody' || state.escape?.step === 'qte')) && <div className={tall ? 'scene-spacer scene-spacer-tall' : 'scene-spacer'} />}
         <div className="play-heading mb-3 flex items-center gap-3">
           <Art
-            id={characterArt(state.characterId, cosmetics)}
+            id={portrait}
             size={60}
             className="play-portrait shrink-0"
           />
@@ -158,7 +156,7 @@ export function PlayScreen({
           {state.phase === 'event' && <EventPhase {...props} />}
           {state.phase === 'launder' && <LaunderPhase {...props} />}
           {state.phase === 'shop' && <ShopPhase {...props} />}
-          {state.phase === 'escape' && <EscapePhase {...props} />}
+          {state.phase === 'escape' && <EscapePhase {...props} portrait={portrait} />}
         </div>
       </main>
       {showResults && <ResultSheet lines={resultLines} onClose={() => setDismissedTick(tick)} />}

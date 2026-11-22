@@ -5,6 +5,7 @@ import type { DailyInfo } from '../net/api';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, Panel, ScreenTitle } from '../components/ui';
 import { SceneBackdrop } from '../components/SceneBackdrop';
+import { usePlayerPortrait } from '../game/usePlayerPortrait';
 
 /** Daily Challenge: seed ร่วมของวันนี้ อาชีพเดียวกันทุกคน นับวันละรอบ */
 export function DailyScreen({
@@ -28,6 +29,7 @@ export function DailyScreen({
   }, []);
 
   const ch = info ? content.characters.find((c) => c.id === info.characterId) : undefined;
+  const portrait = usePlayerPortrait(ch?.id ?? '');
   const start = async () => {
     setBusy(true);
     try {
@@ -49,7 +51,7 @@ export function DailyScreen({
           <div className="font-display text-sm text-ink-soft">
             {t('daily.date', { d: info.date })}
           </div>
-          <Art id={`char:${ch.id}`} size={120} />
+          <Art id={portrait} size={120} />
           <div className="text-xs text-ink-soft">{t('daily.job')}</div>
           <div className="font-display text-xl font-semibold">{lt(ch.name)}</div>
           <div className="text-xs">

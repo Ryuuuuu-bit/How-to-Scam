@@ -9,7 +9,9 @@ const stamps = [{ icon: '🐟', name: 'ปลาทู' }, { icon: '🐾', name:
 const contentKeep = content.config.caughtCleanKeepPct;
 const memorySeconds = 3;
 
-export function CustodyScene({ state, dispatch }: { state: GameState; dispatch: (a: Action) => void }) {
+export function CustodyScene({ state, dispatch, portrait = 'char:' + state.characterId }: {
+  state: GameState; dispatch: (a: Action) => void; portrait?: string | undefined;
+}) {
   const [page, setPage] = useState<'cell' | 'remember' | 'play'>('cell');
   const [answer, setAnswer] = useState<number[]>([]);
   const [photo, setPhoto] = useState(false);
@@ -54,7 +56,7 @@ export function CustodyScene({ state, dispatch }: { state: GameState; dispatch: 
     <div className={'custody-art ' + (cell ? 'cell-art' : 'dream-art')}>
       <span className="custody-tag">{cell ? 'บันทึกประจำวัน' : 'เกมจำภาพของส้มซ่า'}</span>
       {!cell && <div className="dream-door"><Art id="char:orange_cat" size={94} /></div>}
-      {cell && photo && <div className="booking-photo"><Art id={'char:' + state.characterId} size={76} /><span>คดีวันที่ {state.day}</span></div>}
+      {cell && photo && <div className="booking-photo"><Art id={portrait} size={76} /><span>คดีวันที่ {state.day}</span></div>}
       <h2>{cell ? 'คืนแรกหลังลูกกรง' : page === 'remember' ? '① จำภาพจากซ้ายไปขวา' : '② แตะภาพตามที่จำไว้'}</h2>
     </div>
     <div className="custody-copy">

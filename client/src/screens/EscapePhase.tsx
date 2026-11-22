@@ -10,16 +10,17 @@ import { audio } from '../audio/audio';
 interface Props {
   state: GameState;
   dispatch: (a: Action) => void;
+  portrait?: string | undefined;
 }
 
 const money = (s: GameState) => s.dirtyCash + s.cleanCash;
 const baht = (n: number) => `฿${n.toLocaleString('th-TH')}`;
 
 /** โหมดหนีตำรวจ: ปลอมตัว → ที่หนี → เหตุการณ์ → ส่วย → QTE */
-export function EscapePhase({ state, dispatch }: Props) {
+export function EscapePhase({ state, dispatch, portrait }: Props) {
   const e = escapeOf(state);
   const steps = ['disguise', 'route', 'event', 'bribe', 'qte'] as const;
-  if (e.step === 'custody') return <CustodyScene state={state} dispatch={dispatch} />;
+  if (e.step === 'custody') return <CustodyScene state={state} dispatch={dispatch} portrait={portrait} />;
   const activeStep = steps.indexOf(e.step);
   return (
     <div className="flex flex-col gap-3 text-ink">

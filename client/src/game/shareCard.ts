@@ -68,6 +68,7 @@ function wrap(
 
 export interface ShareInfo {
   state: GameState;
+  portrait: string;
   titleId?: string | undefined;
   rank?: number | undefined;
   daily?: string | null | undefined;
@@ -84,7 +85,7 @@ export async function makeShareCard(info: ShareInfo): Promise<Blob> {
   const ending = content.endings.find((e) => e.id === end.endingId);
   const [bg, char] = await Promise.all([
     loadImage(sceneUrl(`end_${end.endingId}`) ?? sceneUrl('menu')),
-    loadImage(ART[`char:${state.characterId}`]?.src),
+    loadImage(ART[info.portrait]?.src),
   ]);
 
   const canvas = document.createElement('canvas');
@@ -177,15 +178,15 @@ export async function makeShareCard(info: ShareInfo): Promise<Blob> {
 }
 
 /** แชร์ผ่านเมนูแชร์ของมือถือ ถ้าไม่รองรับให้ดาวน์โหลดเป็นไฟล์ */
-export async function shareCard(info: ShareInfo): Promise<'shared' | 'saved'> {
+export async function shareCard(info: ShareInfo): Promise<'shared' | 'saved' | 'cancelled'> {
   const blob = await makeShareCard(info);
   const file = new File([blob], 'how-to-scam.png', { type: 'image/png' });
   if (navigator.canShare?.({ files: [file] })) {
     try {
       await navigator.share({ files: [file], text: t('share.caption') });
       return 'shared';
-    } catch {
-      // ผู้เล่นกดยกเลิก → ไปดาวน์โหลดแทน
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return 'cancelled';
     }
   }
   const url = URL.createObjectURL(blob);

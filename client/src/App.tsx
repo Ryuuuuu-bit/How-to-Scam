@@ -110,9 +110,10 @@ function GameScreens() {
         onBack={() => setScreen('menu')}
         onBoard={() => setScreen('dailyBoard')}
         onPlay={(r) => {
-          game.clearSave();
-          setSaved(null);
-          game.start(r.characterId, { runId: r.runId, seed: r.seed });
+          const previous = loadSavedRun();
+          if (previous && previous.runId === r.runId && previous.seed === r.seed &&
+              previous.characterId === r.characterId) game.resume(previous);
+          else game.start(r.characterId, { runId: r.runId, seed: r.seed });
           setScreen('play');
         }}
       />

@@ -3,6 +3,7 @@ import { audio } from '../audio/audio';
 import type { Action, GameState } from '@hts/shared';
 import { useSubmitRun } from '../game/submit';
 import { shareCard } from '../game/shareCard';
+import { usePlayerPortrait } from '../game/usePlayerPortrait';
 import { awardRun } from '../game/meta';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
@@ -15,19 +16,22 @@ export function EndScreen({
   state,
   runId,
   actions,
+  practice = false,
   onAgain,
   onMenu,
 }: {
   state: GameState;
   runId?: string | undefined;
   actions: Action[];
+  practice?: boolean;
   onAgain: () => void;
   onMenu: () => void;
 }) {
-  const submit = useSubmitRun(runId, actions);
+  const portrait = usePlayerPortrait(state.characterId);
+  const submit = useSubmitRun(practice ? undefined : runId, actions);
   // รอบออฟไลน์: ให้แต้มแก๊งในเครื่อง (รอบออนไลน์ server เป็นคนให้)
   const [localAward] = useState(() =>
-    runId
+    runId || practice
       ? { gained: 0, unlocked: [] as typeof content.characters, newAchievements: [] as string[] }
       : awardRun(state),
   );
@@ -65,7 +69,7 @@ export function EndScreen({
         </span>
       </div>
 
-      <EndingCard state={state} />
+      <EndingCard state={state} portrait={portrait} />
 
       <Panel className="anim-rise-in text-center" tone="paper">
         <div className="text-sm text-ink-soft">{t('end.score')}</div>
@@ -75,7 +79,7 @@ export function EndScreen({
         </div>
       </Panel>
 
-      <SubmitBanner state={submit.state} onRetry={() => void submit.retry()} />
+      {!practice && <SubmitBanner state={submit.state} onRetry={() => void submit.retry()} />}
       <div className="grid grid-cols-2 gap-3">
         <Button tone="paper" onClick={onMenu}>{t('end.menu')}</Button>
         <Button tone="pink" onClick={onAgain}>{t('end.again')}</Button>
@@ -107,6 +111,7 @@ export function EndScreen({
           setSharing('making');
           shareCard({
             state,
+            portrait,
             titleId: okResult?.titleId,
             rank: okResult?.rank,
             daily: okResult?.dailyDate,

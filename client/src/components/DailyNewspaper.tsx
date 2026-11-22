@@ -43,7 +43,7 @@ export function DailyNewspaper({
           setOpen(true);
           audio.play('paper');
         }}
-        className={`flex min-h-10 items-center gap-2 border-2 border-ink bg-paper px-3 py-1.5 text-left text-sm font-semibold shadow-pop-sm ${preview ? 'flex-1 rounded-xl' : 'ml-auto rounded-full'}`}
+        className={`flex min-h-10 items-center gap-2 border-2 border-ink bg-paper px-3 py-1.5 text-left text-sm font-semibold text-ink shadow-pop-sm ${preview ? 'flex-1 rounded-xl' : 'ml-auto rounded-full'}`}
       >
         <Art id="icon:news" size={24} className="shrink-0" />
         <span className="min-w-0">

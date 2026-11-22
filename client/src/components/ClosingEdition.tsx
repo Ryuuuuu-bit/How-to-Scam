@@ -2,6 +2,7 @@ import type { GameState } from '@hts/shared';
 import { neighborhoodHeadline } from '../game/origins';
 import { content } from '@hts/shared/data';
 import { Art, Panel } from './ui';
+import { sceneUrl } from '../assets/art';
 
 export function ClosingEdition({ state }: { state: GameState }) {
   const end = state.end;
@@ -24,6 +25,10 @@ export function ClosingEdition({ state }: { state: GameState }) {
   const first = state.history[0];
   const originHeadline = neighborhoodHeadline(state);
   const method = content.methods.find((m) => m.id === first?.methodId);
+  const scene = eventId ? 'ev_' + eventId : 'end_' + end.endingId;
+  const illustration = eventId === 'nat_receipt' ? 'shop:intern_nat'
+    : eventId === 'tuk_mic' ? 'shop:host_tuk'
+    : sceneUrl(scene) ? 'scene:' + scene : 'icon:news';
   return (
     <Panel tone="paper" className="text-left text-ink">
       <p className="border-b-4 border-ink pb-2 font-display text-lg font-bold">เดลี่ต้มตุ๋น · ฉบับปิดคดี</p>
@@ -31,14 +36,7 @@ export function ClosingEdition({ state }: { state: GameState }) {
         {originHeadline || (names ? `จากวันที่ ${names} เข้าทีม ถึงฉากจบ “${ending}”` : ending)}
       </h2>
       <div className="flex items-center gap-3">
-        <Art
-          id={
-            eventId
-              ? `scene:ev_${eventId === 'nat_receipt' ? 'cat_keyboard' : eventId === 'tuk_mic' ? 'celebrity_slip' : eventId}`
-              : `scene:end_${end.endingId}`
-          }
-          size={85}
-        />
+        <Art id={illustration} size={85} className="shrink-0" />
         <ol className="space-y-2 text-sm">
           {hire && names ? (
             <li>
