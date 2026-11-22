@@ -70,7 +70,7 @@ export const achievements: Achievement[] = [
     icon: '🏢',
     rule: { kind: 'level', min: 4 },
     name: { th: 'แก๊งระดับประเทศ' },
-    desc: { th: 'แก๊งขึ้นถึง Lv.4' },
+    desc: { th: 'ขึ้นถึงอาชญากรรม Lv.4' },
   },
   {
     id: 'variety',
