@@ -11,12 +11,16 @@ export function MainMenu({
   onContinue,
   onLeaderboard,
   onProfile,
+  onDaily,
+  onAchievements,
 }: {
   saved: Run | null;
   onNew: () => void;
   onContinue: () => void;
   onLeaderboard?: (() => void) | undefined;
   onProfile?: (() => void) | undefined;
+  onDaily?: (() => void) | undefined;
+  onAchievements?: (() => void) | undefined;
 }) {
   const [help, setHelp] = useState(false);
   const { user, status } = useAuth();
@@ -62,6 +66,11 @@ export function MainMenu({
             >
               {t('menu.newRun')} <span aria-hidden>↗</span>
             </Button>
+            {onDaily && (
+              <Button tone="pink" block onClick={onDaily}>
+                🗓️ {t('menu.daily')}
+              </Button>
+            )}
             <Button tone="grape" block disabled={!onLeaderboard} onClick={onLeaderboard}>
               🏆 {onLeaderboard ? t('menu.leaderboard') : t('menu.leaderboardSoon')}
             </Button>
@@ -81,6 +90,11 @@ export function MainMenu({
               <p className="rounded-xl bg-white/80 p-2 text-xs text-ink">
                 {t('auth.offlineBanner')}
               </p>
+            )}
+            {onAchievements && (
+              <Button tone="paper" block onClick={onAchievements}>
+                🎖️ {t('menu.achievements')}
+              </Button>
             )}
             <Button tone="paper" block onClick={() => setHelp(!help)} aria-expanded={help}>
               วิธีเล่น <span aria-hidden>{help ? '−' : '+'}</span>

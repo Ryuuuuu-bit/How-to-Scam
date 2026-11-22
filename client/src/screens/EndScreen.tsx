@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { audio } from '../audio/audio';
 import type { Action, GameState } from '@hts/shared';
 import { useSubmitRun } from '../game/submit';
+import { shareCard } from '../game/shareCard';
 import { awardRun } from '../game/meta';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
@@ -24,8 +25,11 @@ export function EndScreen({
   const submit = useSubmitRun(runId, actions);
   // รอบออฟไลน์: ให้แต้มแก๊งในเครื่อง (รอบออนไลน์ server เป็นคนให้)
   const [localAward] = useState(() =>
-    runId ? { gained: 0, unlocked: [] as typeof content.characters } : awardRun(state),
+    runId
+      ? { gained: 0, unlocked: [] as typeof content.characters, newAchievements: [] as string[] }
+      : awardRun(state),
   );
+  const [sharing, setSharing] = useState<'idle' | 'making' | 'saved'>('idle');
   const award =
     submit.state.kind === 'ok'
       ? {
@@ -33,8 +37,11 @@ export function EndScreen({
           unlocked: content.characters.filter((c) =>
             submit.state.kind === 'ok' ? submit.state.result.unlocked.includes(c.id) : false,
           ),
+          newAchievements: submit.state.result.newAchievements,
         }
       : localAward;
+  const okResult = submit.state.kind === 'ok' ? submit.state.result : undefined;
+  const newAch = content.achievements.filter((a) => award.newAchievements.includes(a.id));
   useEffect(() => {
     audio.setDanger(false);
     audio.play('end');
@@ -81,6 +88,49 @@ export function EndScreen({
       </Panel>
 
       <SubmitBanner state={submit.state} onRetry={() => void submit.retry()} />
+
+      {newAch.length > 0 && (
+        <div className="anim-rise-in rounded-2xl border-[3px] border-ink bg-sun p-3 text-center text-ink shadow-pop">
+          <div className="font-display text-lg">🎖️ {t('achievements.newTitle')}</div>
+          <div className="mt-1 flex flex-wrap justify-center gap-2">
+            {newAch.map((a) => (
+              <span
+                key={a.id}
+                className="rounded-full border-2 border-ink bg-white px-2 py-0.5 text-sm"
+              >
+                {a.icon} {lt(a.name)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <Button
+        tone="grape"
+        block
+        disabled={sharing === 'making'}
+        onClick={() => {
+          setSharing('making');
+          shareCard({
+            state,
+            titleId: okResult?.titleId,
+            rank: okResult?.rank,
+            daily: okResult?.dailyDate,
+          })
+            .then((r) => setSharing(r === 'saved' ? 'saved' : 'idle'))
+            .catch((e: unknown) => {
+              console.error('share card failed', e);
+              setSharing('idle');
+            });
+        }}
+      >
+        📸{' '}
+        {sharing === 'making'
+          ? t('share.making')
+          : sharing === 'saved'
+            ? t('share.saved')
+            : t('share.button')}
+      </Button>
 
       {(award.gained > 0 || award.unlocked.length > 0) && (
         <div className="anim-rise-in flex flex-col gap-1 rounded-2xl border-[3px] border-ink bg-grape p-3 text-center text-white shadow-pop">

@@ -9,6 +9,9 @@ export type AuthStatus = 'loading' | 'signedOut' | 'ready' | 'offline';
 interface AuthValue {
   status: AuthStatus;
   user: PublicUser | null;
+  /** เหรียญที่ได้แล้ว (ออนไลน์) */
+  achievements: string[];
+  addAchievements: (ids: string[]) => void;
   googleClientId: string | null;
   loginGuest: () => Promise<void>;
   loginGoogle: (credential: string) => Promise<void>;
@@ -24,6 +27,7 @@ const Ctx = createContext<AuthValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>(apiEnabled ? 'loading' : 'offline');
   const [user, setUser] = useState<PublicUser | null>(null);
+  const [achievements, setAchievements] = useState<string[]>([]);
   const [googleClientId, setGoogleClientId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const me = await api.me();
             if (!alive) return;
             setUser(me.user);
+            setAchievements(me.achievements);
             setStatus('ready');
             return;
           } catch (e) {
@@ -60,6 +65,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const finish = useCallback((r: { token: string; user: PublicUser }) => {
     setToken(r.token);
     setUser(r.user);
+    api
+      .me()
+      .then((m) => setAchievements(m.achievements))
+      .catch(() => undefined);
     setError(null);
     setStatus('ready');
   }, []);
@@ -68,6 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       status,
       user,
+      achievements,
+      addAchievements: (ids) => setAchievements((prev) => Array.from(new Set([...prev, ...ids]))),
       googleClientId,
       error,
       loginGuest: async () => {
@@ -88,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout: () => {
         setToken(null);
         setUser(null);
+        setAchievements([]);
         setStatus('signedOut');
       },
       setUser,
@@ -97,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       playOffline: () => setStatus('offline'),
     }),
-    [status, user, googleClientId, error, finish],
+    [status, user, achievements, googleClientId, error, finish],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

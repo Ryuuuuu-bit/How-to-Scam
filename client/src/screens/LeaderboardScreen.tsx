@@ -6,12 +6,18 @@ import { useAuth } from '../net/auth';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, ScreenTitle } from '../components/ui';
 
-type Board = 'top' | 'longest' | 'fastest';
-const BOARDS: Board[] = ['top', 'longest', 'fastest'];
+type Board = 'top' | 'longest' | 'fastest' | 'daily';
+const BOARDS: Board[] = ['daily', 'top', 'longest', 'fastest'];
 
-export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
+export function LeaderboardScreen({
+  onBack,
+  initialBoard = 'top',
+}: {
+  onBack: () => void;
+  initialBoard?: Board;
+}) {
   const { user } = useAuth();
-  const [board, setBoard] = useState<Board>('top');
+  const [board, setBoard] = useState<Board>(initialBoard);
   const [season, setSeason] = useState<string>('');
   const [seasons, setSeasons] = useState<string[]>([]);
   const [rows, setRows] = useState<BoardRow[] | null>(null);
@@ -47,7 +53,7 @@ export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
     <main className="mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
       <ScreenTitle title={t('leaderboard.title')} />
       <div className="mb-2">
-        {seasons.length > 0 && (
+        {seasons.length > 0 && board !== 'daily' && (
           <select
             value={season}
             onChange={(e) => setSeason(e.target.value)}
@@ -61,7 +67,7 @@ export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
           </select>
         )}
       </div>
-      <div className="mb-3 grid grid-cols-3 gap-1.5">
+      <div className="mb-3 grid grid-cols-4 gap-1.5">
         {BOARDS.map((b) => (
           <button
             key={b}
@@ -97,9 +103,13 @@ export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
               </div>
               <div className="text-right">
                 <div className="font-display font-semibold text-pink">
-                  {board === 'top' ? fmt(r.score) : t('leaderboard.days', { n: r.days })}
+                  {board === 'top' || board === 'daily'
+                    ? fmt(r.score)
+                    : t('leaderboard.days', { n: r.days })}
                 </div>
-                {board !== 'top' && <div className="text-xs text-ink-soft">{fmt(r.score)}</div>}
+                {board !== 'top' && board !== 'daily' && (
+                  <div className="text-xs text-ink-soft">{fmt(r.score)}</div>
+                )}
               </div>
             </li>
           );

@@ -1,4 +1,4 @@
-import { isCharacterUnlocked, xpForRun } from '@hts/shared';
+import { achievementsFor, isCharacterUnlocked, xpForRun } from '@hts/shared';
 import type { Character, GameState, UnlockProgress } from '@hts/shared';
 import { content } from '@hts/shared/data';
 
@@ -12,9 +12,11 @@ export interface Meta {
   endings: string[];
   /** seed ของรอบที่ให้แต้มไปแล้ว กันนับซ้ำ */
   awarded: string[];
+  /** เหรียญที่ได้ตอนเล่นออฟไลน์ */
+  achievements: string[];
 }
 
-const empty: Meta = { xp: 0, runs: 0, endings: [], awarded: [] };
+const empty: Meta = { xp: 0, runs: 0, endings: [], awarded: [], achievements: [] };
 
 export function loadMeta(): Meta {
   try {
@@ -44,9 +46,16 @@ export function progressFor(user: UnlockProgress | null): UnlockProgress {
 }
 
 /** ให้แต้มจากรอบที่จบแล้ว (ครั้งเดียวต่อ seed) คืนแต้มที่ได้และอาชีพที่เพิ่งปลดล็อก */
-export function awardRun(s: GameState): { gained: number; unlocked: Character[] } {
+export function awardRun(s: GameState): {
+  gained: number;
+  unlocked: Character[];
+  newAchievements: string[];
+} {
   const m = loadMeta();
-  if (!s.end || m.awarded.includes(s.seed)) return { gained: 0, unlocked: [] };
+  if (!s.end || m.awarded.includes(s.seed)) return { gained: 0, unlocked: [], newAchievements: [] };
+  const newAchievements = achievementsFor(s, { runs: m.runs + 1, daily: false }, content).filter(
+    (a) => !m.achievements.includes(a),
+  );
   const before = content.characters.filter((c) => isUnlocked(c, m)).map((c) => c.id);
   const gained = xpForRun(s);
   const next: Meta = {
@@ -54,8 +63,9 @@ export function awardRun(s: GameState): { gained: number; unlocked: Character[] 
     runs: m.runs + 1,
     endings: m.endings.includes(s.end.endingId) ? m.endings : [...m.endings, s.end.endingId],
     awarded: [...m.awarded, s.seed].slice(-200),
+    achievements: [...m.achievements, ...newAchievements],
   };
   saveMeta(next);
   const unlocked = content.characters.filter((c) => isUnlocked(c, next) && !before.includes(c.id));
-  return { gained, unlocked };
+  return { gained, unlocked, newAchievements };
 }

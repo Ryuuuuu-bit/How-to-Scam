@@ -3,6 +3,8 @@ import { loadSavedRun, useGame } from './game/useGame';
 import { CharacterSelect } from './screens/CharacterSelect';
 import { EndScreen } from './screens/EndScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
+import { DailyScreen } from './screens/DailyScreen';
+import { AchievementsScreen } from './screens/AchievementsScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { MainMenu } from './screens/MainMenu';
 import { PlayScreen } from './screens/PlayScreen';
@@ -14,7 +16,8 @@ import { api } from './net/api';
 import { AuthProvider, useAuth } from './net/auth';
 import { t } from './i18n';
 
-type Screen = 'menu' | 'character' | 'play' | 'leaderboard';
+type Screen =
+  'menu' | 'character' | 'play' | 'leaderboard' | 'dailyBoard' | 'daily' | 'achievements';
 
 export function App() {
   return (
@@ -63,8 +66,32 @@ function GameScreens() {
     setScreen('play');
   };
 
-  if (screen === 'leaderboard') {
-    return <LeaderboardScreen onBack={() => setScreen('menu')} />;
+  if (screen === 'leaderboard' || screen === 'dailyBoard') {
+    return (
+      <LeaderboardScreen
+        initialBoard={screen === 'dailyBoard' ? 'daily' : 'top'}
+        onBack={() => setScreen('menu')}
+      />
+    );
+  }
+
+  if (screen === 'achievements') {
+    return <AchievementsScreen onBack={() => setScreen('menu')} />;
+  }
+
+  if (screen === 'daily') {
+    return (
+      <DailyScreen
+        onBack={() => setScreen('menu')}
+        onBoard={() => setScreen('dailyBoard')}
+        onPlay={(r) => {
+          game.clearSave();
+          setSaved(null);
+          game.start(r.characterId, { runId: r.runId, seed: r.seed });
+          setScreen('play');
+        }}
+      />
+    );
   }
 
   if (screen === 'character') {
@@ -123,6 +150,8 @@ function GameScreens() {
         }}
         onLeaderboard={auth.status === 'ready' ? () => setScreen('leaderboard') : undefined}
         onProfile={auth.status === 'ready' ? () => setProfile(true) : undefined}
+        onDaily={auth.status === 'ready' ? () => setScreen('daily') : undefined}
+        onAchievements={() => setScreen('achievements')}
       />
       {profile && <ProfileSheet onClose={() => setProfile(false)} />}
     </>

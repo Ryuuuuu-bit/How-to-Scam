@@ -19,7 +19,7 @@ export function useSubmitRun(runId: string | undefined, actions: Action[]) {
     runId && auth.status === 'ready' ? { kind: 'sending' } : { kind: 'offline' },
   );
   const started = useRef(false);
-  const { setUser } = auth;
+  const { setUser, addAchievements } = auth;
 
   const send = useCallback(async () => {
     if (!runId) return;
@@ -32,6 +32,7 @@ export function useSubmitRun(runId: string | undefined, actions: Action[]) {
         // ไม่จำก็ได้
       }
       setUser(result.user);
+      addAchievements(result.newAchievements);
       setState({ kind: 'ok', result });
     } catch (e) {
       // ส่งไปแล้วรอบก่อน (เช่นรีเฟรชหน้า) ให้แสดงผลเดิม
@@ -48,7 +49,7 @@ export function useSubmitRun(runId: string | undefined, actions: Action[]) {
       }
       setState({ kind: 'error', code: e instanceof ApiError ? e.code : 'error' });
     }
-  }, [runId, actions, setUser]);
+  }, [runId, actions, setUser, addAchievements]);
 
   useEffect(() => {
     if (started.current || !runId || auth.status !== 'ready') return;

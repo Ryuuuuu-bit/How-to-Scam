@@ -14,7 +14,15 @@ export interface PublicUser {
   avatarUrl: string | null;
   xp: number;
   runsPlayed: number;
+  dailyPlays: number;
   endings: string[];
+}
+
+export interface DailyInfo {
+  date: string;
+  characterId: string;
+  status: 'new' | 'started' | 'done';
+  result: { score: number; titleId: string; rank: number } | null;
 }
 
 export interface BoardRow {
@@ -38,7 +46,10 @@ export interface SubmitResult {
   xpGained: number;
   unlocked: string[];
   seasonId: string;
+  mode: 'normal' | 'daily';
+  dailyDate: string | null;
   rank: number;
+  newAchievements: string[];
   user: PublicUser;
 }
 
@@ -95,15 +106,20 @@ export const api = {
     call<{ token: string; user: PublicUser }>('/api/auth/guest', { method: 'POST', body: {} }),
   google: (credential: string) =>
     call<{ token: string; user: PublicUser }>('/api/auth/google', { body: { credential } }),
-  me: () => call<{ user: PublicUser }>('/api/me'),
+  me: () => call<{ user: PublicUser; achievements: string[] }>('/api/me'),
+  daily: () => call<DailyInfo>('/api/daily'),
+  dailyStart: () =>
+    call<{ runId: string; seed: string; characterId: string; date: string }>('/api/daily/start', {
+      body: {},
+    }),
   rename: (displayName: string) =>
     call<{ user: PublicUser }>('/api/me', { method: 'PATCH', body: { displayName } }),
   startRun: (characterId: string) =>
     call<{ runId: string; seed: string }>('/api/runs', { body: { characterId } }),
   submitRun: (runId: string, actions: Action[]) =>
     call<SubmitResult>(`/api/runs/${runId}/submit`, { body: { actions } }),
-  leaderboard: (board: 'top' | 'longest' | 'fastest', season?: string) =>
-    call<{ seasonId: string; board: string; rows: BoardRow[] }>(
+  leaderboard: (board: 'top' | 'longest' | 'fastest' | 'daily', season?: string) =>
+    call<{ seasonId: string; date?: string; board: string; rows: BoardRow[] }>(
       `/api/leaderboard?board=${board}${season ? `&season=${season}` : ''}`,
     ),
   seasons: () =>
