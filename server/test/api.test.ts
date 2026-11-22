@@ -1,5 +1,8 @@
-import type { AddressInfo } from 'node:net';
-import type { Server } from 'node:http';
+import { once } from 'node:events';
+import { request, type IncomingMessage, type Server } from 'node:http';
+import { randomUUID } from 'node:crypto';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { escapeOf, newGame, replay, step, unlockedMethods } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
@@ -10,7 +13,9 @@ import { memoryStore } from './memoryStore';
 
 const store = memoryStore();
 let server: Server;
-let base = '';
+const socketName = `hts-api-${randomUUID()}`;
+const socketPath =
+  process.platform === 'win32' ? `//./pipe/${socketName}` : join(tmpdir(), socketName);
 
 beforeAll(async () => {
   const app = createApp({
@@ -27,24 +32,33 @@ beforeAll(async () => {
     },
     disableRateLimit: true,
   });
-  server = app.listen(0);
-  await new Promise((r) => server.once('listening', r));
-  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  server = app.listen(socketPath);
+  await once(server, 'listening');
 });
-afterAll(() => {
+afterAll(async () => {
+  const closed = once(server, 'close');
   server.close();
+  await closed;
 });
 
 async function api(path: string, opts: { method?: string; token?: string; body?: unknown } = {}) {
-  const res = await fetch(base + path, {
+  const req = request({
+    socketPath,
+    path,
+    agent: false,
     method: opts.method ?? (opts.body ? 'POST' : 'GET'),
     headers: {
       'content-type': 'application/json',
       ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {}),
     },
-    ...(opts.body ? { body: JSON.stringify(opts.body) } : {}),
   });
-  return { status: res.status, body: (await res.json()) as Record<string, unknown> };
+  const response = once(req, 'response');
+  req.end(opts.body === undefined ? undefined : JSON.stringify(opts.body));
+  const [res] = (await response) as [IncomingMessage];
+  res.setEncoding('utf8');
+  let json = '';
+  for await (const chunk of res) json += chunk;
+  return { status: res.statusCode, body: JSON.parse(json) as Record<string, unknown> };
 }
 
 async function guest() {
