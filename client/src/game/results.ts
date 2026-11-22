@@ -138,6 +138,10 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
             art: 'icon:rest',
           };
     case 'escape':
+      if (r.textKey === 'dream_escape') return {
+        tone: 'good', title: 'หลุดออกมาทางประตูแมว!',
+        body: 'ลืมตาอีกที คุณนอนกอดปลาทูอยู่หน้าตลาด เงินสกปรกถูกยึดไปแล้ว แต่ยังเล่นรอบนี้ต่อได้', art: 'char:orange_cat',
+      };
       return {
         tone: r.success ? 'good' : 'bad',
         title: r.success ? t('result.escapeOk') : t('result.escapeFail'),

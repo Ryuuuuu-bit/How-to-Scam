@@ -26,4 +26,4 @@ export type { PlayerTotals } from './engine/achievements';
 export { bangkokDate, dailyCharacter, isDailyDate } from './engine/daily';
 export { currentOffer } from './engine/offers';
 export { newsScout } from './engine/day';
-export { bribeCost, escapeChance, escapeOf } from './engine/escape';
+export { bribeCost, dreamSequence, escapeChance, escapeOf } from './engine/escape';

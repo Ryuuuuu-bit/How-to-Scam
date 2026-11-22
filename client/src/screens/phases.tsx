@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LiveCounter } from './LiveCounter';
+import { CatDesk } from './CatDesk';
 import type { Action, GameState, ScamMethod } from '@hts/shared';
 import {
   activeFestivals,
@@ -352,6 +353,7 @@ export function CallPhase({ state, dispatch }: PhaseProps) {
 export function EventPhase({ state, dispatch }: PhaseProps) {
   const ev = content.events.find((e) => e.id === state.pendingEvents[0]);
   if (!ev) return null;
+  if (ev.id === 'cat_keyboard') return <CatDesk choose={choiceIdx => dispatch({ t: 'eventChoice', choiceIdx })} />;
   if (ev.id === 'counter_live') return <LiveCounter seller={state.characterId === 'live_seller'} onFinish={cat => dispatch({ t: 'eventChoice', choiceIdx: cat ? 1 : 0 })} />;
   const tones = ['pink', 'mint', 'grape'] as const;
   return (

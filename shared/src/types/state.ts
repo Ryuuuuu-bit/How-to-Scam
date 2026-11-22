@@ -71,7 +71,7 @@ export interface CallState {
 
 /** ขั้นตอนของโหมดหนีตำรวจ */
 export interface EscapeState {
-  step: 'disguise' | 'route' | 'event' | 'bribe' | 'qte';
+  step: 'disguise' | 'route' | 'event' | 'bribe' | 'qte' | 'custody';
   /** % โอกาสรอดที่สะสมจากการเลือก (ก่อนบวกเส้นทาง) */
   bonus: number;
   disguiseId?: string;
@@ -214,8 +214,9 @@ export type Action =
   | { t: 'escapeRoute'; id: string }
   | { t: 'escapeEvent'; choiceIdx: number }
   | { t: 'escapeBribe'; pay: boolean }
-  | { t: 'escapeQte'; hits: number }
-  | { t: 'escapeSurrender' }
+  | { t: 'escapeQte'; hits: number; custody?: true | undefined }
+  | { t: 'escapeSurrender'; custody?: true | undefined }
+  | { t: 'custodyVerdict'; answer: number[] | null }
   | { t: 'retire' };
 
 export type PublicGameState = Omit<GameState, 'karma' | 'rng'>;

@@ -17,6 +17,7 @@ import { invariant } from './errors';
 import { resolveEventChoice } from './events';
 import {
   applyCaught,
+  dreamSequence,
   escapeBribe,
   escapeDisguise,
   escapeEvent,
@@ -178,13 +179,40 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       break;
     case 'escapeQte':
       expectPhase(s, 'escape');
-      if (escapeQte(s, c, rng, action.hits)) finish(s, c, rng, 'caught');
+      if (escapeQte(s, c, rng, action.hits)) {
+        if (action.custody) s.escape = { step: 'custody', bonus: 0 };
+        else finish(s, c, rng, 'caught');
+      }
       break;
     case 'escapeSurrender':
       expectPhase(s, 'escape');
+      invariant(s.escape?.step !== 'custody', 'already in custody');
       escapeSurrender(s, c);
-      finish(s, c, rng, 'caught');
+      if (action.custody) s.escape = { step: 'custody', bonus: 0 };
+      else finish(s, c, rng, 'caught');
       break;
+    case 'custodyVerdict': {
+      expectPhase(s, 'escape');
+      invariant(s.escape?.step === 'custody', 'not in custody');
+      const answer = action.answer;
+      if (answer !== null) {
+        invariant(!s.flags.includes('dream_escape') && !s.flags.includes('surrendered'), 'dream unavailable');
+        invariant(answer.length === 3 && answer.every(n => Number.isInteger(n) && n >= 0 && n < 3), 'invalid dream');
+      }
+      if (!answer || !dreamSequence(s).every((n, i) => n === answer[i])) {
+        finish(s, c, rng, 'caught');
+        break;
+      }
+      applyCaught(s, c);
+      s.flags.push('dream_escape');
+      s.escapes++;
+      s.heat = 45;
+      s.day = Math.min(c.config.maxDays, s.day + 1);
+      s.pendingEvents = [];
+      s.lastResults.push({ kind: 'escape', success: true, textKey: 'dream_escape' });
+      goToLaunder(s, c, rng);
+      break;
+    }
     case 'retire':
       expectPhase(s, 'plan', 'shop');
       finish(s, c, rng, 'retired');

@@ -4,6 +4,7 @@ import { bribeCost, escapeChance, escapeOf } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, Panel } from '../components/ui';
+import { CustodyScene } from './CustodyScene';
 
 interface Props {
   state: GameState;
@@ -17,6 +18,8 @@ const baht = (n: number) => `฿${n.toLocaleString('th-TH')}`;
 export function EscapePhase({ state, dispatch }: Props) {
   const e = escapeOf(state);
   const steps = ['disguise', 'route', 'event', 'bribe', 'qte'] as const;
+  if (e.step === 'custody') return <CustodyScene state={state} dispatch={dispatch} />;
+  const activeStep = steps.indexOf(e.step);
   return (
     <div className="flex flex-col gap-3 text-ink">
       <div className="flex items-center gap-2 rounded-2xl border-[3px] border-ink bg-paper p-2 shadow-pop-sm">
@@ -36,7 +39,7 @@ export function EscapePhase({ state, dispatch }: Props) {
           <div
             key={st}
             className={`h-2 flex-1 rounded-full border border-ink ${
-              steps.indexOf(e.step) >= i ? 'bg-danger' : 'bg-paper'
+              activeStep >= i ? 'bg-danger' : 'bg-paper'
             }`}
           />
         ))}
@@ -50,7 +53,7 @@ export function EscapePhase({ state, dispatch }: Props) {
         type="button"
         className="mx-auto mt-1 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-sm font-semibold text-ink shadow-pop-sm"
         onClick={() => {
-          if (window.confirm(t('escape.surrenderConfirm'))) dispatch({ t: 'escapeSurrender' });
+          if (window.confirm(t('escape.surrenderConfirm'))) dispatch({ t: 'escapeSurrender', custody: true });
         }}
       >
         🙇 {t('escape.surrender')}
@@ -240,8 +243,9 @@ function QteStep({ state, dispatch }: Props) {
         </Panel>
       )}
       <Panel className="anim-rise-in">
-        <p className="font-display mb-2 leading-snug">{t('escape.qteBody', { n: total })}</p>
-        <div className="relative h-64 overflow-hidden rounded-2xl border-2 border-ink bg-[repeating-linear-gradient(45deg,#ffe9a8,#ffe9a8_12px,#ffd86b_12px,#ffd86b_24px)]">
+        <h2 className="font-display mb-1 text-xl font-bold">วิ่งตามส้ม!</h2>
+        <p className="mb-2 text-sm">ไซเรนดังลั่นซอย แต่ส้มยังแวะทุกแผง! แตะตัวแมวให้ทัน {total} จังหวะ ยิ่งเจอหลายครั้ง โอกาสหนีสำเร็จยิ่งสูง</p>
+        <div className="chase-stage relative h-64 overflow-hidden rounded-2xl border-2 border-ink">
           {phase === 'ready' && (
             <div className="absolute inset-0 flex items-center justify-center">
               <Button tone="danger" onClick={() => setPhase('run')}>
@@ -259,7 +263,7 @@ function QteStep({ state, dispatch }: Props) {
               className="anim-pop absolute flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] border-ink bg-danger text-2xl shadow-pop-sm"
               style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
             >
-              🏃
+              <Art id="char:orange_cat" size={48} />
             </button>
           )}
           {phase === 'done' && (
@@ -281,7 +285,7 @@ function QteStep({ state, dispatch }: Props) {
           block
           className="mt-3 text-xl"
           disabled={phase !== 'done'}
-          onClick={() => dispatch({ t: 'escapeQte', hits })}
+          onClick={() => dispatch({ t: 'escapeQte', hits, custody: true })}
         >
           {t('escape.run')}
         </Button>

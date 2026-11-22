@@ -3,7 +3,12 @@ import type { EscapeState, GameState } from '../types/state';
 import { goToLaunder, spend } from './day';
 import { invariant } from './errors';
 import { karmaDelta } from './perks';
-import type { Rng } from './rng';
+import { hashSeed, Rng } from './rng';
+
+export function dreamSequence(s: GameState): number[] {
+  const rng = new Rng(hashSeed(s.seed + ':dream:' + s.day + ':' + s.escapes));
+  return [rng.int(0, 2), rng.int(0, 2), rng.int(0, 2)];
+}
 
 /**
  * โหมดหนีตำรวจ (มุกล้วนๆ ไม่ใช่วิธีหนีจริง):
