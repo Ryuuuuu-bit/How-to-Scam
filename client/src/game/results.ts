@@ -139,8 +139,8 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
           };
     case 'escape':
       if (r.textKey === 'dream_escape') return {
-        tone: 'good', title: 'หลุดออกมาทางประตูแมว!',
-        body: 'ลืมตาอีกที คุณนอนกอดปลาทูอยู่หน้าตลาด เงินสกปรกถูกยึดไปแล้ว แต่ยังเล่นรอบนี้ต่อได้', art: 'char:orange_cat',
+        tone: 'good', title: 'จำถูกทั้งสามใบ! ส้มพากลับตลาดแล้ว',
+        body: 'เงินสกปรกถูกยึดไปแล้ว แต่คุณได้เล่นรอบนี้ต่อ ส่วนส้มขอค่าตัวเป็นปลาทู', art: 'char:orange_cat',
       };
       return {
         tone: r.success ? 'good' : 'bad',

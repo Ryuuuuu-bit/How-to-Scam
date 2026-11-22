@@ -26,6 +26,11 @@ export function ScenePreview() {
     if (!state) return;
     const next = step(state, action, content);
     if (next.phase === 'escape') { setState(next); return; }
+    if (action.t === 'custodyVerdict' && action.answer) {
+      setResult(next.end ? 'ลำดับภาพไม่ตรง · รอบนี้จบในคุก' : 'จำถูกทั้งสามใบ! ส้มพากลับตลาด · Heat ' + next.heat);
+      setState(null);
+      return;
+    }
     setResult(next.end ? 'ปิดคดี · จบรอบในห้องขัง' : action.t === 'eventChoice'
       ? 'ส้มซ่าจัดให้แล้ว · เงินสกปรก ฿' + next.dirtyCash.toLocaleString('th-TH') + ' · Heat ' + next.heat
       : 'หนีสำเร็จ · เล่นต่อได้ · Heat ' + next.heat);
@@ -37,7 +42,7 @@ export function ScenePreview() {
       <><h1 className="font-display text-2xl font-bold text-white">ลองเล่นเหตุการณ์</h1>
         {result && <p role="status" className="rounded-xl bg-paper p-3 text-ink">{result}</p>}
         <Button tone="sun" onClick={() => start('qte')}>หนีตำรวจ · วิ่งตามส้ม!</Button>
-        <Button tone="grape" onClick={() => start('custody')}>คืนแรกหลังลูกกรง · แหกคุกมิติแมว</Button>
+        <Button tone="grape" onClick={() => start('custody')}>ออกจากคุก · เกมจำภาพของส้มซ่า</Button>
         <Button tone="paper" onClick={() => start('desk')}>ส้มซ่าบนโต๊ะทำงาน</Button></>}
   </main>;
 }

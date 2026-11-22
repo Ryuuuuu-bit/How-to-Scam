@@ -16,28 +16,32 @@ export function CustodyScene({ state, dispatch }: { state: GameState; dispatch: 
   const cell = page === 'cell';
   function stamp(n: number) {
     if (answer.length === code.length) return;
-    const next = [...answer, n];
-    setAnswer(next);
-    if (next.length === code.length) dispatch({ t: 'custodyVerdict', answer: next });
+    setAnswer(previous => previous.length < code.length ? [...previous, n] : previous);
   }
   return <section className="custody-card">
     <div className={'custody-art ' + (cell ? 'cell-art' : 'dream-art')}>
-      <span className="custody-tag">{cell ? 'บันทึกประจำวัน' : 'ความฝันของแมวส้ม'}</span>
+      <span className="custody-tag">{cell ? 'บันทึกประจำวัน' : 'เกมจำภาพของส้มซ่า'}</span>
       {!cell && <div className="dream-door"><Art id="char:orange_cat" size={94} /></div>}
       {cell && photo && <div className="booking-photo"><Art id={'char:' + state.characterId} size={76} /><span>คดีวันที่ {state.day}</span></div>}
-      <h2>{cell ? 'คืนแรกหลังลูกกรง' : 'แหกคุกมิติแมว'}</h2>
+      <h2>{cell ? 'คืนแรกหลังลูกกรง' : page === 'remember' ? '① จำภาพจากซ้ายไปขวา' : '② แตะภาพตามที่จำไว้'}</h2>
     </div>
     <div className="custody-copy">
-      {cell && <><p>{available ? 'คุณเพิ่งได้เตียงริมหน้าต่าง แมวส้มก็มานอนทับหมอน พอเคลิ้มหลับ มันกระซิบว่า “อยากออกทางประตูแมวมะ?”' : 'แมวส้มจองหมอนใบเดียวในห้องไปแล้ว คืนนี้คุณเลยได้ทั้งเตียง… ยกเว้นตรงหัว'}</p>
+      {cell && <><p>{available ? 'ส้มซ่าคาบการ์ดสามใบมาวางหน้าห้องขัง “จำให้ได้นะ เดี๋ยวส้มคว่ำไพ่ ถ้าจิ้มถูกทั้งสามใบ ส้มพากลับตลาดเอง”' : 'แมวส้มจองหมอนใบเดียวในห้องไปแล้ว คืนนี้คุณเลยได้ทั้งเตียง… ยกเว้นตรงหัว'}</p>
+        {available && <><Button tone="grape" block onClick={() => setPage('remember')}>เล่นเกมจำภาพเพื่อออกจากคุก</Button><small>ตอบถูกได้เล่นต่อวันที่ {Math.min(state.day + 1, content.config.maxDays)} เงินสกปรกถูกยึด เงินสะอาดเหลือ ฿{Math.round(state.cleanCash * contentKeep / 100).toLocaleString('th-TH')} และ Heat เหลือ 45 ถ้าตอบผิด รอบนี้จบในคุก</small></>}
         {photo ? <p role="status">“รูปนี้ใช้ยื่นสมัครงานได้ไหมครับ” ทั้งห้องเงียบ… ได้ยินแต่เสียงแมวกรน</p> :
           <Button tone="sun" block onClick={() => setPhoto(true)}>ถ่ายรูปติดแฟ้มคดี</Button>}
-        {available && <><Button tone="grape" block onClick={() => setPage('remember')}>ตามแมวเข้าไปในฝัน</Button><small>ลองได้ครั้งเดียวต่อรอบ จำถูกแล้วไปต่ออีกวัน (สูงสุดวันที่ {content.config.maxDays}) เงินสกปรกถูกยึด เงินสะอาดเหลือ ฿{Math.round(state.cleanCash * contentKeep / 100).toLocaleString('th-TH')} และ Heat เหลือ 45</small></>}
-        <Button tone="paper" block onClick={() => dispatch({ t: 'custodyVerdict', answer: null })}>ดูบทสรุปคดี</Button></>}
-      {page === 'remember' && <><p>แมวส้มประทับตราสามดวงบนประตูเมฆ จำจากซ้ายไปขวาแล้วกดตามให้ครบ ถ้าผิด คุณจะตื่นในห้องขัง</p>
-        <ol className="dream-stamps">{code.map((n,i) => <li key={i}><b>{stamps[n]!.icon}</b>{stamps[n]!.name}</li>)}</ol>
-        <Button tone="grape" block onClick={() => setPage('play')}>จำได้แล้ว พลิกป้ายเลย</Button></>}
-      {page === 'play' && <><p aria-live="polite">ตราดวงที่ {Math.min(answer.length+1,3)} จาก 3 · {answer.length ? answer.map(n => stamps[n]!.name).join(' → ') : 'เริ่มจากดวงซ้ายสุด'}</p>
-        <div className="dream-stamps">{stamps.map((s,n) => <button key={s.name} onClick={() => stamp(n)}><b>{s.icon}</b>{s.name}</button>)}</div></>}
+        <Button tone="paper" block onClick={() => dispatch({ t: 'custodyVerdict', answer: null })}>จบรอบในคุก</Button></>}
+      {page === 'remember' && <><p>ดูได้จนกว่าจะพร้อม พอกดคว่ำไพ่แล้ว ให้แตะรูปเรียงตามที่เห็น รูปซ้ำก็แตะซ้ำได้</p>
+        <ol className="dream-stamps">{code.map((n,i) => <li key={i}><small>ใบที่ {i+1}</small><b>{stamps[n]!.icon}</b>{stamps[n]!.name}</li>)}</ol>
+        <Button tone="grape" block onClick={() => setPage('play')}>จำแล้ว · คว่ำไพ่</Button></>}
+      {page === 'play' && <><p aria-live="polite">{answer.length === 3 ? 'ครบแล้ว ตรวจลำดับก่อนส่งคำตอบ' : 'เลือกภาพที่ ' + (answer.length+1) + ' จาก 3'}</p>
+        <ol className="dream-stamps answer-slots" aria-label="คำตอบของคุณ">{code.map((_,i) => {
+          const picked = stamps[answer[i] ?? -1];
+          return <li key={i} aria-current={answer.length === i ? 'step' : undefined}><small>ใบที่ {i+1}</small><b>{picked?.icon ?? '·'}</b>{picked?.name ?? 'ว่าง'}</li>;
+        })}</ol>
+        <div className="dream-stamps">{stamps.map((s,n) => <button key={s.name} disabled={answer.length === 3} onClick={() => stamp(n)}><b>{s.icon}</b>{s.name}</button>)}</div>
+        {answer.length > 0 && <Button tone="paper" block onClick={() => setAnswer(answer.slice(0,-1))}>ลบใบล่าสุด</Button>}
+        {answer.length === 3 && <Button tone="grape" block onClick={() => dispatch({ t: 'custodyVerdict', answer })}>ส่งคำตอบ</Button>}</>}
     </div>
   </section>;
 }
