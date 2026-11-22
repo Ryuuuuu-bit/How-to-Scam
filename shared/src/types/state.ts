@@ -92,6 +92,8 @@ export interface MethodState {
 }
 
 export interface DayLog {
+  liveCat?: 'lift' | 'stay';
+  natFirstPay?: boolean;
   opening?: 'mother' | 'guild' | 'parcel';
   recruits?: string[];
   interview?: 'henchman' | 'cat';

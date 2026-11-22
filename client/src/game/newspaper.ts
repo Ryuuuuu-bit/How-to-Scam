@@ -36,6 +36,9 @@ function articleFor(log: DayLog, content: GameContent): DailyArticle {
   const events = log.events
     .map((id) => content.events.find((e) => e.id === id)?.title.th)
     .filter((s): s is string => !!s);
+  const momShared = log.day === 1 && log.methodId === 'fake_shop';
+  if (momShared) events.push('แม่: “แม่แชร์ร้านให้แล้วนะลูก” คุณ: “ขอบคุณนะแม่ แชร์ไปกลุ่มไหนอะ?” แม่: “กลุ่มเตือนภัยจ้ะ”');
+  if (log.natFirstPay) events.push('นัท: “เฮีย ขอหนังสือรับรองเงินเดือนหน่อย” เฮีย: “จะยื่นกู้เหรอ?” นัท: “เอาให้แม่ดูครับ แม่ไม่เชื่อว่าที่นี่จ่ายจริง”');
   const headline = log.methodId
     ? (headlines[log.methodId] ?? 'เมืองนี้มีเรื่องเล่าใหม่อีกแล้ว')
     : 'เมืองเงียบผิดปกติ! ชาวบ้านรับสายแล้วไม่มีใครขายฝัน';
@@ -50,6 +53,8 @@ function articleFor(log: DayLog, content: GameContent): DailyArticle {
     image: method ? `newsphoto:${method.id}` : 'icon:rest',
     caption: method ? method.name.th : 'วันพักของตัวเอก',
     meme: newspaperMeme(log),
+    ...(momShared && { headline: 'เปิดร้านวันแรก แม่ช่วยแชร์ให้แล้ว', caption: 'ร้านดังในกลุ่มไลน์ของแม่' }),
+    ...(log.natFirstPay && { headline: 'นัทได้เงินเดือนครั้งแรก ขอใบรับรองให้แม่ดู', image: 'shop:intern_nat', caption: 'น้องนัท เด็กฝึกงาน' }),
     ...(log.opening && { headline: openingStories[log.opening][log.methodId ? 'workNews' : 'quietNews'] }),
     ...(log.interview === 'henchman' && {
       headline: 'โฆษกปากซอยยืนยัน ยังไม่ทราบว่าบริษัททำอะไร',
@@ -64,6 +69,15 @@ function articleFor(log: DayLog, content: GameContent): DailyArticle {
       image: 'char:orange_cat',
       caption: 'แขกรับเชิญหลังจบรายการ',
       meme: null,
+    }),
+    ...(log.liveCat && {
+      headline: log.liveCat === 'stay'
+        ? 'รีวิวร้านเจ๊ “แมวน่ารักมากค่ะ ส่วนของที่ขายจำไม่ได้”'
+        : 'เจ๊อุ้มแมวออก แฟนคลับออกตาม เหลือคนดูแปดคนเท่าเดิม',
+      body: log.liveCat === 'stay'
+        ? 'ลูกค้าขอให้ไลฟ์เวลาเดิมพรุ่งนี้ เจ๊บอกว่าร้านเปิดสิบโมง ลูกค้าบอก “ถามเวลาน้องตื่นค่ะ”'
+        : 'เจ๊ยืนยันว่ารอบหน้ามีหม้อทอดเหมือนเดิม ส่วนแมวต้องถามเจ้าตัวก่อน',
+      image: 'char:orange_cat', caption: 'ส้มซ่า ดาวประจำไลฟ์', meme: null,
     }),
   };
 }

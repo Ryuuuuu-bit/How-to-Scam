@@ -2,6 +2,32 @@ import type { GameEvent } from '../../src/types/content';
 
 // เหตุการณ์ต่อเนื่อง (เลือกวันนี้ มีผลอีกหลายวัน) และตัวละครประจำที่กลับมาเรื่อยๆ
 export const storyEvents: GameEvent[] = [
+  {
+    id: 'cf_orange_cat',
+    category: 'silly',
+    weight: 45,
+    when: { neighborhoodEdition: true, characters: ['live_seller'], methods: ['fake_shop'] },
+    title: { th: 'ลูกค้าขอเอฟแมว' },
+    body: { th: 'เจ๊ชูหม้อทอดขึ้นกล้อง “เหลือใบสุดท้ายแล้วค่ะ ใครรับพิมพ์เอฟ!” ส้มซ่าเดินตัดหน้ากล้องพอดี ยอดคนดูพุ่งจาก 8 เป็น 80 คน แชตเด้งขึ้นมา “เอฟตัวส้มค่ะ”' },
+    choices: [
+      {
+        text: { th: 'อุ้มส้มซ่าออกจากกล้อง' },
+        liveCat: 'lift',
+        outcomes: [{
+          text: { th: 'เจ๊: “แมวไม่ขายค่ะ” ลูกค้า: “งั้นผ่านค่ะ” คนดูจาก 80 เหลือ 8 เจ๊วางหม้อทอดแล้วหันไปมองแมว' },
+          effects: [{ kind: 'add', stat: 'heat', value: -2 }],
+        }],
+      },
+      {
+        text: { th: 'ให้ส้มซ่านั่งขายด้วย' },
+        liveCat: 'stay',
+        outcomes: [{
+          text: { th: 'คนดูทะลุร้อย เจ๊พลิกหม้อทอดให้ดูทุกมุม แชตถามอยู่เรื่องเดียว “เจ๊คะ ขอดูอุ้งเท้าอีกที”' },
+          effects: [{ kind: 'add', stat: 'fame', value: 4 }],
+        }],
+      },
+    ],
+  },
   {id:'nat_receipt',category:'silly',weight:28,when:{recruit:'intern_nat'},title:{th:'น้องนัทขอเบิกค่าเทปกาว'},body:{th:'เด็กฝึกงานยื่นใบเสร็จยาวถึงพื้น เขาซื้อเทปกาวมาซ่อมเครื่องพิมพ์ใบเสร็จที่หยุดพิมพ์ไม่ได้'},choices:[
     {text:{th:'อนุมัติค่าซ่อมให้เด็ก'},outcomes:[{text:{th:'นัทแปะปุ่มหยุดสำเร็จ ทั้งโต๊ะปรบมือให้'},effects:[{kind:'add',stat:'dirtyCash',value:-100},{kind:'loyalty',value:6}]}]},
     {text:{th:'เอาใบเสร็จไปประกวดว่าว'},outcomes:[{text:{th:'ว่าวใบเสร็จคว้ารางวัลขวัญใจตลาด'},effects:[{kind:'add',stat:'fame',value:4}]}]}]},

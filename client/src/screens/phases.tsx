@@ -357,7 +357,7 @@ export function EventPhase({ state, dispatch }: PhaseProps) {
       <ScreenTitle title={t('phase.event')} />
       <Panel tone="paper" className="anim-rise-in" key={ev.id}>
         <div className="flex items-center gap-3">
-          <Art id={`event:${ev.category}`} size={52} className="shrink-0" />
+            <Art id={ev.id === 'cf_orange_cat' ? 'char:orange_cat' : `event:${ev.category}`} size={52} className="shrink-0" />
           <h3 className="text-xl leading-snug font-semibold">{lt(ev.title)}</h3>
         </div>
         <p className="mt-2">{lt(ev.body)}</p>

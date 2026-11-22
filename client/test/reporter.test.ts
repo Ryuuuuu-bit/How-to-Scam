@@ -2,6 +2,21 @@ import { expect, it } from 'vitest';
 import { newGame, priceOf, step } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { dailyArticles } from '../src/game/newspaper';
+import { isEventEligible } from '../../shared/src/engine/events';
+
+it.each(['lift', 'stay'] as const)('prints the matching live-sale ending for %s', (ending) => {
+  const event = content.events.find(e => e.id === 'cf_orange_cat')!;
+  const planned = step(newGame('v3:soi:test', 'live_seller', content), { t: 'choosePlan', methodId: 'fake_shop' }, content);
+  expect(isEventEligible(planned, content, event)).toBe(true);
+  expect(isEventEligible({ ...planned, seed: 'v3:older' }, content, event)).toBe(false);
+  expect(isEventEligible({ ...planned, todayMethodId: null }, content, event)).toBe(false);
+  const next = step({ ...planned, phase: 'event', pendingEvents: [event.id] },
+    { t: 'eventChoice', choiceIdx: event.choices.findIndex(c => c.liveCat === ending) }, content);
+  expect(dailyArticles(next, content)).toEqual([]);
+  const article = dailyArticles({ ...next, day: 2 }, content)[0]!;
+  expect(article.headline).toContain(ending === 'stay' ? 'จำไม่ได้' : 'ออกตาม');
+  expect(article.events.join(' ')).toContain('กลุ่มเตือนภัย');
+});
 
 it.each(['cat', 'henchman'] as const)('prints the %s interview the next morning', (subject) => {
   const s = step(

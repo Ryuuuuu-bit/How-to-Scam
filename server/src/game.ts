@@ -52,7 +52,7 @@ const RUN_TTL_MS = 48 * 60 * 60 * 1000;
 const MAX_RUNS_PER_HOUR = 60;
 
 export function newSeed(): string {
-  return 'v3:' + randomBytes(16).toString('hex');
+  return 'v3:soi:' + randomBytes(16).toString('hex');
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */
@@ -75,7 +75,7 @@ export async function startRun(store: Store, c: GameContent, user: UserRec, char
 /** seed ของ Daily Challenge: ทุกคนได้ seed เดียวกันในวันนั้น แต่เดาล่วงหน้าไม่ได้ */
 export function dailySeed(date: string, secret: string): string {
   const seed = createHmac('sha256', secret).update(`daily:${date}`).digest('hex').slice(0, 32);
-  return date >= '2026-11-23' ? 'v3:' + seed : seed;
+  return date >= '2026-11-23' ? 'v3:soi:' + seed : seed;
 }
 
 /** ข้อมูล Daily ของวันนี้ + ผู้เล่นคนนี้เล่นไปหรือยัง */

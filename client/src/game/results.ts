@@ -141,6 +141,9 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
       return {
         tone: r.success ? 'good' : 'bad',
         title: r.success ? t('result.escapeOk') : t('result.escapeFail'),
+        ...(r.success && s.escapes === 1 && {
+          body: 'ข่าวด่วน: สายตรวจไปไม่ถึงปากซอย รถกับข้าวจอดขวางอยู่ พยานบอกว่าตำรวจลงจากรถแล้ว… ได้ไข่มาสิบฟอง',
+        }),
         art: 'icon:police',
       };
   }

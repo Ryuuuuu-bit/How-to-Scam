@@ -106,6 +106,7 @@ export interface ChoiceRequirement {
 }
 
 export interface EventChoice {
+  liveCat?: 'lift' | 'stay';
   interview?: 'henchman' | 'cat';
   text: LocalizedText;
   requires?: ChoiceRequirement;
@@ -114,6 +115,7 @@ export interface EventChoice {
 }
 
 export interface EventCondition {
+  neighborhoodEdition?: boolean;
   recruit?: string;
   /** แผนของวันนี้ต้องเป็นหนึ่งในนี้ */
   methods?: MethodId[];

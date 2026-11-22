@@ -449,6 +449,10 @@ export function endDay(s: GameState, c: GameContent, rng: Rng): boolean {
   for (const h of [...s.henchmen]) {
     if (s.dirtyCash + s.cleanCash >= h.wage) {
       spend(s, h.wage);
+      if (h.recruit === 'intern_nat' && !s.history.some(day => day.natFirstPay)) {
+        const today = s.history.at(-1);
+        if (today) today.natFirstPay = true;
+      }
       if (s.heat > 70) h.loyalty = Math.max(0, h.loyalty - 5);
     } else {
       // จ่ายไม่ไหว ลูกน้องเดินออก

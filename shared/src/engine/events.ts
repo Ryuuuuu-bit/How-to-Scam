@@ -17,6 +17,7 @@ export function isEventEligible(s: GameState, c: GameContent, ev: GameEvent): bo
 }
 
 export function conditionMet(s: GameState, c: GameContent, w: EventCondition): boolean {
+  if (w.neighborhoodEdition && !s.seed.startsWith('v3:soi:')) return false;
   if (w.recruit && !s.henchmen.some((h) => h.recruit === w.recruit)) return false;
   if (w.methods && (!s.todayMethodId || !w.methods.includes(s.todayMethodId))) return false;
   if (w.usedMethods && !w.usedMethods.some((m) => s.methodsUsed.includes(m))) return false;
@@ -104,6 +105,7 @@ export function resolveEventChoice(
   s.history.at(-1)?.events.push(ev.id);
   const log = s.history.at(-1);
   if (log && choice.interview) log.interview = choice.interview;
+  if (log && choice.liveCat) log.liveCat = choice.liveCat;
   s.lastResults.push({
     kind: 'event',
     textKey: `${ev.id}:${choiceIdx}:${oi}`,
