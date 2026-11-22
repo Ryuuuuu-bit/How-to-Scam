@@ -140,7 +140,7 @@ function SubmitBanner({
   }
   if (state.kind === 'error') {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-2xl border-2 border-ink bg-white p-2 text-sm">
+      <div className="flex items-center justify-between gap-2 rounded-2xl border-2 border-ink bg-white p-2 text-sm text-ink">
         <span className="text-danger">{t('submit.failed')}</span>
         <Button tone="sun" className="px-3 py-1 text-sm" onClick={onRetry}>
           {t('submit.retry')}

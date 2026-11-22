@@ -45,13 +45,13 @@ export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
-      <div className="flex items-start justify-between gap-2">
-        <ScreenTitle title={t('leaderboard.title')} />
+      <ScreenTitle title={t('leaderboard.title')} />
+      <div className="mb-2">
         {seasons.length > 0 && (
           <select
             value={season}
             onChange={(e) => setSeason(e.target.value)}
-            className="font-display mt-1 rounded-xl border-2 border-ink bg-white px-2 py-1 text-sm"
+            className="font-display rounded-xl border-2 border-ink bg-white px-2 py-1 text-sm text-ink"
           >
             {seasons.map((s) => (
               <option key={s} value={s}>
@@ -67,7 +67,7 @@ export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
             key={b}
             type="button"
             onClick={() => setBoard(b)}
-            className={`font-display rounded-xl border-2 border-ink px-1 py-2 text-xs leading-tight ${b === board ? 'bg-sun shadow-pop-sm' : 'bg-paper'}`}
+            className={`font-display rounded-xl border-2 border-ink px-1 py-2 text-xs leading-tight text-ink ${b === board ? 'bg-sun shadow-pop-sm' : 'bg-paper'}`}
           >
             {t(`leaderboard.boards.${b}`)}
           </button>
@@ -82,7 +82,7 @@ export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
           return (
             <li
               key={r.userId}
-              className={`flex items-center gap-2 rounded-2xl border-2 border-ink p-2 ${me ? 'bg-sun' : 'bg-paper'}`}
+              className={`flex items-center gap-2 rounded-2xl border-2 border-ink p-2 text-ink ${me ? 'bg-sun' : 'bg-paper'}`}
             >
               <span className="font-display w-8 text-center text-lg font-semibold">
                 {r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}

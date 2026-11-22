@@ -17,7 +17,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="anim-rise-in flex w-full max-w-md flex-col gap-3 rounded-3xl border-[3px] border-ink bg-paper p-4 shadow-pop"
+        className="anim-rise-in flex w-full max-w-md flex-col gap-3 rounded-3xl border-[3px] border-ink bg-paper p-4 text-ink shadow-pop"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-semibold">{t('profile.title')}</h2>
@@ -51,7 +51,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
               value={name}
               maxLength={24}
               onChange={(e) => setName(e.target.value)}
-              className="min-w-0 flex-1 rounded-xl border-2 border-ink bg-white px-3 py-2 font-normal"
+              className="min-w-0 flex-1 rounded-xl border-2 border-ink bg-white px-3 py-2 font-normal text-ink"
             />
             <Button
               tone="mint"

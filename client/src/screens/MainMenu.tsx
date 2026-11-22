@@ -69,7 +69,7 @@ export function MainMenu({
               <button
                 type="button"
                 onClick={onProfile}
-                className="flex items-center justify-between gap-2 rounded-2xl border-2 border-ink bg-white px-3 py-2 text-left text-sm"
+                className="flex items-center justify-between gap-2 rounded-2xl border-2 border-ink bg-white px-3 py-2 text-left text-sm text-ink"
               >
                 <span className="truncate">
                   👤 <b>{user.displayName}</b>
@@ -78,7 +78,9 @@ export function MainMenu({
               </button>
             )}
             {status === 'offline' && (
-              <p className="rounded-xl bg-white/80 p-2 text-xs">{t('auth.offlineBanner')}</p>
+              <p className="rounded-xl bg-white/80 p-2 text-xs text-ink">
+                {t('auth.offlineBanner')}
+              </p>
             )}
             <Button tone="paper" block onClick={() => setHelp(!help)} aria-expanded={help}>
               วิธีเล่น <span aria-hidden>{help ? '−' : '+'}</span>

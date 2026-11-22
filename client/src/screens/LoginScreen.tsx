@@ -22,7 +22,7 @@ export function LoginScreen() {
         <Art id="char:live_seller" size={96} className="-mx-3" />
         <Art id="char:orange_cat" size={96} />
       </div>
-      <Panel className="relative z-10 flex flex-col gap-3 text-center">
+      <Panel className="relative z-10 flex flex-col gap-3 text-center text-ink">
         <h1 className="text-3xl font-semibold">{t('auth.title')}</h1>
         <p className="text-sm text-ink-soft">{t('auth.hint')}</p>
         {auth.googleClientId ? (
