@@ -101,6 +101,8 @@ async function call<T>(path: string, init: { method?: string; body?: unknown } =
 }
 
 export const api = {
+  feedback: (category: 'bug' | 'idea' | 'other', message: string) =>
+    call<{ ok: true }>('/api/feedback', { body: { category, message } }),
   presence: () => call<{ count: number }>('/api/presence', { method: 'POST' }),
   config: () => call<{ googleClientId: string | null; season: string }>('/api/config'),
   guest: () =>

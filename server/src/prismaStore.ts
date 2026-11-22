@@ -10,6 +10,9 @@ export function createPrisma(databaseUrl: string): PrismaClient {
 /** Store ที่เก็บจริงใน Postgres ผ่าน Prisma */
 export function prismaStore(db: PrismaClient): Store {
   return {
+    async saveFeedback(userId, category, message) {
+      await db.feedback.create({ data: { userId, category, message } });
+    },
     async markOnline(userId, now, since) {
       return db.$transaction(async (tx) => {
         await tx.$executeRaw`UPDATE "User" SET "lastOnlineAt" = ${now} WHERE id = ${userId}`;

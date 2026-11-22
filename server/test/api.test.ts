@@ -66,6 +66,17 @@ async function guest() {
   return r.body as { token: string; user: { uid: string; kind: string } };
 }
 
+it('stores validated feedback from guests', async () => {
+  const { token, user } = await guest();
+  const body = { category: 'idea', message: '  ลองเพิ่มฉากตลาด  ' };
+  expect((await api('/api/feedback', { body })).status).toBe(401);
+  for (const invalid of [{ ...body, category: 'unknown' }, { ...body, message: '  ' }, { ...body, message: 'a'.repeat(1001) }]) {
+    expect((await api('/api/feedback', { token, body: invalid })).status).toBe(400);
+  }
+  expect((await api('/api/feedback', { token, body })).status).toBe(201);
+  expect(store.feedback).toEqual([{ userId: user.uid, category: 'idea', message: body.message.trim() }]);
+});
+
 it('counts recent accounts once across tabs and expires inactive players', async () => {
   const first = await guest();
   const second = await guest();

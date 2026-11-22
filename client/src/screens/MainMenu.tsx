@@ -7,6 +7,7 @@ import { useAuth } from '../net/auth';
 import { loadCosmetics, menuScenes } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
 import { HowToPlay } from './HowToPlay';
+import { Feedback } from './Feedback';
 import { OnlineCount } from '../components/OnlineCount';
 import { ConfirmPopup } from '../components/PopupControls';
 
@@ -142,6 +143,7 @@ export function MainMenu({
               </span>
               <span aria-hidden>↗</span>
             </Button>
+            <Feedback connected={!!user} />
           </div>
           <div className="menu-facts">
             <div>

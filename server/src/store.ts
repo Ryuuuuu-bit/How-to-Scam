@@ -73,6 +73,7 @@ export interface NewRun {
 }
 
 export interface Store {
+  saveFeedback(userId: string, category: string, message: string): Promise<void>;
   markOnline(userId: string, now: Date, since: Date): Promise<number>;
   createGuest(displayName: string): Promise<UserRec>;
   findUser(id: string): Promise<UserRec | null>;

@@ -63,6 +63,21 @@ export function createApp(d: AppDeps) {
           message: { error: 'rate_limited' },
         });
 
+  app.post(
+    '/api/feedback',
+    limit(10, 5),
+    wrap(async (req, res) => {
+      const user = requireUser(req);
+      const { category, message } = z.object({
+        category: z.enum(['bug', 'idea', 'other']),
+        message: z.string().trim().min(1).max(1000),
+      }).parse(req.body);
+      await d.store.saveFeedback(user.id, category, message);
+      res.status(201);
+      return { ok: true };
+    }),
+  );
+
   app.get('/health', (_req, res) => {
     res.json({ ok: true });
   });

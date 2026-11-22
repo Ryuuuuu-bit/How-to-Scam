@@ -37,6 +37,7 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   lastOnlineAt DateTime?
+  feedback     Feedback[]
   runs        Run[]
   scores      Score[]
   achievements UserAchievement[]
@@ -107,4 +108,13 @@ model Score {
   @@index([seasonId, score])
   @@index([seasonId, days])
   @@index([seasonId, reason, days])
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  String
+  message   String
+  createdAt DateTime @default(now())
 }
