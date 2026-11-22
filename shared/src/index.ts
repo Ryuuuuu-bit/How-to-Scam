@@ -18,3 +18,5 @@ export { launderSuccessPct } from './engine/launder';
 export { priceOf, perksOfKind } from './engine/perks';
 export { isEventEligible, choiceAvailable } from './engine/events';
 export { validateContent } from './validate';
+export { titleFor, isCharacterUnlocked } from './engine/titles';
+export type { UnlockProgress } from './engine/titles';

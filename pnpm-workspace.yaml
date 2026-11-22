@@ -1,6 +1,8 @@
 packages:
   - shared
   - client
-  # - server  (Phase 3)
+  - server
 allowBuilds:
+  '@prisma/engines': true
   esbuild: true
+  prisma: true

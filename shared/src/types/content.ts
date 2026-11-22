@@ -337,6 +337,22 @@ export interface GameConfig {
   score: { daysWeight: number; maxVarietyBonus: number; noEscapeBonus: number };
 }
 
+/** ฉายาอัตโนมัติ */
+export type TitleRule =
+  | { kind: 'caughtBy'; day: number }
+  | { kind: 'card'; cardId: CardId; count: number }
+  | { kind: 'karma'; min: number }
+  | { kind: 'restDays'; count: number }
+  /** วิธีที่ใช้บ่อยที่สุดในรอบ */
+  | { kind: 'method'; methodId: MethodId }
+  | { kind: 'always' };
+
+export interface Title {
+  id: string;
+  rule: TitleRule;
+  name: LocalizedText;
+}
+
 export interface GameContent {
   config: GameConfig;
   methods: ScamMethod[];
@@ -351,4 +367,5 @@ export interface GameContent {
   endings: Ending[];
   festivals: Festival[];
   news: News[];
+  titles: Title[];
 }

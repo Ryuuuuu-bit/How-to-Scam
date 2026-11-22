@@ -16,6 +16,7 @@ import { unluckyEvents } from './events/unlucky';
 import { launderCards } from './launderCards';
 import { methods } from './methods';
 import { shopItems } from './shop';
+import { titles } from './titles';
 
 /** เนื้อหาเกมทั้งหมด — client และ server import ตัวนี้ตัวเดียวกัน */
 export const content: GameContent = {
@@ -41,4 +42,5 @@ export const content: GameContent = {
   endings,
   festivals,
   news,
+  titles,
 };

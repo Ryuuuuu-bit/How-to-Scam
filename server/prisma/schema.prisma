@@ -1,0 +1,87 @@
+// ฐานข้อมูลของ How to Scam
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserKind {
+  guest
+  google
+}
+
+enum RunStatus {
+  started
+  submitted
+  rejected
+}
+
+/// ผู้เล่น 1 คน = 1 UID ไม่ว่าจะเป็น Guest หรือ Google (Guest ผูก Google ทีหลังได้ UID เดิม)
+model User {
+  id          String   @id @default(uuid())
+  kind        UserKind @default(guest)
+  googleSub   String?  @unique
+  email       String?
+  displayName String
+  avatarUrl   String?
+  /// แต้มประสบการณ์แก๊ง (ใช้ปลดล็อกอาชีพ)
+  xp          Int      @default(0)
+  runsPlayed  Int      @default(0)
+  /// ฉากจบที่เคยเห็น (ใช้ปลดล็อกตัวลับ)
+  endings     String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  runs        Run[]
+  scores      Score[]
+}
+
+/// ซีซั่นรายเดือน id = "2026-11"
+model Season {
+  id       String   @id
+  startsAt DateTime
+  endsAt   DateTime
+  scores   Score[]
+}
+
+/// หนึ่งรอบการเล่น: server ออก seed ตอนเริ่ม และ replay action log ตอนส่ง
+model Run {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seed        String
+  characterId String
+  status      RunStatus @default(started)
+  actionCount Int       @default(0)
+  rejectReason String?
+  createdAt   DateTime  @default(now())
+  submittedAt DateTime?
+  score       Score?
+
+  @@index([userId, createdAt])
+}
+
+/// คะแนนที่ผ่านการตรวจแล้ว (1 ต่อรอบ)
+model Score {
+  id          String   @id @default(uuid())
+  runId       String   @unique
+  run         Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seasonId    String
+  season      Season   @relation(fields: [seasonId], references: [id])
+  characterId String
+  score       Int
+  cleanCash   Int
+  days        Int
+  reason      String
+  endingId    String
+  titleId     String
+  createdAt   DateTime @default(now())
+
+  @@index([seasonId, score])
+  @@index([seasonId, days])
+  @@index([seasonId, reason, days])
+}
