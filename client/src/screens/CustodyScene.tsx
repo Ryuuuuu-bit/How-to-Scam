@@ -6,7 +6,7 @@ import './custody.css';
 
 const stamps = [{ icon: '🐟', name: 'ปลาทู' }, { icon: '🐾', name: 'อุ้งเท้า' }, { icon: '🌙', name: 'พระจันทร์' }];
 const contentKeep = content.config.caughtCleanKeepPct;
-const memorySeconds = 6;
+const memorySeconds = 3;
 
 export function CustodyScene({ state, dispatch }: { state: GameState; dispatch: (a: Action) => void }) {
   const [page, setPage] = useState<'cell' | 'remember' | 'play'>('cell');
