@@ -2,7 +2,7 @@ import type { Title } from '../src/types/content';
 
 // ฉายาอัตโนมัติตามสไตล์การเล่น — ตรวจตามลำดับ อันแรกที่เข้าเงื่อนไขคือฉายา
 export const titles: Title[] = [
-  { id: 'speedrun_jail', rule: { kind: 'caughtBy', day: 7 }, name: { th: 'ติดคุกไวกว่าไฟเขียว' } },
+  { id: 'speedrun_jail', rule: { kind: 'caughtBy', day: 7 }, name: { th: 'ซิ่งเข้าโรงพัก' } },
   {
     id: 'goldfish_boss',
     rule: { kind: 'card', cardId: 'goldfish', count: 3 },
@@ -28,7 +28,7 @@ export const titles: Title[] = [
     rule: { kind: 'card', cardId: 'golden_durian', count: 2 },
     name: { th: 'เสี่ยทุเรียนทองคำ' },
   },
-  { id: 'kind_scammer', rule: { kind: 'karma', min: 20 }, name: { th: 'มิจฉาชีพใจดีเกินอาชีพ' } },
+  { id: 'kind_scammer', rule: { kind: 'karma', min: 20 }, name: { th: 'มิจฯ ใจอ่อน' } },
   { id: 'sleepy', rule: { kind: 'restDays', count: 10 }, name: { th: 'นักพักผ่อนมืออาชีพ' } },
   { id: 'ponzi_sage', rule: { kind: 'method', methodId: 'ponzi' }, name: { th: 'เซียนปลาทองคอยน์' } },
   {

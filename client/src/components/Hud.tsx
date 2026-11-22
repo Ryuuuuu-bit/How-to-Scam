@@ -115,7 +115,7 @@ export function HeatBar({ heat }: { heat: number }) {
           </span>
         </div>
         <details className="heat-help shrink-0">
-          <summary className="cursor-pointer text-xs text-[#f7f4eb]" aria-label="กติกา Heat">
+          <summary className="cursor-pointer text-xs text-[#f7f4eb]" aria-label="Heat คืออะไร?">
             ?
           </summary>
           <p className="mt-1 max-w-44 rounded-lg bg-paper p-2 text-xs text-ink">

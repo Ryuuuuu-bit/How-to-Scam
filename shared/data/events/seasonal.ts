@@ -14,7 +14,7 @@ export const seasonalEvents: GameEvent[] = [
         text: { th: 'ออกไปเล่นน้ำด้วยเลย' },
         outcomes: [
           {
-            text: { th: 'ทั้งแก๊งเปียกและมีความสุข วันนี้ไม่มีใครทำงาน' },
+            text: { th: 'เปียกยันถุงเท้ากันทั้งแก๊ง วันนี้ถือว่าหยุดสงกรานต์ก็แล้วกัน' },
             effects: [
               { kind: 'add', stat: 'heat', value: -15 },
               { kind: 'loyalty', value: 10 },
@@ -90,7 +90,7 @@ export const seasonalEvents: GameEvent[] = [
         text: { th: 'สั่งชาบูให้ลูกน้องฉลอง' },
         outcomes: [
           {
-            text: { th: 'ลูกน้องอิ่มและภักดีขึ้น' },
+            text: { th: 'ลูกน้องกินกันจนอิ่ม บอก “คราวหน้าเลี้ยงอีกนะเฮีย”' },
             effects: [
               { kind: 'add', stat: 'dirtyCash', value: -2_000 },
               { kind: 'loyalty', value: 15 },
@@ -282,7 +282,7 @@ export const seasonalEvents: GameEvent[] = [
     weight: 6,
     when: { methods: ['merit'] },
     title: { th: 'ลำโพงงานใหญ่กว่าเวที' },
-    body: { th: 'ลำโพงที่เช่ามาสำหรับงานรื่นเริงดังจนกระจกบ้านข้างๆ สั่น ลุงบ้านตรงข้ามโทรแจ้งตำรวจสามรอบ' },
+    body: { th: 'ลำโพงที่เช่ามาสำหรับงานรื่นเริงดังจนกระจกบ้านข้าง ๆ สั่น ลุงบ้านตรงข้ามโทรแจ้งตำรวจสามรอบ' },
     choices: [
       {
         text: { th: 'ลดเสียงลงครึ่งหนึ่ง' },
@@ -313,7 +313,7 @@ export const seasonalEvents: GameEvent[] = [
     weight: 7,
     when: { methods: ['merit'], festivals: ['kathin', 'songkran'] },
     title: { th: 'งานแน่นจนที่จอดรถไม่พอ' },
-    body: { th: 'ช่วงเทศกาล คนมาร่วมงานที่คุณจัดเยอะจนต้องเช่าลานจอดรถห้างข้างๆ เพิ่ม' },
+    body: { th: 'ช่วงเทศกาล คนมาร่วมงานที่คุณจัดเยอะจนต้องเช่าลานจอดรถห้างข้าง ๆ เพิ่ม' },
     choices: [
       {
         text: { th: 'ขยายงานอีกวัน' },
@@ -328,10 +328,10 @@ export const seasonalEvents: GameEvent[] = [
         ],
       },
       {
-        text: { th: 'ให้เงินส่วนเกินกับโรงเรียนในชุมชนจริงๆ' },
+        text: { th: 'ให้เงินส่วนเกินกับโรงเรียนในชุมชนจริง ๆ' },
         outcomes: [
           {
-            text: { th: 'เด็กๆ ได้หนังสือใหม่ทั้งห้องสมุด ครูส่งรูปมาขอบคุณ' },
+            text: { th: 'เด็ก ๆ ได้หนังสือใหม่ทั้งห้องสมุด ครูส่งรูปมาขอบคุณ' },
             effects: [
               { kind: 'add', stat: 'dirtyCash', value: -6_000 },
               { kind: 'add', stat: 'karma', value: 14 },
@@ -377,7 +377,7 @@ export const seasonalEvents: GameEvent[] = [
     category: 'silly',
     weight: 5,
     when: { methods: ['gambling'] },
-    title: { th: 'มีคนชนะรางวัลใหญ่จริงๆ ครั้งแรกของเว็บ' },
+    title: { th: 'มีคนชนะรางวัลใหญ่จริง ๆ ครั้งแรกของเว็บ' },
     body: { th: 'ระบบผิดพลาด ลุงคนหนึ่งชนะแจ็กพอต 2 แสนบาท ลุงไลฟ์ร้องไห้ดีใจรอรับเงิน' },
     choices: [
       {
@@ -425,7 +425,7 @@ export const seasonalEvents: GameEvent[] = [
         ],
       },
       {
-        text: { th: 'เปิดเพลงปลุกใจดังๆ' },
+        text: { th: 'เปิดเพลงปลุกใจดัง ๆ' },
         outcomes: [
           {
             text: { th: 'ทุกคนลุกเต้น ลืมคำถาม แต่ป้าแถวหน้าจดชื่อคุณไว้' },

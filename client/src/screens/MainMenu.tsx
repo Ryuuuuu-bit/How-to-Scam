@@ -52,12 +52,12 @@ export function MainMenu({
         <a href="#" aria-label="How to Scam หน้าหลัก">
           HTS<span>®</span>
         </a>
-        <span>เกมตลกร้าย · วางแผน · เอาตัวรอด</span>
+        <span>ตลกร้าย · วางแผน · เอาตัวรอด</span>
       </header>
       <div className="menu-layout">
         <section className="menu-copy anim-rise-in">
           <div className="eyebrow">
-            <OnlineCount /> ยินดีต้อนรับสู่ด้านสีเทาของเมือง
+            <OnlineCount /> ยินดีต้อนรับสู่ย่านสีเทา
           </div>
           <h1 className="game-logo">
             HOW TO
@@ -68,10 +68,10 @@ export function MainMenu({
           <p className="menu-subtitle">
             เริ่มจากศูนย์…
             <br />
-            จบที่เศรษฐี หรือสถานีตำรวจ
+            จะได้เป็นเศรษฐี หรือไปจบที่โรงพัก?
           </p>
           <p className="menu-description">
-            {t('app.subtitle')} วางแผน รับความเสี่ยง และรับมือเรื่องวุ่น ๆ ที่คุณไม่มีวันเดาถูก
+            {t('app.subtitle')} วางแผนหาเงินให้ทันก่อนตำรวจมาเคาะประตู
           </p>
           <div className="menu-actions">
             {saved && (

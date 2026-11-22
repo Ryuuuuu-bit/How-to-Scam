@@ -96,8 +96,8 @@ describe('contextual Thai memes', () => {
     const resolved = { ...state, lastResults: [{ kind: 'resolve' as const, dirtyCash: 22_000 }] };
     expect(reactionMeme(resolved, 1_200)).toBeNull();
     expect(reactionMeme(resolved, null)).toBeNull();
-    expect(reactionMeme(resolved, -10)?.caption).toContain('สภาพ');
-    expect(reactionMeme(resolved, 20_000)?.caption).toContain('จึ้ง');
+    expect(reactionMeme(resolved, -10)?.caption).toContain('กำไร');
+    expect(reactionMeme(resolved, 20_000)?.caption).toContain('ยอดจริง');
   });
 
   it('shows the siren reaction only on the initial escape step', () => {
@@ -118,7 +118,7 @@ describe('contextual Thai memes', () => {
       history: planned.history.map((day) => ({ ...day, events: ['runaway_rooster'] })),
     };
     const meme = reactionMeme(afterEvent, null);
-    expect(meme?.caption).toContain('ตัวตึง');
+    expect(meme?.caption).toContain('ไก่หลุด');
     expect(dailyArticles(afterEvent, content)).toEqual([]);
     expect(dailyArticles({ ...afterEvent, day: 2 }, content)[0]?.meme).toEqual(meme);
   });

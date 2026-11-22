@@ -45,10 +45,10 @@ export function scoutHint(state: GameState, methodId: string, items: string[]) {
   let forecast = step(state, { t: 'choosePlan', methodId }, content);
   for (const itemId of items) forecast = step(forecast, { t: 'invest', itemId }, content);
   forecast = step(forecast, { t: 'confirmInvest' }, content);
-  if (forecast.phase === 'escape') return 'มีสัญญาณไล่ล่า เตรียมรับมือ Heat';
-  if (forecast.call) return 'ข่าวยังขึ้นกับการเลือกบทพูดและการรับสายในงานนี้';
+  if (forecast.phase === 'escape') return 'ตำรวจเริ่มตามแล้ว ระวัง Heat พุ่ง';
+  if (forecast.call) return 'สายนี้จะจบยังไง ขึ้นอยู่กับว่าคุณเลือกพูดอะไร';
   const event = content.events.find((e) => e.id === forecast.pendingEvents[0]);
   return event
-    ? `เบาะแสแรก · ${{ lucky: 'มีโชคเข้าข้าง', unlucky: 'มีเรื่องให้เสียทรัพย์หรือแก้ปัญหา', silly: 'มีเรื่องชวนป่วน', karma: 'ผลจากการตัดสินใจกำลังตามมา' }[event.category]}`
-    : 'ข่าวเงียบ วันนี้ไม่มีเหตุการณ์สุ่มหลังงานนี้';
+    ? `เบาะแสแรก · ${{ lucky: 'มีโชคเข้าข้าง', unlucky: 'งานนี้อาจต้องควักเงินหรือออกแรงแก้เรื่องวุ่น', silly: 'มีเรื่องชวนป่วน', karma: 'เรื่องที่เคยตัดสินใจไว้กำลังจะย้อนกลับมา' }[event.category]}`
+    : 'จบงานนี้แล้วไม่มีเรื่องแทรก';
 }

@@ -133,7 +133,7 @@ export const characterEvents: GameEvent[] = [
         text: { th: 'เปลี่ยนแบตให้ แล้วทำเป็นไม่เห็น' },
         outcomes: [
           {
-            text: { th: 'ได้ค่าแบต 450 บาท กับความรู้สึกแปลกๆ' },
+            text: { th: 'ได้ค่าแบต 450 บาท กับความรู้สึกแปลก ๆ' },
             effects: [
               { kind: 'add', stat: 'dirtyCash', value: 450 },
               { kind: 'add', stat: 'karma', value: -4 },
@@ -202,7 +202,7 @@ export const characterEvents: GameEvent[] = [
         text: { th: 'บอกลูกค้าว่าฟลุก อย่าเชื่อมาก' },
         outcomes: [
           {
-            text: { th: 'ลูกค้ายิ่งเชื่อว่าอาจารย์ถ่อมตัว ทุกอย่างเลยแย่ลงในทางที่ดี' },
+            text: { th: 'ยิ่งปฏิเสธ ลูกค้ายิ่งชมว่า “อาจารย์ถ่อมตัวอีกแล้ว” คิวดูดวงยาวไปถึงปากซอย' },
             effects: [
               { kind: 'add', stat: 'karma', value: 5 },
               { kind: 'add', stat: 'fame', value: 8 },
@@ -238,7 +238,7 @@ export const characterEvents: GameEvent[] = [
         text: { th: 'สอนฟรีเรื่องออมเงิน (ของจริง)' },
         outcomes: [
           {
-            text: { th: 'ผู้เข้าร่วมงงมาก แต่บางคนเริ่มจดบัญชีรายจ่ายจริงๆ' },
+            text: { th: 'ผู้เข้าร่วมงงมาก แต่บางคนเริ่มจดบัญชีรายจ่ายจริง ๆ' },
             effects: [
               { kind: 'add', stat: 'karma', value: 10 },
               { kind: 'add', stat: 'fame', value: -10 },
@@ -326,7 +326,7 @@ export const characterEvents: GameEvent[] = [
     weight: 6,
     when: { characters: ['ex_banker'] },
     title: { th: 'อดีตหัวหน้าโทรมาถามสารทุกข์' },
-    body: { th: 'อดีตหัวหน้าสาขาโทรมาถามว่า "ช่วงนี้ทำอะไรอยู่" พร้อมเสียงพิมพ์คีย์บอร์ดเบาๆ ด้านหลัง' },
+    body: { th: 'อดีตหัวหน้าสาขาโทรมาถามว่า "ช่วงนี้ทำอะไรอยู่" พร้อมเสียงพิมพ์คีย์บอร์ดเบา ๆ ด้านหลัง' },
     choices: [
       {
         text: { th: 'บอกว่าเปิดร้านหมูกระทะ' },
@@ -354,7 +354,7 @@ export const characterEvents: GameEvent[] = [
     weight: 9,
     when: { characters: ['share_auntie'], karma: [-9999, -25] },
     title: { th: 'เพื่อนบ้านรวมตัวกันแฉ' },
-    body: { th: 'ป้าๆ ในซอยตั้งกลุ่มไลน์ใหม่ชื่อ "วงแชร์นี้ไม่มีเธอ" และเริ่มแชร์หลักฐานกันตั้งแต่ตีห้า' },
+    body: { th: 'ป้า ๆ ในซอยตั้งกลุ่มไลน์ใหม่ชื่อ "วงแชร์นี้ไม่มีเธอ" และเริ่มแชร์หลักฐานกันตั้งแต่ตีห้า' },
     choices: [
       {
         text: { th: 'จัดเลี้ยงขนมจีนทั้งซอยขอโทษ' },
@@ -407,7 +407,7 @@ export const characterEvents: GameEvent[] = [
         text: { th: 'ช่วยล้างจานทั้งงานแทน' },
         outcomes: [
           {
-            text: { th: 'ป้าๆ ชมว่าเป็นคนดี และลืมถามเรื่องเงินไปหนึ่งวัน' },
+            text: { th: 'ป้า ๆ ชมว่าเป็นคนดี และลืมถามเรื่องเงินไปหนึ่งวัน' },
             effects: [
               { kind: 'add', stat: 'karma', value: 4 },
               { kind: 'add', stat: 'heat', value: -5 },

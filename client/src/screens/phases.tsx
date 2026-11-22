@@ -36,14 +36,14 @@ export function NewsCard({ state, compact = false }: { state: GameState; compact
       const change = n.launderSuccessPct;
       effects.push(`โอกาสฟอกสำเร็จ ${change > 0 ? '+' : ''}${change} จุดเปอร์เซ็นต์`);
     }
-    if (n.victimWealthPct) effects.push(`เงินคู่สนทนา ${signed(n.victimWealthPct)}`);
+    if (n.victimWealthPct) effects.push(`เงินของคนรับสาย ${signed(n.victimWealthPct)}`);
     if (!effects.length) return null;
     return (
       <div className="play-feedback mb-3 flex items-center gap-2 rounded-xl px-3 py-2 text-xs">
         <Art id="icon:news" size={24} className="shrink-0" />
         <div>
           <span className="block text-[#d6d4dd]">
-            ผลข่าวสัปดาห์นี้ · {t('news.until', { n: state.news?.untilDay ?? 0 })}
+            ผลจากข่าวประจำสัปดาห์ · {t('news.until', { n: state.news?.untilDay ?? 0 })}
           </span>
           <strong>{effects.join(' / ')}</strong>
         </div>

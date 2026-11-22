@@ -13,7 +13,7 @@ export const luckyEvents: GameEvent[] = [
     },
     choices: [
       {
-        text: { th: 'นั่งกินป๊อปคอร์นดูดราม่าเงียบๆ' },
+        text: { th: 'นั่งกินป๊อปคอร์นดูดราม่าเงียบ ๆ' },
         outcomes: [
           {
             text: { th: 'ตำรวจไซเบอร์ทั้งกองย้ายไปทำคดีดารา คุณหายใจโล่งขึ้นเยอะ' },
@@ -52,7 +52,7 @@ export const luckyEvents: GameEvent[] = [
         text: { th: 'เล่นบทยาว ฟังเรื่องปลาคาร์ปทุกคืน' },
         outcomes: [
           {
-            text: { th: 'คุณรู้จักปลาคาร์ปทั้ง 214 ตัวด้วยชื่อ เสี่ยผูกพันสุดๆ' },
+            text: { th: 'คุณรู้จักปลาคาร์ปทั้ง 214 ตัวด้วยชื่อ เสี่ยผูกพันสุด ๆ' },
             effects: [
               { kind: 'romanceBond', value: 3 },
               { kind: 'add', stat: 'karma', value: -2 },
@@ -64,7 +64,7 @@ export const luckyEvents: GameEvent[] = [
         text: { th: 'ขอยืมก้อนใหญ่ทีเดียวจบ' },
         outcomes: [
           {
-            text: { th: 'เสี่ยโอนให้ทันทีพร้อมรูปปลาคาร์ป แต่เริ่มสงสัยนิดๆ' },
+            text: { th: 'เสี่ยโอนให้ทันทีพร้อมรูปปลาคาร์ป แต่เริ่มสงสัยนิด ๆ' },
             effects: [
               { kind: 'add', stat: 'dirtyCash', value: [20_000, 40_000] },
               { kind: 'add', stat: 'heat', value: 10 },
@@ -81,7 +81,7 @@ export const luckyEvents: GameEvent[] = [
     category: 'lucky',
     weight: 4,
     when: { day: [2, 30] },
-    title: { th: 'หวยออกตรงเลขที่ใบ้มั่วๆ' },
+    title: { th: 'หวยออกตรงเลขที่ใบ้มั่ว ๆ' },
     body: {
       th: 'เมื่อวานคุณโพสต์เลขที่เห็นบนป้ายทะเบียนรถขายลูกชิ้น วันนี้หวยออกตรงเป๊ะ เพจคุณมีคนแห่ไลก์',
     },
@@ -90,7 +90,7 @@ export const luckyEvents: GameEvent[] = [
         text: { th: 'ตั้งตัวเป็น "อาจารย์ใบ้แม่น" ขายเลขงวดหน้า' },
         outcomes: [
           {
-            text: { th: 'คนแห่โอนค่าเลข คุณใบ้เลขงวดหน้าจากป้ายรถขายลูกชิ้นคันเดิม' },
+            text: { th: 'คนแห่จ่ายค่าเลขเด็ด งวดหน้าก็ต้องฝากความหวังไว้กับทะเบียนรถลูกชิ้นเจ้าเดิม' },
             effects: [
               { kind: 'add', stat: 'dirtyCash', value: [5_000, 15_000] },
               { kind: 'add', stat: 'fame', value: 10 },
@@ -104,7 +104,7 @@ export const luckyEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
-            text: { th: 'ถูกเองด้วย! เงินรางวัลเป็นเงินสะอาดล้วนๆ ครั้งแรกในชีวิต' },
+            text: { th: 'ถูกเองด้วย! เงินรางวัลเป็นเงินสะอาดล้วน ๆ ครั้งแรกในชีวิต' },
             effects: [{ kind: 'add', stat: 'cleanCash', value: 20_000 }],
           },
           {

@@ -44,7 +44,7 @@ export const offers: DailyOffer[] = [
     price: 1_500,
     effects: [{ kind: 'gainHenchman', loyalty: 90 }],
     name: { th: 'ผู้สมัครลูกน้อง: อดีตนักมายากลงานวัด' },
-    desc: { th: 'เสกเหรียญหายได้ แต่เสกกลับมาไม่ได้ ภักดีสูงมากเพราะไม่มีใครรับเข้างาน' },
+    desc: { th: 'เสกเหรียญหายได้ แต่เสกกลับมาไม่ได้ อยู่กับเรายาว ๆ เพราะสมัครที่ไหนก็ไม่มีใครรับ' },
   },
   {
     id: 'borrowed_ringlight',
@@ -53,7 +53,7 @@ export const offers: DailyOffer[] = [
     price: 500,
     effects: [{ kind: 'modifier', target: 'income', methodId: 'fake_shop', pct: 40, days: 1 }],
     name: { th: 'ยืมริงไลต์เพื่อน' },
-    desc: { th: 'ไลฟ์ขายของหน้าใสขึ้นสองระดับ ขายของไม่ส่งวันนี้ +40% ค่าเช่า 500' },
+    desc: { th: 'เปิดไฟปุ๊บ รอยอดนอนหายเกลี้ยง ค่าเช่า 500 บาท วันนี้แผนขายของไม่ส่งได้เงินเพิ่ม 40%' },
   },
   {
     id: 'dark_glasses',
@@ -91,7 +91,7 @@ export const offers: DailyOffer[] = [
     price: 4_000,
     effects: [{ kind: 'modifier', target: 'heat', pct: -20, days: 3 }],
     name: { th: 'ห้องเช่าเก็บเสียงลดราคา' },
-    desc: { th: 'เพื่อนบ้านไม่ได้ยินเสียงโทรศัพท์อีกต่อไป Heat ที่เพิ่ม -20% สามวัน' },
+    desc: { th: 'คราวนี้ข้างห้องก็หลับสบายสักที Heat ขึ้นน้อยลง 20% นาน 3 วัน' },
   },
   // ---------- mission ----------
   {

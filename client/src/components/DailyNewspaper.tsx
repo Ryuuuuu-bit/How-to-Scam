@@ -69,7 +69,7 @@ export function DailyNewspaper({
       >
         <div className="flex items-center justify-between gap-3 border-b-4 border-ink pb-3">
           <div>
-            <p className="eyebrow">ข่าวสมมติจากการเล่นของคุณ</p>
+            <p className="eyebrow">ข่าวจากรอบที่คุณเล่น</p>
             <h2 id="paper-title" className="font-display text-2xl">
               เดลี่ต้มตุ๋น
             </h2>
@@ -111,7 +111,7 @@ export function DailyNewspaper({
               </div>
             )}
             <p className="mt-4 text-xs text-ink-soft">
-              เรื่องราวทั้งหมดเป็นเรื่องแต่งในเกมเพื่อเสียดสีและให้ตระหนักถึงภัยมิจฉาชีพ
+              ข่าวฉบับนี้เป็นเรื่องแต่ง อ่านเอาฮา รู้ทันมิจฯ ไว้ด้วยนะ
             </p>
           </article>
         )}

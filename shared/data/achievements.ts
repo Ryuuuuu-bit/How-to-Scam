@@ -49,7 +49,7 @@ export const achievements: Achievement[] = [
     icon: '🏖️',
     rule: { kind: 'reason', reason: 'retired', minDay: 10 },
     name: { th: 'รู้จักพอ' },
-    desc: { th: 'เกษียณเองหลังวันที่ 10' },
+    desc: { th: 'วางมือหลังวันที่ 10' },
   },
   {
     id: 'clean_100k',
@@ -168,7 +168,7 @@ export const achievements: Achievement[] = [
     icon: '🙇',
     rule: { kind: 'ending', endingId: 'surrendered' },
     name: { th: 'มอบตัว' },
-    desc: { th: 'เดินเข้าไปมอบตัวเอง' },
+    desc: { th: 'เดินเข้ามอบตัว' },
   },
   {
     id: 'whistleblower',

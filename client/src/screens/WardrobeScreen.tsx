@@ -21,10 +21,10 @@ export function WardrobeScreen({ onBack }: { onBack: () => void }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-4xl flex-col gap-4 px-4 py-6">
       <ScreenTitle
-        title="ห้องแต่งตัวข้ามรอบ"
+        title="ห้องแต่งตัว"
         hint={`สะสมแล้ว ${progress.xp.toLocaleString('th-TH')} XP · เปลี่ยนภาพได้โดยไม่กระทบค่าสถานะหรือคะแนน`}
       />
-      <p className="text-sm text-ink-soft">ฉากและสกินที่เลือกจะจำไว้บนเครื่องนี้ แยกตามบัญชีที่ใช้งาน</p>
+      <p className="text-sm text-ink-soft">เกมจะจำฉากกับชุดที่เลือกไว้ในเครื่องนี้ แยกให้แต่ละบัญชี</p>
       <h2 className="font-display text-xl">ฉากเมนูหลัก</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {menuScenes.map((item) => {

@@ -79,7 +79,7 @@ export const storyEvents: GameEvent[] = [
         text: { th: 'ไม่ให้ลา ยังมีงานค้าง' },
         outcomes: [
           {
-            text: { th: 'ลูกน้องทำงานต่อแบบไม่มีวิญญาณ และเริ่มคุยกับตำรวจในใจ' },
+            text: { th: 'ตัวนั่งอยู่โต๊ะ แต่ใจลูกน้องเดินไปถึงโรงพักแล้ว' },
             effects: [{ kind: 'loyalty', value: -35 }],
           },
         ],
@@ -99,7 +99,7 @@ export const storyEvents: GameEvent[] = [
         text: { th: 'ไปงาน ใส่สูทเต็มยศ' },
         outcomes: [
           {
-            text: { th: 'งานซึ้งมาก ตำรวจครึ่งห้องจำหน้าคุณได้ แต่ทุกคนกำลังซึ้ง' },
+            text: { th: 'ตำรวจครึ่งห้องหันมามอง หน้าอย่างคุ้น! พอดีเจ้าบ่าวเริ่มกล่าวขอบคุณ ทุกคนเลยหันไปซับน้ำตา' },
             effects: [
               { kind: 'add', stat: 'karma', value: 5 },
               { kind: 'add', stat: 'fame', value: 5 },

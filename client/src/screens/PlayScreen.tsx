@@ -101,7 +101,7 @@ export function PlayScreen({
         <h1>{state.phase === 'ended' ? '' : t(`phase.${state.phase}`)}</h1>
         <p>
           {lt(content.characters.find((c) => c.id === state.characterId)?.name ?? { th: '' })} ·
-          ทุกทางเลือกมีราคา
+          วันนี้จะเอายังไงดี?
         </p>
         <div className="phase-track" aria-label="ลำดับของวัน">
           {(['plan', 'invest', 'event', 'launder', 'shop'] as const).map((phase, i) => (

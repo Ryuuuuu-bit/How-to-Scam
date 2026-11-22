@@ -7,24 +7,24 @@ export interface Meme {
 
 const heat: Meme = {
   art: 'icon:police',
-  caption: 'ว้าวุ่นเลย… ไฟแดงทั้งซอยมาจากรถคันเดียว',
+  caption: 'ไฟหน้าบ้านกะพริบ นึกว่ารถพุ่มพวง… รถตำรวจนี่หว่า',
 };
 const loss: Meme = {
   art: 'char:orange_cat',
-  caption: 'สภาพ… ต้นทุนเดินนำ กำไรยังหาทางมา',
+  caption: 'เงินเข้าก็จริง หักทุนแล้ว… กำไรหายไปไหนหมด',
 };
 const windfall: Meme = {
   art: 'icon:dirty',
-  caption: 'จึ้งเกินคาด เครื่องคิดเลขขอนับอีกรอบ',
+  caption: 'เดี๋ยวนะ ศูนย์เกินมาตัวนึงปะ? อ้าว ยอดจริง',
 };
 const failedCard: Meme = {
   art: 'char:orange_cat',
-  caption: 'ช็อตฟีลทั้งโต๊ะ ใบสรุปบอกให้กลับไปคิดใหม่',
+  caption: 'เมื่อกี้ใครพูดว่า “รอบนี้ชัวร์” นะ',
 };
 const eventMemes: ReadonlyMap<string, Meme> = new Map([
-  ['runaway_rooster', { art: 'icon:news', caption: 'ตัวตึงประจำซอย ไก่หนึ่งตัวทำคนทั้งแก๊งวิ่ง' }],
-  ['cat_keyboard', { art: 'char:orange_cat', caption: 'น้อนกดไปปุ่มเดียว คนทั้งแก๊งประชุมด่วน' }],
-  ['deepfake_cat', { art: 'char:orange_cat', caption: 'น้อนมองกล้องแล้วถาม ใครเอาหนูไปเล่นเป็นคุณ' }],
+  ['runaway_rooster', { art: 'icon:news', caption: 'ไก่หลุดตัวเดียว ได้คาร์ดิโอกันทั้งซอย' }],
+  ['cat_keyboard', { art: 'char:orange_cat', caption: 'แมวเหยียบไปทีเดียว หัวหน้าเรียกประชุมทั้งแก๊ง' }],
+  ['deepfake_cat', { art: 'char:orange_cat', caption: 'แมวส้มฝากบอก คลิปนั้นมีคนตัดต่อ ปกติผมหล่อกว่านี้' }],
 ]);
 
 export function reactionMeme(
