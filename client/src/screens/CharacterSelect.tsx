@@ -38,11 +38,11 @@ export function CharacterSelect({
               className={`character-card anim-rise-in flex items-center gap-3 rounded-3xl border-2 border-ink p-4 text-left transition ${active ? 'is-selected bg-sun shadow-pop' : 'bg-paper'} ${open ? '' : 'opacity-60'}`}
               style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
             >
-              <div className="relative shrink-0">
+              <div className="character-portrait relative shrink-0">
                 <Art
                   id={characterArt(c.id, cosmetics)}
-                  size={84}
-                  className={open ? '' : 'brightness-0 opacity-40'}
+                  size={100}
+                  className={`character-figure ${open ? '' : 'brightness-0 opacity-40'}`}
                 />
                 {!open && <Art id="icon:lock" size={34} className="absolute right-0 bottom-0" />}
               </div>

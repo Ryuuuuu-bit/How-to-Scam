@@ -451,6 +451,16 @@ button {
   position: relative;
   box-shadow: 0 4px 0 #090b10;
 }
+.character-portrait {
+  width: clamp(100px, 12vw, 125px);
+  aspect-ratio: 5 / 4;
+}
+.character-portrait .character-figure {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
 .character-card.is-selected {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
