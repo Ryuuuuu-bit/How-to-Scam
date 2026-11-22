@@ -13,7 +13,8 @@ function quietDay(s: GameState): Action {
     case 'plan': return { t: 'choosePlan', methodId: null };
     case 'invest': return { t: 'confirmInvest' };
     case 'event': {
-      const event = content.events.find(e => e.id === s.pendingEvents[0])!;
+      const event = content.events.find(e => e.id === s.pendingEvents[0]);
+      if (!event) throw new Error('Missing pending event for the test day');
       return { t: 'eventChoice', choiceIdx: event.choices.findIndex(c => choiceAvailable(s, c.requires)) };
     }
     case 'launder': return { t: 'launder', cardId: null };
