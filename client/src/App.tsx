@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LiveCounter } from './screens/LiveCounter';
 import { ScenePreview } from './screens/ScenePreview';
+import { OriginPreview } from './screens/OriginPreview';
 import { loadSavedRun, useGame } from './game/useGame';
 import { CharacterSelect } from './screens/CharacterSelect';
 import { EndScreen } from './screens/EndScreen';
@@ -31,6 +32,7 @@ type Screen =
   | 'wardrobe';
 
 export function App() {
+  if (new URLSearchParams(window.location.search).get('preview') === 'origins') return <><OriginPreview /><AudioControls /></>;
   if (new URLSearchParams(window.location.search).get('preview') === 'scenes') return <><ScenePreview /><AudioControls /></>;
   if (new URLSearchParams(window.location.search).get('preview') === 'live') {
     return <><main><LiveCounter seller onFinish={() => window.location.assign('/')} /></main><AudioControls /></>;

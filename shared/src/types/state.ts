@@ -188,6 +188,7 @@ export interface GameState {
   /** สถิติสำหรับ achievement */
   stats: { specialChoices: number; maxPonziStreak: number; launderOk: number };
   history: DayLog[];
+  originStory?: { reply: 'help' | 'later'; followedUpOn?: number };
   lastResults: LastResult[];
   end: {
     reason: EndReason;
@@ -199,6 +200,8 @@ export interface GameState {
 
 /** การกระทำของผู้เล่น — server เก็บเป็น action log เพื่อ replay */
 export type Action =
+  | { t: 'replyOrigin'; reply: 'help' | 'later' }
+  | { t: 'readOrigin' }
   | { t: 'choosePlan'; methodId: MethodId | null; opening?: true | undefined }
   | { t: 'invest'; itemId: ShopItemId }
   | { t: 'acceptOffer' }

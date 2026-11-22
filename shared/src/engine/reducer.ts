@@ -14,6 +14,7 @@ import {
   spend,
 } from './day';
 import { invariant } from './errors';
+import { originRewards, originStage } from './opening';
 import { resolveEventChoice } from './events';
 import {
   applyCaught,
@@ -112,6 +113,16 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
   const rng = new Rng(s.rng);
 
   switch (action.t) {
+    case 'replyOrigin':
+      invariant(originStage(s) === 'opening' && (action.reply === 'help' || action.reply === 'later'), 'invalid origin reply');
+      s.originStory = { reply: action.reply };
+      break;
+    case 'readOrigin':
+      invariant(originStage(s) === 'followup' && s.originStory, 'no origin message due');
+      if (s.originStory.reply === 'help') s.fame += originRewards.help.fame;
+      else s.cleanCash += originRewards.later.cleanCash;
+      s.originStory.followedUpOn = s.day;
+      break;
     case 'scoutNews':
       expectPhase(s, 'plan');
       invariant(s.day >= newsScout.firstDay && s.scoutedDay !== s.day, 'news scout unavailable');

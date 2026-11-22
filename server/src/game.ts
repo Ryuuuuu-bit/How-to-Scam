@@ -6,6 +6,7 @@ import {
   dailyCharacter,
   InvalidActionError,
   isCharacterUnlocked,
+  originSeedPrefix,
   replay,
   titleFor,
   xpForRun,
@@ -28,6 +29,8 @@ const id = z.string().min(1).max(64);
 /** รูปแบบ action ที่รับจาก client (ตรวจก่อนเอาไป replay) */
 export const actionSchema: z.ZodType<Action> = z.discriminatedUnion('t', [
   z.object({ t: z.literal('choosePlan'), methodId: id.nullable(), opening: z.literal(true).optional() }),
+  z.object({ t: z.literal('replyOrigin'), reply: z.enum(['help', 'later']) }),
+  z.object({ t: z.literal('readOrigin') }),
   z.object({ t: z.literal('invest'), itemId: id }),
   z.object({ t: z.literal('acceptOffer') }),
   z.object({ t: z.literal('scoutNews') }),
@@ -53,7 +56,7 @@ const RUN_TTL_MS = 48 * 60 * 60 * 1000;
 const MAX_RUNS_PER_HOUR = 60;
 
 export function newSeed(): string {
-  return 'v3:soi:live:' + randomBytes(16).toString('hex');
+  return originSeedPrefix + randomBytes(16).toString('hex');
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */

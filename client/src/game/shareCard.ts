@@ -4,6 +4,7 @@ import type { GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { ART, sceneUrl } from '../assets/art';
 import { fmt, lt, t } from '../i18n';
+import { neighborhoodHeadline } from './origins';
 
 const W = 1080;
 const H = 1350;
@@ -154,6 +155,11 @@ export async function makeShareCard(info: ShareInfo): Promise<Blob> {
   const days = end.reason === 'survived' ? content.config.maxDays : state.day;
   const rank = info.rank ? ` · อันดับ ${info.rank}` : '';
   ctx.fillText(`คะแนน · อยู่รอด ${days} วัน${rank}`, 92, 1196);
+  const headline = neighborhoodHeadline(state);
+  if (headline) {
+    ctx.font = '600 28px Sarabun';
+    ctx.fillText(headline, 92, 1236, W - 184);
+  }
 
   // ข้อความเตือนภัยจริง (ส่วนสำคัญของเกม)
   const sign = content.dangerSigns.find((d) => d.id === end.dangerSignIds[0]);

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { Action, GameState } from '@hts/shared';
-import { currentOffer, methodBlock, newsScout, openingFor, priceOf } from '@hts/shared';
+import { currentOffer, methodBlock, newsScout, openingFor, originStage, priceOf } from '@hts/shared';
 import { openingStories } from '../game/openingStories';
+import { OriginChat } from './OriginChat';
 import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
@@ -145,6 +146,7 @@ export function DayPlanner({
   const omitted = lastPlan?.items.filter(banned) ?? [];
 
   const opening = state.day === 1 && !skipped && openingFor(state.seed, state.characterId);
+  if (originStage(state)) return <OriginChat state={state} dispatch={dispatch} />;
   const shop = methods.find(({ method }) => method.id === 'fake_shop');
   if (opening && shop) {
     const story = openingStories[opening];

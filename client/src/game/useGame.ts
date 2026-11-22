@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { InvalidActionError, newGame, replay, step } from '@hts/shared';
+import { InvalidActionError, newGame, originSeedPrefix, replay, step } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 
@@ -81,7 +81,7 @@ export function useGame() {
 
   /** เริ่มรอบ: ถ้ามี seed จาก server (runId) คะแนนจะส่งขึ้นกระดานได้ */
   const start = useCallback((characterId: string, server?: { runId: string; seed: string }) => {
-    const seed = server?.seed ?? 'v3:soi:live:' + randomSeed();
+    const seed = server?.seed ?? originSeedPrefix + randomSeed();
     const next: Run = {
       seed,
       characterId,

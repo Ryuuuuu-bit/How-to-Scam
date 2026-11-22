@@ -1,4 +1,5 @@
 import type { GameState } from '@hts/shared';
+import { neighborhoodHeadline } from '../game/origins';
 import { content } from '@hts/shared/data';
 import { Art, Panel } from './ui';
 
@@ -21,12 +22,13 @@ export function ClosingEdition({ state }: { state: GameState }) {
     (eventDay?.interview ? 'reporter_aunt' : eventDay?.events[0]);
   const title = content.events.find((e) => e.id === eventId)?.title.th;
   const first = state.history[0];
+  const originHeadline = neighborhoodHeadline(state);
   const method = content.methods.find((m) => m.id === first?.methodId);
   return (
     <Panel tone="paper" className="text-left text-ink">
       <p className="border-b-4 border-ink pb-2 font-display text-lg font-bold">เดลี่ต้มตุ๋น · ฉบับปิดคดี</p>
       <h2 className="my-3 text-2xl font-bold">
-        {names ? `จากวันที่ ${names} เข้าทีม ถึงฉากจบ “${ending}”` : ending}
+        {originHeadline || (names ? `จากวันที่ ${names} เข้าทีม ถึงฉากจบ “${ending}”` : ending)}
       </h2>
       <div className="flex items-center gap-3">
         <Art
