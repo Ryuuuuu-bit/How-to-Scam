@@ -7,7 +7,11 @@ import {
   bangkokDate,
   dailyCharacter,
   InvalidActionError,
+  auditionsPassed,
+  charKey,
   isCharacterUnlocked,
+  marketPrice,
+  moneyForRun,
   questSeedPrefix,
   replay,
   titleFor,
@@ -191,6 +195,8 @@ export async function submitRun(
     c,
   ).filter((a) => !had.includes(a));
   const xpGained = xpForRun(state);
+  const moneyGained = moneyForRun(state);
+  const auditions = auditionsPassed(state, c, user.owned);
   const before = c.characters.filter((ch) => isCharacterUnlocked(ch, user)).map((ch) => ch.id);
   const days = state.end.reason === 'survived' ? state.maxDays : state.day;
   const updated = await store.saveScore({
@@ -208,6 +214,8 @@ export async function submitRun(
     titleId,
     actionCount: actions.length,
     xpGained,
+    moneyGained,
+    newOwned: auditions.map(charKey),
     newAchievements,
   });
   const unlocked = c.characters
@@ -223,6 +231,8 @@ export async function submitRun(
     endingId: state.end.endingId,
     titleId,
     xpGained,
+    moneyGained,
+    auditions,
     unlocked,
     seasonId: season.id,
     mode,
@@ -231,4 +241,15 @@ export async function submitRun(
     newAchievements,
     user: updated,
   };
+}
+
+/** ซื้อของในตลาดใต้ดินด้วยเงินใต้ดิน: ราคามาจากข้อมูลเกมเท่านั้น */
+export async function buyMarketItem(store: Store, c: GameContent, user: UserRec, key: string) {
+  const price = marketPrice(c, key);
+  if (price === null) throw new HttpError(400, 'unknown_item');
+  if (user.owned.includes(key)) throw new HttpError(409, 'already_owned');
+  if (user.money < price) throw new HttpError(402, 'not_enough_money');
+  const updated = await store.buyItem(user.id, key, price);
+  if (!updated) throw new HttpError(409, 'purchase_failed');
+  return { key, price, user: updated };
 }

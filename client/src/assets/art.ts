@@ -24,6 +24,10 @@ const EMOJI: Record<string, ArtEntry> = {
   'icon:ponzi_crash': { emoji: '📉' },
   'icon:exposed': { emoji: '🔍' },
   'icon:bribe': { emoji: '✉️' },
+  'icon:bounty': { emoji: '🎯' },
+  'icon:undermoney': { emoji: '💴' },
+  'icon:audition': { emoji: '🎤' },
+  'icon:undermarket': { emoji: '🏮' },
 
   // โหมดหนีตำรวจ
   'disguise:somtam': { emoji: '🥗' },

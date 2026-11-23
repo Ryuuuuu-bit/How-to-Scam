@@ -1,6 +1,7 @@
 # ตัดแผ่นไอคอนวงกลม 4x4 จาก ChatGPT (art/gen/<sheet>.png) เป็นไอคอน 192px พื้นโปร่ง
 # ใช้: python art/cut_icons.py sheet-shop-a id1 id2 ... (16 ชื่อ ตามลำดับอ่าน)
-import pathlib, sys
+# ตั้ง GRID=2 สำหรับแผ่น 2x2
+import os, pathlib, sys
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -10,11 +11,12 @@ name, ids = sys.argv[1], sys.argv[2:]
 src = Image.open(ROOT / "gen" / f"{name}.png").convert("RGB")
 arr = np.array(src).astype(int)
 ink = (arr.min(axis=2) < 225)
-cw, ch = src.width / 4, src.height / 4
+n = int(os.environ.get("GRID", "4"))
+cw, ch = src.width / n, src.height / n
 for i, key in enumerate(ids):
     if key == "-":
         continue
-    x0, y0 = int((i % 4) * cw), int((i // 4) * ch)
+    x0, y0 = int((i % n) * cw), int((i // n) * ch)
     cell = ink[y0 : int(y0 + ch), x0 : int(x0 + cw)]
     ys, xs = np.nonzero(cell)
     # ใช้ขอบนอกของวงกลม (ตัดเศษเล็ก ๆ ด้วย percentile)

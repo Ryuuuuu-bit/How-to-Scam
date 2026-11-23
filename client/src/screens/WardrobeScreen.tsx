@@ -3,26 +3,30 @@ import { content } from '@hts/shared/data';
 import { sceneUrl } from '../assets/art';
 import { Art, Button, Panel, ScreenTitle } from '../components/ui';
 import {
+  cosmeticKey,
   cosmeticUnlocked,
   loadCosmetics,
   menuScenes,
   saveCosmetics,
   skins,
 } from '../game/cosmetics';
-import { progressFor } from '../game/meta';
 import { useAuth } from '../net/auth';
+import { useMarket } from '../game/market';
+import { BuyButton } from '../components/Underground';
+import { bountyText } from '../game/bounty';
 import { lt } from '../i18n';
 
-export function WardrobeScreen({ onBack }: { onBack: () => void }) {
+export function WardrobeScreen({ onBack, onMarket }: { onBack: () => void; onMarket?: () => void }) {
   const { user } = useAuth();
-  const progress = progressFor(user);
+  const market = useMarket();
+  const progress = market.progress;
   const [selected, setSelected] = useState(() => loadCosmetics(progress, user?.uid));
   const [saved, setSaved] = useState(true);
   return (
     <main className="collection-screen mx-auto flex min-h-dvh max-w-4xl flex-col gap-4 px-4 py-6">
       <ScreenTitle
         title="ห้องแต่งตัว"
-        hint={`สะสมแล้ว ${progress.xp.toLocaleString('th-TH')} XP · เปลี่ยนภาพได้โดยไม่กระทบค่าสถานะหรือคะแนน`}
+        hint={`ค่าหัวตอนนี้ ${bountyText(progress.xp)} · เปลี่ยนภาพได้โดยไม่กระทบค่าสถานะหรือคะแนน`}
       />
       <p className="text-sm text-ink-soft">เกมจะจำฉากกับชุดที่เลือกไว้ในเครื่องนี้ แยกให้แต่ละบัญชี</p>
       <h2 className="font-display text-xl">ฉากเมนูหลัก</h2>
@@ -79,6 +83,7 @@ export function WardrobeScreen({ onBack }: { onBack: () => void }) {
                   <p className="my-2 text-xs text-ink-soft">
                     {open ? 'ปลดล็อกแล้ว · ใช้เมื่อเลือกตัวละครนี้' : `🔒 ${item.hint}`}
                   </p>
+                  {!open && <BuyButton market={market} itemKey={cosmeticKey(item)} className="mb-2" />}
                   <Button
                     tone={equipped ? 'mint' : 'paper'}
                     disabled={!open}
@@ -106,6 +111,11 @@ export function WardrobeScreen({ onBack }: { onBack: () => void }) {
       <p role="status" className="text-center text-sm text-ink-soft">
         {saved ? 'เลือกฉากหรือสกินที่ปลดล็อกแล้วได้เลย' : 'เลือกแล้ว · จะใช้กับเมนูและตัวละครของคุณ'}
       </p>
+      {onMarket && (
+        <Button tone="sun" onClick={onMarket}>
+          ซื้อฉากและสกินเพิ่มที่ตลาดใต้ดิน
+        </Button>
+      )}
       <Button tone="paper" onClick={onBack}>
         กลับเมนูหลัก
       </Button>

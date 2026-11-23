@@ -34,6 +34,10 @@ model User {
   dailyPlays  Int      @default(0)
   /// ฉากจบที่เคยเห็น (ใช้ปลดล็อกตัวลับ)
   endings     String[] @default([])
+  /// เงินใต้ดิน: ได้จากทุกรอบที่จบ ใช้ซื้อตัวละครและของแต่ง
+  money       Int      @default(0)
+  /// ของที่ซื้อหรือได้จากออดิชั่นแล้ว เช่น "char:live_seller"
+  owned       String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   lastOnlineAt DateTime?

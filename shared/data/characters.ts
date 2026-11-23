@@ -2,6 +2,7 @@ import type { Character } from '../src/types/content';
 
 // อาชีพที่เล่นได้ — ทุกอาชีพมีจุดเด่น ข้อเสีย และเหตุการณ์เฉพาะตัว
 // unlockXp = ต้องสะสมแต้มประสบการณ์แก๊งเท่านี้ก่อน (ไม่ใส่ = เปิดตั้งแต่แรก)
+// price = ซื้อด้วยเงินใต้ดิน หรือผ่าน audition ในรอบเดียวแล้วได้ฟรี (สามตัวแรกเป็นตัวเริ่มต้น)
 export const characters: Character[] = [
   {
     id: 'ex_insurance',
@@ -37,7 +38,7 @@ export const characters: Character[] = [
     cons: { th: 'รู้สึกผิดง่าย ทำเรื่องไม่ดีแล้วกรรมหนักกว่าคนอื่น' },
   },
   {
-    id: 'live_seller',
+    id: 'live_seller', price: 1500, audition: { kind: 'shifts', methodId: 'fake_shop', count: 6 },
     perks: [
       { kind: 'methodIncome', methodId: 'fake_shop', pct: 25 },
       { kind: 'startFame', value: 10 },
@@ -49,7 +50,7 @@ export const characters: Character[] = [
     cons: { th: 'ยิ่งดัง Heat ยิ่งขึ้นไว' },
   },
   {
-    id: 'phone_tech',
+    id: 'phone_tech', price: 1800, audition: { kind: 'shifts', methodId: 'call_center', count: 7 },
     perks: [
       { kind: 'shopDiscount', itemIds: ['sim_pack', 'new_phone'], pct: 50 },
       { kind: 'methodHeat', methodId: 'call_center', pct: -15 },
@@ -61,7 +62,7 @@ export const characters: Character[] = [
     cons: { th: 'คุยหวานไม่เป็น หลอกรัก -20%' },
   },
   {
-    id: 'fortune_teller',
+    id: 'fortune_teller', price: 2000, audition: { kind: 'shifts', methodId: 'romance', count: 7 },
     perks: [
       { kind: 'revealWeakness', weaknesses: ['faith', 'fear'] },
       { kind: 'methodIncome', methodId: 'merit', pct: 10 },
@@ -73,7 +74,7 @@ export const characters: Character[] = [
     cons: { th: 'หลอกคนที่เชื่อใจ กรรมหนักขึ้น' },
   },
   {
-    id: 'rich_coach',
+    id: 'rich_coach', price: 3000, audition: { kind: 'shifts', methodId: 'ponzi', count: 4 },
     perks: [
       { kind: 'methodIncome', methodId: 'ponzi', pct: 25 },
       { kind: 'startFame', value: 30 },
@@ -85,7 +86,7 @@ export const characters: Character[] = [
     cons: { th: 'โอกาสที่วงแชร์จะล่มสูงกว่าปกติ 1.4 เท่า' },
   },
   {
-    id: 'fallen_star',
+    id: 'fallen_star', price: 2500, audition: { kind: 'shifts', methodId: 'foundation', count: 6 },
     perks: [
       { kind: 'methodIncome', methodId: 'foundation', pct: 50 },
       { kind: 'startFame', value: 25 },
@@ -97,7 +98,7 @@ export const characters: Character[] = [
     cons: { th: 'นักสืบโซเชียลกับนักข่าวตามติดเป็นพิเศษ' },
   },
   {
-    id: 'ex_banker',
+    id: 'ex_banker', price: 3000, audition: { kind: 'launder', count: 14 },
     perks: [
       { kind: 'launderOffer', extra: 1 },
       { kind: 'launderSuccess', pct: 10 },
@@ -109,7 +110,7 @@ export const characters: Character[] = [
     cons: { th: 'ฟอกพังเมื่อไหร่ Heat ×3' },
   },
   {
-    id: 'share_auntie',
+    id: 'share_auntie', price: 1500, audition: { kind: 'shifts', methodId: 'mystery_stall', count: 6 },
     perks: [
       { kind: 'methodIncome', methodId: 'ponzi', pct: 15 },
       { kind: 'victimWealth', pct: 25 },
@@ -121,7 +122,7 @@ export const characters: Character[] = [
     cons: { th: 'Karma ต่ำเมื่อไหร่ เพื่อนบ้านรวมตัวแฉ' },
   },
   {
-    id: 'orange_cat',
+    id: 'orange_cat', price: 2200, audition: { kind: 'shifts', methodId: 'cat_dub', count: 7 },
     perks: [
       { kind: 'chaos', min: 0.4, max: 3 },
       { kind: 'bannedMethod', methodId: 'call_center' },

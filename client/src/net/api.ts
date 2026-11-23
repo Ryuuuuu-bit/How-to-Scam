@@ -16,6 +16,9 @@ export interface PublicUser {
   runsPlayed: number;
   dailyPlays: number;
   endings: string[];
+  /** เงินใต้ดิน (server รุ่นเก่ายังไม่ส่งมา) */
+  money?: number;
+  owned?: string[];
 }
 
 export interface DailyInfo {
@@ -44,6 +47,9 @@ export interface SubmitResult {
   endingId: string;
   titleId: string;
   xpGained: number;
+  moneyGained?: number;
+  /** ตัวละครที่ผ่านออดิชั่นในรอบนี้ */
+  auditions?: string[];
   unlocked: string[];
   seasonId: string;
   mode: 'normal' | 'normal60' | 'normal90' | 'daily';
@@ -125,6 +131,8 @@ export const api = {
     call<{ seasonId: string; date?: string; board: string; rows: BoardRow[] }>(
       `/api/leaderboard?board=${board}&days=${days}${season ? `&season=${season}` : ''}`,
     ),
+  marketBuy: (key: string) =>
+    call<{ key: string; price: number; user: PublicUser }>('/api/market/buy', { body: { key } }),
   seasons: () =>
     call<{ current: string; seasons: { id: string; players: number }[] }>('/api/seasons'),
 };

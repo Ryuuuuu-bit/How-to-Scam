@@ -7,6 +7,7 @@ import { sceneUrl } from '../assets/art';
 import { useAuth } from '../net/auth';
 import { loadCosmetics, menuScenes } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
+import { WalletBar } from '../components/Underground';
 import { HowToPlay } from './HowToPlay';
 import { Feedback } from './Feedback';
 import { OnlineCount } from '../components/OnlineCount';
@@ -21,6 +22,7 @@ export function MainMenu({
   onDaily,
   onAchievements,
   onWardrobe,
+  onMarket,
   onEndings,
 }: {
   saved: Run | null;
@@ -31,13 +33,15 @@ export function MainMenu({
   onDaily?: (() => void) | undefined;
   onAchievements?: (() => void) | undefined;
   onWardrobe: () => void;
+  onMarket: () => void;
   onEndings?: (() => void) | undefined;
 }) {
   const [help, setHelp] = useState(false);
   const [confirmNewRun, setConfirmNewRun] = useState(false);
   const helpButton = useRef<HTMLButtonElement>(null);
   const { user, status } = useAuth();
-  const cosmetics = loadCosmetics(progressFor(user), user?.uid);
+  const progress = progressFor(user);
+  const cosmetics = loadCosmetics(progress, user?.uid);
   const menuScene = menuScenes.find((s) => s.id === cosmetics.scene) ?? menuScenes[0];
   if (help) {
     return (
@@ -108,6 +112,12 @@ export function MainMenu({
               </span>
             </Button>
             </div>
+            <button type="button" className="menu-wallet" onClick={onMarket} aria-label="ไปตลาดใต้ดิน">
+              <WalletBar progress={progress} compact />
+              <span className="menu-wallet-go">
+                <Art id="icon:undermarket" size={28} /> ตลาดใต้ดิน ↗
+              </span>
+            </button>
             {user && onProfile && (
               <button
                 type="button"

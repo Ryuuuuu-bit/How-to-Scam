@@ -213,12 +213,20 @@ export type Perk =
   | { kind: 'eventWeight'; eventIds: EventId[]; mul: number }
   | { kind: 'victimWealth'; pct: number };
 
+export type Audition =
+  | { kind: 'shifts'; methodId: MethodId; count: number }
+  | { kind: 'launder'; count: number };
+
 export interface Character {
   id: CharacterId;
   /** ใช้แต้มประสบการณ์แก๊งเท่านี้เพื่อปลดล็อก (ไม่ใส่ = เปิดตั้งแต่แรก) */
   unlockXp?: number;
   /** ตัวลับ: ปลดล็อกเมื่อเคยเห็นฉากจบนี้ */
   unlockEnding?: EndingId;
+  /** ราคาเป็นเงินใต้ดิน (ไม่ใส่ = ตัวเริ่มต้น) */
+  price?: number;
+  /** ภารกิจออดิชั่น: ทำสำเร็จในรอบเดียวแล้วได้ตัวนี้ฟรี */
+  audition?: Audition;
   perks: Perk[];
   name: LocalizedText;
   desc: LocalizedText;

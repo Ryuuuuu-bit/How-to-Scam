@@ -1,10 +1,13 @@
-import { careerAffinities, durations, type Duration } from '@hts/shared';
+import { careerAffinities, charKey, durations, type Duration } from '@hts/shared';
 import { useState } from 'react';
 import { content } from '@hts/shared/data';
-import { isUnlocked, progressFor } from '../game/meta';
+import { isUnlocked } from '../game/meta';
+import { useMarket } from '../game/market';
+import { bountyText } from '../game/bounty';
+import { AuditionNote, BuyButton, WalletBar } from '../components/Underground';
 import { useAuth } from '../net/auth';
 import { lt, t } from '../i18n';
-import { Art, Button, Chip, ScreenTitle } from '../components/ui';
+import { Art, Button, ScreenTitle } from '../components/ui';
 import { characterArt, loadCosmetics } from '../game/cosmetics';
 
 export function CharacterSelect({
@@ -20,17 +23,20 @@ export function CharacterSelect({
 }) {
   const [days, setDays] = useState<Duration>(30);
   const { user } = useAuth();
-  const meta = progressFor(user);
+  const market = useMarket();
+  const meta = market.progress;
   const cosmetics = loadCosmetics(meta, user?.uid);
   const [picked, setPicked] = useState(content.characters[0]?.id ?? '');
   const [showLocked, setShowLocked] = useState(false);
   const unlocked = content.characters.filter(c => isUnlocked(c, meta));
+  const forSale = content.characters.filter(c => !isUnlocked(c, meta) && c.price !== undefined);
+  const shown = showLocked ? content.characters : [...unlocked, ...forSale];
   return (
     <main className="character-screen mx-auto flex min-h-dvh flex-col px-4 py-6">
       <div className="eyebrow mb-3">THE CREW / เลือกตัวละครของคุณ</div>
-      <div className="flex items-start justify-between gap-2">
-        <ScreenTitle title={t('character.title')} />
-        <Chip className="mt-1 shrink-0">⭐ {t('character.xp', { n: meta.xp })}</Chip>
+      <ScreenTitle title={t('character.title')} />
+      <div className="mb-3">
+        <WalletBar progress={meta} compact />
       </div>
       <fieldset className="mb-3">
         <legend className="mb-1 font-semibold">ระยะเวลาของรอบ</legend>
@@ -44,13 +50,36 @@ export function CharacterSelect({
         </p>
       </fieldset>
       <div className="collection-filter" role="group" aria-label="แสดงอาชีพ">
-        <button aria-pressed={!showLocked} onClick={() => setShowLocked(false)}>เลือกเล่นได้ · {unlocked.length}</button>
+        <button aria-pressed={!showLocked} onClick={() => setShowLocked(false)}>เลือกเล่นได้ {unlocked.length}{forSale.length > 0 ? ` · รอรับเข้าแก๊ง ${forSale.length}` : ''}</button>
         <button aria-pressed={showLocked} onClick={() => setShowLocked(true)}>ทั้งหมด · {content.characters.length}</button>
       </div>
       <div className="character-grid grid gap-4 pb-28">
-        {(showLocked ? content.characters : unlocked).map((c, i) => {
+        {shown.map((c, i) => {
           const open = isUnlocked(c, meta);
           const active = open && c.id === picked;
+          if (!open && c.price !== undefined) {
+            return (
+              <div
+                key={c.id}
+                className="character-card is-for-sale anim-rise-in flex items-center gap-3 rounded-3xl border-2 border-ink bg-paper p-4 text-left"
+                style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
+              >
+                <div className="character-portrait relative shrink-0">
+                  <Art id={characterArt(c.id, cosmetics)} size={100} className="character-figure" />
+                  <Art id="icon:lock" size={34} className="absolute right-0 bottom-0" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-display text-lg leading-tight font-semibold">{lt(c.name)}</div>
+                  <div className="text-xs text-ink-soft">{lt(c.desc)}</div>
+                  <div className="mt-1 text-xs">
+                    <span className="font-semibold text-clean">{t('character.pros')}:</span> {lt(c.pros)}
+                  </div>
+                  <AuditionNote ch={c} />
+                  <BuyButton market={market} itemKey={charKey(c.id)} label="รับเข้าแก๊ง" />
+                </div>
+              </div>
+            );
+          }
           return (
             <button
               key={c.id}
@@ -90,7 +119,7 @@ export function CharacterSelect({
                   <div className="text-sm text-ink-soft">
                     {c.unlockEnding
                       ? t('character.lockedSecret')
-                      : t('character.lockedXp', { n: c.unlockXp ?? 0 })}
+                      : t('character.lockedXp', { n: bountyText(c.unlockXp ?? 0) })}
                   </div>
                 )}
               </div>

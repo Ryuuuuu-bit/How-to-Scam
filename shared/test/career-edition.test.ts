@@ -3,10 +3,13 @@ import { content, day30Ending } from '../data';
 import { careerOrigins, careerSeedPrefix, isEventEligible, newGame, openingFor, originFor, originStage, step } from '../src';
 import { pickEnding } from '../src/engine/score';
 import { isCharacterUnlocked } from '../src/engine/titles';
+import { legacyCharacterKeys } from '../src/engine/progression';
 import { unlockedMethods } from '../src/engine/day';
 
-it('opens eleven starters and unlocks the three new careers at their XP thresholds', () => {
-  const available = (xp: number) => content.characters.filter(ch => isCharacterUnlocked(ch, { xp, endings: [] }));
+it('opens three starters, eleven for veterans, and unlocks the three new careers at their XP thresholds', () => {
+  const owned = legacyCharacterKeys(content);
+  const available = (xp: number) => content.characters.filter(ch => isCharacterUnlocked(ch, { xp, endings: [], owned }));
+  expect(content.characters.filter(ch => isCharacterUnlocked(ch, { xp: 0, endings: [] }))).toHaveLength(3);
   expect(content.characters.slice(11).map(ch => ch.id)).toEqual(['foundation_chief', 'grey_lawyer', 'ex_inmate']);
   for (const [xp, count] of [[0, 11], [59, 11], [60, 12], [119, 12], [120, 13], [179, 13], [180, 14]] as const) {
     expect(available(xp)).toHaveLength(count);

@@ -3,6 +3,7 @@ import { GoogleButton } from '../net/GoogleButton';
 import { useAuth } from '../net/auth';
 import { t } from '../i18n';
 import { PopupButton, PopupClose, ConfirmPopup } from '../components/PopupControls';
+import { bountyText, moneyText } from '../game/bounty';
 
 /** แผ่นโปรไฟล์: ชื่อ UID ผูก Google ออกจากระบบ */
 export function ProfileSheet({ onClose }: { onClose: () => void }) {
@@ -55,7 +56,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
               <span className="font-mono font-semibold text-ink">{user.shortId}</span>
             </div>
             <div className="text-xs text-ink-soft">
-              {t('profile.xp', { n: user.xp, r: user.runsPlayed })}
+              {t('profile.xp', { n: bountyText(user.xp), m: moneyText(user.money ?? 0), r: user.runsPlayed })}
             </div>
           </div>
         </div>

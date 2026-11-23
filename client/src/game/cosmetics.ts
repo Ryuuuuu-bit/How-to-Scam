@@ -2,7 +2,7 @@ import type { UnlockProgress } from '@hts/shared';
 
 export const menuScenes = [
   { id: 'menu', name: 'ฐานบัญชาการ', scene: 'menu', xp: 0, hint: 'มีให้ตั้งแต่เริ่มเกม' },
-  { id: 'condo', name: 'คอนโดวิวหลักล้าน', scene: 'menu_condo', xp: 300, hint: 'สะสม 300 XP' },
+  { id: 'condo', name: 'คอนโดวิวหลักล้าน', scene: 'menu_condo', xp: 300, hint: 'ค่าหัวถึง ฿6 ล้าน' },
   { id: 'jail', name: 'ห้องพักมีลูกกรง', scene: 'menu_jail', ending: 'jailed', hint: 'พบฉากจบติดคุก' },
   {
     id: 'farm',
@@ -33,35 +33,35 @@ export const skins = [
     characterId: 'ex_insurance',
     name: 'สูททองคำ',
     xp: 150,
-    hint: 'สะสม 150 XP',
+    hint: 'ค่าหัวถึง ฿3 ล้าน',
   },
   {
     id: 'gamer_kid_pro',
     characterId: 'gamer_kid',
     name: 'โปรเพลเยอร์',
     xp: 250,
-    hint: 'สะสม 250 XP',
+    hint: 'ค่าหัวถึง ฿5 ล้าน',
   },
   {
     id: 'temple_kid_fair',
     characterId: 'temple_kid',
     name: 'ดาวงานวัด',
     xp: 350,
-    hint: 'สะสม 350 XP',
+    hint: 'ค่าหัวถึง ฿7 ล้าน',
   },
   {
     id: 'live_seller_idol',
     characterId: 'live_seller',
     name: 'ไอดอลไลฟ์สด',
     xp: 500,
-    hint: 'สะสม 500 XP',
+    hint: 'ค่าหัวถึง ฿10 ล้าน',
   },
   {
     id: 'phone_tech_hacker',
     characterId: 'phone_tech',
     name: 'แฮกเกอร์จอเขียว',
     xp: 650,
-    hint: 'สะสม 650 XP',
+    hint: 'ค่าหัวถึง ฿13 ล้าน',
   },
   {
     id: 'orange_cat_boss',
@@ -73,12 +73,19 @@ export const skins = [
 ] as const;
 
 interface Requirement {
+  id: string;
   xp?: number;
   ending?: string;
   endings?: readonly string[];
+  characterId?: string;
 }
 
+/** key ในตลาดใต้ดิน เช่น "skin:ex_insurance_gold" */
+export const cosmeticKey = (item: { id: string; characterId?: string }) =>
+  item.characterId ? `skin:${item.id}` : `scene:${item.id}`;
+
 export function cosmeticUnlocked(item: Requirement, progress: UnlockProgress): boolean {
+  if ((progress.owned ?? []).includes(cosmeticKey(item))) return true;
   return (
     (item.xp === undefined || progress.xp >= item.xp) &&
     (item.ending === undefined || progress.endings.includes(item.ending)) &&

@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { audio } from '../audio/audio';
 import type { Action, GameState } from '@hts/shared';
 import { useSubmitRun } from '../game/submit';
 import { shareCard } from '../game/shareCard';
 import { usePlayerPortrait } from '../game/usePlayerPortrait';
-import { awardRun } from '../game/meta';
+import { awardRun, noAward, progressFor } from '../game/meta';
+import { auditionProgress, charKey } from '@hts/shared';
+import { useAuth } from '../net/auth';
+import { bountyText, moneyText } from '../game/bounty';
+import '../components/underground.css';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, Panel } from '../components/ui';
@@ -20,6 +24,7 @@ export function EndScreen({
   practice = false,
   onAgain,
   onMenu,
+  onMarket,
 }: {
   state: GameState;
   runId?: string | undefined;
@@ -27,22 +32,27 @@ export function EndScreen({
   practice?: boolean;
   onAgain: () => void;
   onMenu: () => void;
+  onMarket?: () => void;
 }) {
   const portrait = usePlayerPortrait(state.characterId);
   const submit = useSubmitRun(practice ? undefined : runId, actions);
   // รอบออฟไลน์: ให้แต้มแก๊งในเครื่อง (รอบออนไลน์ server เป็นคนให้)
-  const [localAward] = useState(() =>
-    runId || practice
-      ? { gained: 0, unlocked: [] as typeof content.characters, newAchievements: [] as string[] }
-      : awardRun(state),
-  );
+  const [localAward] = useState(() => (runId || practice ? noAward : awardRun(state)));
+  const { user } = useAuth();
   const [sharing, setSharing] = useState<'idle' | 'making' | 'saved'>('idle');
   const award =
     submit.state.kind === 'ok'
       ? {
           gained: submit.state.result.xpGained,
-          unlocked: content.characters.filter((c) =>
-            submit.state.kind === 'ok' ? submit.state.result.unlocked.includes(c.id) : false,
+          money: submit.state.result.moneyGained ?? 0,
+          unlocked: content.characters.filter(
+            (c) =>
+              submit.state.kind === 'ok' &&
+              submit.state.result.unlocked.includes(c.id) &&
+              !(submit.state.result.auditions ?? []).includes(c.id),
+          ),
+          auditions: content.characters.filter(
+            (c) => submit.state.kind === 'ok' && (submit.state.result.auditions ?? []).includes(c.id),
           ),
           newAchievements: submit.state.result.newAchievements,
         }
@@ -55,6 +65,15 @@ export function EndScreen({
     else if (!content.endings.find(e => e.id === state.end?.endingId)?.when.retirementLife) audio.sfx('sfx_coins', 'end');
   }, []);
   const end = state.end;
+  // หลังให้รางวัลแล้ว อ่านยอดล่าสุดของผู้เล่น
+  const progress = progressFor(submit.state.kind === 'ok' ? submit.state.result.user : user);
+  // ออดิชั่นที่ทำไปได้บ้างแต่ยังไม่ผ่าน (แสดงสามอันที่ใกล้สุด)
+  const trying = content.characters
+    .filter((c) => c.price !== undefined && !progress.owned.includes(charKey(c.id)))
+    .map((c) => ({ c, p: auditionProgress(state, c) }))
+    .filter((x): x is { c: (typeof content.characters)[number]; p: NonNullable<typeof x.p> } => !!x.p && x.p.done > 0 && !x.p.passed)
+    .sort((a, b) => b.p.done / b.p.need - a.p.done / a.p.need)
+    .slice(0, 3);
   if (!end) return null;
   const signs = end.dangerSignIds
     .map((id) => content.dangerSigns.find((d) => d.id === id))
@@ -134,17 +153,54 @@ export function EndScreen({
             : t('share.button')}
       </Button>
 
-      {(award.gained > 0 || award.unlocked.length > 0) && (
-        <div className="anim-rise-in flex flex-col gap-1 rounded-2xl border-[3px] border-ink bg-grape p-3 text-center text-white shadow-pop">
-          {award.gained > 0 && (
-            <div className="font-display text-lg">⭐ {t('end.xpGain', { n: award.gained })}</div>
+      {(award.gained > 0 || award.unlocked.length > 0 || award.auditions.length > 0) && (
+        <div className="end-loot anim-rise-in">
+          {award.money > 0 && (
+            <div className="end-loot-row">
+              <Art id="icon:undermoney" size={36} />
+              <span>
+                {t('end.moneyGain', { n: moneyText(award.money) })} · มีอยู่ <b>{moneyText(progress.money)}</b>
+              </span>
+            </div>
           )}
+          {award.gained > 0 && (
+            <div className="end-loot-row">
+              <Art id="icon:bounty" size={36} />
+              <span>{t('end.xpGain', { n: bountyText(progress.xp) })}</span>
+            </div>
+          )}
+          {award.auditions.map((c) => (
+            <div key={c.id} className="end-loot-row">
+              <Art id={`char:${c.id}`} size={40} />
+              {t('end.audition', { name: lt(c.name) })}
+            </div>
+          ))}
           {award.unlocked.map((c) => (
-            <div key={c.id} className="font-display flex items-center justify-center gap-2">
+            <div key={c.id} className="end-loot-row">
               <Art id={`char:${c.id}`} size={40} />
               {t('end.unlocked', { name: lt(c.name) })}
             </div>
           ))}
+          {trying.length > 0 && (
+            <div className="end-loot-progress" aria-label="ความคืบหน้าออดิชั่นในรอบนี้">
+              {trying.map(({ c, p }) => (
+                <div key={c.id}>
+                  <span>ออดิชั่น{lt(c.name)}</span>
+                  <i style={{ '--p': `${(p.done / p.need) * 100}%` } as CSSProperties} />
+                  <span>
+                    {p.done}/{p.need}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          {onMarket && (
+            <Button tone="sun" block onClick={onMarket}>
+              <span className="flex items-center justify-center gap-2">
+                <Art id="icon:undermarket" size={26} /> ไปตลาดใต้ดิน
+              </span>
+            </Button>
+          )}
         </div>
       )}
 
