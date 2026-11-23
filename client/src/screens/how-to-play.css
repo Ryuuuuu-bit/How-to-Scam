@@ -17,6 +17,12 @@
 .tutorial-screen[data-chapter='heat'] {
   --lesson-accent: #ffab80;
 }
+.tutorial-screen[data-chapter='soi'] {
+  --lesson-accent: #ffd27a;
+}
+.tutorial-screen[data-chapter='meta'] {
+  --lesson-accent: #c4b5ff;
+}
 
 .tutorial-wrap {
   width: min(1120px, 100%);

@@ -47,7 +47,7 @@ export function LoginScreen() {
               {busy ? t('auth.loading') : 'เริ่มเล่นทันที'}
               <span aria-hidden="true">↗</span>
             </button>
-            <p>ผูก Google ทีหลังได้ คะแนนไม่หาย</p>
+            <p>ผูก Google ทีหลังได้ คะแนน ค่าหัว และเงินใต้ดินไม่หาย</p>
             <div className="pass-divider">หรือ</div>
             {auth.googleClientId ? (
               <GoogleButton

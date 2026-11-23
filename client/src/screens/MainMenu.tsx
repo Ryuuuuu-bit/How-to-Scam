@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { durations } from '@hts/shared';
+import { content } from '@hts/shared/data';
 import type { Run } from '../game/useGame';
 import { t } from '../i18n';
 import { Art, Button } from '../components/ui';
@@ -177,12 +178,12 @@ export function MainMenu({
               <span>โหมด · {durations.join(' / ')} วัน</span>
             </div>
             <div>
-              <b>∞</b>
-              <span>เรื่องไม่คาดฝัน</span>
+              <b>{content.characters.length}</b>
+              <span>ตัวละครให้รับเข้าแก๊ง</span>
             </div>
             <div>
-              <b>1</b>
-              <span>การตัดสินใจของคุณ</span>
+              <b>{content.endings.length}</b>
+              <span>ฉากจบให้ตามเก็บ</span>
             </div>
           </div>
         </section>
