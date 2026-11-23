@@ -1,0 +1,210 @@
+.caper-entry {
+  --ticket: #faf5e7;
+  --acid: #e7ff67;
+  --midnight: #181624;
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+  padding: max(76px, env(safe-area-inset-top)) clamp(20px, 6vw, 104px)
+    max(42px, env(safe-area-inset-bottom));
+}
+.caper-entry .scene-image {
+  opacity: 1;
+  object-position: center 44%;
+}
+.caper-entry .scene-shade {
+  background:
+    linear-gradient(0deg, #100f21f7, #1713296b 54%, #1b153030),
+    linear-gradient(90deg, #24153060, transparent 62%);
+}
+.entry-layout {
+  position: relative;
+  margin: auto;
+  width: min(100%, 1160px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 396px);
+  align-items: center;
+  gap: clamp(36px, 7vw, 104px);
+}
+.entry-poster {
+  position: relative;
+  width: fit-content;
+}
+.entry-poster h1 {
+  width: fit-content;
+  transform: rotate(-5deg) skew(-7deg);
+  font:
+    1000 clamp(88px, 10.4vw, 156px)/0.79 'Arial Black',
+    Impact,
+    system-ui,
+    sans-serif;
+  letter-spacing: -0.075em;
+  color: var(--ticket);
+  -webkit-text-stroke: 1.5px var(--midnight);
+  paint-order: stroke fill;
+  text-shadow: 4px 6px var(--midnight);
+}
+.entry-poster h1 span,
+.entry-poster h1 strong {
+  display: block;
+}
+.entry-poster h1 span {
+  font-size: 0.55em;
+  letter-spacing: -0.055em;
+  margin: 0 0 0.09em 0.05em;
+}
+.entry-poster h1 strong {
+  color: var(--acid);
+  font-weight: inherit;
+}
+.entry-premise {
+  position: relative;
+  width: fit-content;
+  margin: 12px 0 0 14%;
+  padding: 3px 15px;
+  transform: rotate(-5deg);
+  background: var(--midnight);
+  border-left: 4px solid #ff75a1;
+  color: white;
+  font: 500 clamp(14px, 1.4vw, 21px)/1.6 var(--font-display);
+}
+.entry-crew {
+  display: flex;
+  align-items: end;
+  margin: 16px 0 0 1%;
+  filter: drop-shadow(0 8px 4px #0d0b1c88);
+}
+.entry-crew img {
+  width: 43%;
+  height: auto;
+}
+.entry-crew img + img {
+  width: 39%;
+  margin-left: -9%;
+}
+.entry-crew img:last-child {
+  width: 30%;
+}
+.entry-pass {
+  position: relative;
+  color: var(--midnight);
+  background: var(--ticket);
+  border: 2px solid var(--midnight);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    6px 8px 0 var(--midnight),
+    0 20px 70px #100e2540;
+}
+.entry-pass::before {
+  content: '';
+  display: block;
+  height: 8px;
+  background: repeating-linear-gradient(120deg, var(--acid) 0 16px, var(--midnight) 16px 22px);
+}
+.pass-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 28px 26px 0;
+}
+.pass-heading h2 {
+  font: 600 clamp(26px, 3vw, 36px)/1.35 var(--font-display);
+}
+.pass-hint,
+.pass-actions p {
+  color: #524e5b;
+  line-height: 1.6;
+}
+.pass-hint {
+  margin: 9px 26px 21px;
+  font-size: 15px;
+}
+.pass-actions {
+  padding: 0 18px 24px;
+  text-align: center;
+}
+.pass-start {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 56px;
+  padding: 6px 18px;
+  background: var(--acid);
+  border: 2px solid var(--midnight);
+  border-radius: 10px;
+  box-shadow: 0 4px var(--midnight);
+  font: 600 18px var(--font-display);
+}
+.pass-start:hover {
+  background: #ddfa43;
+}
+.pass-start:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px var(--midnight);
+}
+.pass-start span {
+  font: bold 28px/1 system-ui;
+}
+.pass-actions p {
+  font-size: 13px;
+  margin: 11px 0 0;
+}
+.pass-divider {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 14px 0;
+  color: #655f68;
+  font-size: 12px;
+}
+.pass-divider::before,
+.pass-divider::after {
+  content: '';
+  height: 1px;
+  background: #d3cdbe;
+  flex: 1;
+}
+.pass-error {
+  padding: 0 18px 15px;
+  color: #9c153c;
+}
+@media (max-width: 740px) {
+  .caper-entry {
+    padding: 66px 14px max(24px, env(safe-area-inset-bottom));
+  }
+  .entry-layout {
+    max-width: 420px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .entry-poster {
+    width: 100%;
+  }
+  .entry-poster h1 {
+    font-size: clamp(64px, 17vw, 82px);
+  }
+  .entry-premise {
+    margin: 7px 0 0;
+    font-size: 12px;
+  }
+  .entry-crew {
+    position: absolute;
+    bottom: 4px;
+    right: -2px;
+    width: 44%;
+    margin: 0;
+  }
+  .pass-heading {
+    margin: 19px 18px 0;
+  }
+  .pass-hint {
+    margin: 7px 18px 16px;
+  }
+  .pass-actions {
+    padding-inline: 10px;
+  }
+}

@@ -2,47 +2,71 @@ import { useState } from 'react';
 import { GoogleButton } from '../net/GoogleButton';
 import { useAuth } from '../net/auth';
 import { t } from '../i18n';
-import { Art, Button, Panel } from '../components/ui';
+import { Art } from '../components/ui';
 import { SceneBackdrop } from '../components/SceneBackdrop';
+import './login.css';
 
-/** หน้าเข้าสู่ระบบ: Google หรือ Guest (ทุกคนได้ UID) */
 export function LoginScreen() {
   const auth = useAuth();
   const [busy, setBusy] = useState(false);
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
-    await fn();
-    setBusy(false);
+    try {
+      await fn();
+    } finally {
+      setBusy(false);
+    }
   };
+
   return (
-    <main className="relative mx-auto flex min-h-dvh max-w-md flex-col justify-end gap-4 px-4 pt-10 pb-[max(env(safe-area-inset-bottom),28px)]">
+    <main className="caper-entry">
       <SceneBackdrop id="menu" />
-      <div className="relative z-10 -mb-2 flex items-end justify-center">
-        <Art id="char:ex_insurance" size={96} />
-        <Art id="char:live_seller" size={96} className="-mx-3" />
-        <Art id="char:orange_cat" size={96} />
+      <div className="entry-layout">
+        <header className="entry-poster">
+          <h1 aria-label="How to Scam">
+            <span>HOW TO</span>
+            <strong>SCAM</strong>
+          </h1>
+          <p className="entry-premise">จะรอดไปได้กี่วัน?</p>
+          <div className="entry-crew" aria-hidden="true">
+            <Art id="char:ex_insurance" size={210} />
+            <Art id="char:live_seller" size={185} />
+            <Art id="char:orange_cat" size={134} />
+          </div>
+        </header>
+        <section className="entry-pass" aria-labelledby="entry-heading">
+          <header className="pass-heading">
+            <img src="/caper-mask.png" width="44" height="44" alt="" />
+            <h2 id="entry-heading">{t('auth.title')}</h2>
+          </header>
+          <p className="pass-hint">{t('auth.hint')}</p>
+          <div className="pass-actions" inert={busy} aria-busy={busy}>
+            <button
+              className="pass-start"
+              disabled={busy}
+              onClick={() => void run(auth.loginGuest)}
+            >
+              {busy ? t('auth.loading') : 'เริ่มเล่นทันที'}
+              <span aria-hidden="true">↗</span>
+            </button>
+            <p>{t('auth.guestHint')}</p>
+            <div className="pass-divider">หรือ</div>
+            {auth.googleClientId ? (
+              <GoogleButton
+                clientId={auth.googleClientId}
+                onCredential={(c) => void run(() => auth.loginGoogle(c))}
+              />
+            ) : (
+              <p>{t('auth.googleSoon')}</p>
+            )}
+          </div>
+          {auth.error && (
+            <p className="pass-error" role="alert">
+              {t('auth.failed')}
+            </p>
+          )}
+        </section>
       </div>
-      <Panel className="relative z-10 flex flex-col gap-3 text-center text-ink">
-        <h1 className="text-3xl font-semibold">{t('auth.title')}</h1>
-        <p className="text-sm text-ink-soft">{t('auth.hint')}</p>
-        {auth.googleClientId ? (
-          <GoogleButton
-            clientId={auth.googleClientId}
-            onCredential={(c) => void run(() => auth.loginGoogle(c))}
-          />
-        ) : (
-          <p className="rounded-xl bg-cream p-2 text-xs text-ink-soft">{t('auth.googleSoon')}</p>
-        )}
-        <Button tone="sun" block disabled={busy} onClick={() => void run(auth.loginGuest)}>
-          {t('auth.guest')}
-        </Button>
-        <p className="-mt-1 text-xs text-ink-soft">{t('auth.guestHint')}</p>
-        {auth.error && <p className="text-sm font-semibold text-danger">{t('auth.failed')}</p>}
-        <a className="inline-flex min-h-11 items-center justify-center rounded-xl bg-ink px-3 text-sm font-semibold text-paper" href="?preview=planner">ลองเล่น 1 วันก่อน</a>
-        <button type="button" className="min-h-11 text-sm underline" onClick={auth.playOffline}>
-          {t('auth.offline')}
-        </button>
-      </Panel>
     </main>
   );
 }
