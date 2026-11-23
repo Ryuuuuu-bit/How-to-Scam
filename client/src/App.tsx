@@ -23,6 +23,7 @@ import { api } from './net/api';
 import { AuthProvider, useAuth } from './net/auth';
 import { t } from './i18n';
 import { WardrobeScreen } from './screens/WardrobeScreen';
+import { MarketScreen } from './screens/MarketScreen';
 import { EndingsGallery } from './screens/EndingsGallery';
 import './components/phone.css';
 
@@ -35,6 +36,7 @@ type Screen =
   | 'daily'
   | 'achievements'
   | 'wardrobe'
+  | 'market'
   | 'endings';
 
 export function App() {
@@ -112,7 +114,8 @@ function GameScreens() {
     return <AchievementsScreen onBack={() => setScreen('menu')} />;
   }
 
-  if (screen === 'wardrobe') return <WardrobeScreen onBack={() => setScreen('menu')} />;
+  if (screen === 'wardrobe') return <WardrobeScreen onBack={() => setScreen('menu')} onMarket={() => setScreen('market')} />;
+  if (screen === 'market') return <MarketScreen onBack={() => setScreen('menu')} />;
   if (screen === 'endings') return <EndingsGallery onBack={() => setScreen('menu')} />;
 
   if (screen === 'daily') {
@@ -174,6 +177,11 @@ function GameScreens() {
               setScreen('menu');
             }}
             onAgain={() => { setSaved(loadSavedRun()); setScreen('character'); }}
+            onMarket={() => {
+              game.quit();
+              setSaved(loadSavedRun());
+              setScreen('market');
+            }}
           />
           {finalLines.length > 0 && <EndIntro key={game.tick} lines={finalLines} />}
         </>
@@ -193,6 +201,7 @@ function GameScreens() {
     <>
       <MainMenu
         onWardrobe={() => setScreen('wardrobe')}
+        onMarket={() => setScreen('market')}
         onEndings={() => setScreen('endings')}
         saved={saved}
         onNew={() => {

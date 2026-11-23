@@ -23,6 +23,19 @@ export { isEventEligible, choiceAvailable } from './engine/events';
 export { validateContent } from './validate';
 export { titleFor, isCharacterUnlocked } from './engine/titles';
 export type { UnlockProgress } from './engine/titles';
+export {
+  auditionProgress,
+  auditionsPassed,
+  bountyOf,
+  bountyRank,
+  bountyRanks,
+  charKey,
+  cosmeticPrices,
+  isStarter,
+  legacyCharacterKeys,
+  marketPrice,
+  moneyForRun,
+} from './engine/progression';
 export { achievementsFor } from './engine/achievements';
 export type { PlayerTotals } from './engine/achievements';
 export { bangkokDate, dailyCharacter, isDailyDate } from './engine/daily';

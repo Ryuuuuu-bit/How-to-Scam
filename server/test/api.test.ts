@@ -307,6 +307,47 @@ describe('ส่งคะแนน (anti-cheat)', () => {
     expect(r.status).toBe(403);
   });
 
+  it('ตัวละครที่ต้องซื้อ เริ่มไม่ได้จนกว่าจะซื้อด้วยเงินใต้ดิน', async () => {
+    const g = await guest();
+    expect(g.user).toMatchObject({ money: 0, owned: [] });
+    expect((await api('/api/runs', { token: g.token, body: { characterId: 'live_seller' } })).status).toBe(403);
+    const poor = await api('/api/market/buy', { token: g.token, body: { key: 'char:live_seller' } });
+    expect(poor.status).toBe(402);
+    const u = await store.findUser(g.user.uid);
+    if (!u) throw new Error('no user');
+    u.money = 2_000;
+    expect((await api('/api/market/buy', { token: g.token, body: { key: 'char:nobody' } })).status).toBe(400);
+    expect((await api('/api/market/buy', { token: g.token, body: { key: 'char:ex_insurance' } })).status).toBe(400);
+    const buy = await api('/api/market/buy', { token: g.token, body: { key: 'char:live_seller' } });
+    expect(buy.status).toBe(200);
+    expect(buy.body.user).toMatchObject({ money: 500, owned: ['char:live_seller'] });
+    expect((await api('/api/market/buy', { token: g.token, body: { key: 'char:live_seller' } })).status).toBe(409);
+    expect((await api('/api/runs', { token: g.token, body: { characterId: 'live_seller' } })).status).toBe(200);
+  });
+
+  it('จบรอบได้เงินใต้ดิน และผ่านออดิชั่นได้ตัวละครฟรี', async () => {
+    const g = await guest();
+    const { runId, seed } = (
+      await api('/api/runs', { token: g.token, body: { characterId: 'gamer_kid' } })
+    ).body as { runId: string; seed: string };
+    // ทำงานร้านออนไลน์ทุกวันที่ทำได้ เพื่อผ่านออดิชั่นของแม่ค้าไลฟ์สด
+    const actions = play(seed, 'gamer_kid', (s) => {
+      const money = s.dirtyCash + s.cleanCash;
+      const fake = unlockedMethods(s, content).find((m) => m.id === 'fake_shop' && m.cost <= money);
+      return { t: 'choosePlan', methodId: s.heat > 70 ? null : (fake?.id ?? null) };
+    });
+    const local = replay(seed, 'gamer_kid', actions, content);
+    const shifts = local.history.filter((h) => h.methodId === 'fake_shop').length;
+    const sub = await api(`/api/runs/${runId}/submit`, { token: g.token, body: { actions } });
+    expect(sub.status).toBe(200);
+    const user = sub.body.user as { money: number; xp: number; owned: string[] };
+    expect(sub.body.moneyGained).toBe(user.xp * 10);
+    expect(user.money).toBe(user.xp * 10);
+    expect(shifts).toBeGreaterThanOrEqual(5);
+    expect(sub.body.auditions).toContain('live_seller');
+    expect(user.owned).toContain('char:live_seller');
+  });
+
   it('ไม่ล็อกอินเริ่มรอบไม่ได้', async () => {
     const r = await api('/api/runs', { body: { characterId: 'ex_insurance' } });
     expect(r.status).toBe(401);

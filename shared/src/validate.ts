@@ -125,6 +125,10 @@ export function validateContent(c: GameContent): string[] {
         errors.push(`character ${ch.id}: perk on unknown method ${p.methodId}`);
       }
     }
+    if (ch.audition?.kind === 'shifts' && !methodIds.has(ch.audition.methodId)) {
+      errors.push(`character ${ch.id}: audition on unknown method ${ch.audition.methodId}`);
+    }
+    if (ch.audition && ch.price === undefined) errors.push(`character ${ch.id}: audition without price`);
   }
   for (const n of c.news) {
     for (const m of n.modifiers) {

@@ -116,12 +116,20 @@ export function prismaStore(db: PrismaClient): Store {
           where: { id: s.userId },
           data: {
             xp: { increment: s.xpGained },
+            money: { increment: s.moneyGained },
+            owned: [...u.owned, ...s.newOwned.filter((k) => !u.owned.includes(k))],
             runsPlayed: { increment: 1 },
             ...(s.mode === 'daily' ? { dailyPlays: { increment: 1 } } : {}),
             endings: u.endings.includes(s.endingId) ? u.endings : [...u.endings, s.endingId],
           },
         });
       });
+    },
+    async buyItem(userId, key, price) {
+      // หักเงินแบบมีเงื่อนไขในคำสั่งเดียว กันกดซื้อซ้อนกัน
+      const n = await db.$executeRaw`UPDATE "User" SET "money" = "money" - ${price}, "owned" = array_append("owned", ${key}), "updatedAt" = now() WHERE id = ${userId} AND "money" >= ${price} AND NOT (${key} = ANY("owned"))`;
+      if (n === 0) return null;
+      return db.user.findUnique({ where: { id: userId } });
     },
     async rejectRun(runId, reason, actionCount) {
       await db.run.update({

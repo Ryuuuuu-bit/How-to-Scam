@@ -30,9 +30,12 @@ export function titleFor(s: GameState, c: GameContent): string {
 export interface UnlockProgress {
   xp: number;
   endings: string[];
+  /** ของที่ซื้อหรือได้จากออดิชั่นแล้ว เช่น "char:live_seller" */
+  owned?: string[];
 }
 
 export function isCharacterUnlocked(ch: Character, p: UnlockProgress): boolean {
   if (ch.unlockEnding) return p.endings.includes(ch.unlockEnding);
+  if (ch.price !== undefined && !(p.owned ?? []).includes(`char:${ch.id}`)) return false;
   return p.xp >= (ch.unlockXp ?? 0);
 }

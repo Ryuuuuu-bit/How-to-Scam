@@ -1,0 +1,247 @@
+/* ค่าหัว เงินใต้ดิน และตลาดใต้ดิน */
+.wallet-bar {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+}
+.wallet-bar > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 2px solid var(--color-ink);
+  border-radius: 18px;
+  box-shadow: var(--shadow-pop);
+}
+.wallet-bar small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+.wallet-bar b {
+  display: block;
+  font: 600 20px/1.15 var(--font-display);
+}
+.wallet-bar span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.wallet-bounty {
+  background: #f3e3c3 repeating-linear-gradient(0deg, #0000 0 22px, #8a5a2a14 22px 23px);
+  color: #3b2412;
+}
+.wallet-money {
+  background: #0f2a22;
+  color: #e9fb77;
+  border-color: #087f71 !important;
+}
+.wallet-bar[data-compact] b {
+  font-size: 16px;
+}
+.wallet-bar[data-compact] > div {
+  padding: 6px 10px;
+  gap: 8px;
+}
+@media (max-width: 420px) {
+  .wallet-bar:not([data-compact]) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- ออดิชั่น ---------- */
+.audition-note {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin: 6px 0;
+  padding: 6px 8px;
+  border: 1.5px dashed #7b5cff;
+  border-radius: 12px;
+  background: #7b5cff14;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.audition-note > :first-child {
+  flex-shrink: 0;
+}
+
+/* ---------- ปุ่มซื้อ ---------- */
+.buy-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+.buy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.buy-short {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* ---------- หน้าตลาด ---------- */
+.market-screen {
+  color: var(--color-paper);
+}
+.market-crew,
+.market-style {
+  display: grid;
+  gap: 12px;
+}
+@media (min-width: 720px) {
+  .market-crew,
+  .market-style {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.crew-card,
+.style-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border: 2px solid var(--color-ink);
+  border-radius: 22px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pop);
+}
+.crew-card[data-owned],
+.style-card[data-owned] {
+  background: #e6efe9;
+}
+.crew-portrait,
+.style-art {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+.crew-body {
+  min-width: 0;
+}
+.crew-card h3,
+.style-card h3 {
+  font: 600 18px/1.2 var(--font-display);
+}
+.crew-desc {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+}
+.crew-pros {
+  margin-top: 4px;
+  font-size: 12px;
+}
+.crew-owned {
+  margin-top: 8px;
+  font: 500 13px var(--font-display);
+  color: var(--color-clean);
+}
+.style-card small {
+  font-size: 11px;
+  color: var(--color-ink-soft);
+}
+.style-card p {
+  margin: 4px 0 8px;
+  font-size: 12px;
+}
+.style-scene {
+  flex-shrink: 0;
+  width: 112px;
+  aspect-ratio: 4 / 3;
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: top;
+}
+.market-tip {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* ---------- การ์ดตัวละครที่ยังไม่มี (หน้าเลือกอาชีพ) ---------- */
+.character-card.is-for-sale {
+  opacity: 1;
+  border-style: dashed;
+}
+.character-card.is-for-sale .character-figure {
+  filter: grayscale(1) brightness(0.55);
+  opacity: 0.8;
+}
+
+/* ---------- รางวัลหลังจบรอบ ---------- */
+.end-loot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 3px solid var(--color-ink);
+  border-radius: 20px;
+  background: #0f2a22;
+  color: var(--color-paper);
+  box-shadow: var(--shadow-pop);
+}
+.end-loot-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: 500 17px var(--font-display);
+}
+.end-loot-row b {
+  color: #e9fb77;
+}
+.end-loot-progress {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.end-loot-progress div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.end-loot-progress i {
+  flex: 1;
+  height: 6px;
+  border-radius: 99px;
+  background: #ffffff22;
+  overflow: hidden;
+}
+.end-loot-progress i::after {
+  content: '';
+  display: block;
+  width: var(--p);
+  height: 100%;
+  background: #7b5cff;
+}
+
+/* ---------- กระเป๋าบนเมนูหลัก ---------- */
+.menu-wallet {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.menu-wallet-go {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font: 500 13px var(--font-display);
+  color: var(--color-sun);
+}
+.menu-wallet:hover .wallet-bar > div,
+.menu-wallet:focus-visible .wallet-bar > div {
+  transform: translateY(-1px);
+}

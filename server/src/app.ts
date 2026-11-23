@@ -8,7 +8,7 @@ import { bangkokDate, isDailyDate } from '@hts/shared';
 import type { GameContent } from '@hts/shared';
 import { attachUser, guestName, requireUser, signToken } from './auth';
 import type { GoogleVerifier } from './auth';
-import { dailyInfo, HttpError, MAX_ACTIONS, startDaily, startRun, submitRun } from './game';
+import { buyMarketItem, dailyInfo, HttpError, MAX_ACTIONS, startDaily, startRun, submitRun } from './game';
 import { isSeasonId, seasonFor } from './season';
 import type { Board, Scope, Store, UserRec } from './store';
 
@@ -35,6 +35,8 @@ export function publicUser(u: UserRec) {
     runsPlayed: u.runsPlayed,
     dailyPlays: u.dailyPlays,
     endings: u.endings,
+    money: u.money,
+    owned: u.owned,
   };
 }
 
@@ -170,6 +172,18 @@ export function createApp(d: AppDeps) {
       const runId = z.string().uuid().parse(req.params.id);
       const body = z.object({ actions: z.array(z.unknown()).max(MAX_ACTIONS) }).parse(req.body);
       const r = await submitRun(d.store, d.content, user, runId, body.actions);
+      return { ...r, user: publicUser(r.user) };
+    }),
+  );
+
+  // ---------- ตลาดใต้ดิน ----------
+  app.post(
+    '/api/market/buy',
+    limit(10, 30),
+    wrap(async (req) => {
+      const user = requireUser(req);
+      const { key } = z.object({ key: z.string().min(3).max(80) }).parse(req.body);
+      const r = await buyMarketItem(d.store, d.content, user, key);
       return { ...r, user: publicUser(r.user) };
     }),
   );

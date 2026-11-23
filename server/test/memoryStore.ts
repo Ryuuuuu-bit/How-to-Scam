@@ -27,6 +27,8 @@ export function memoryStore() {
     runsPlayed: 0,
     dailyPlays: 0,
     endings: [],
+    money: 0,
+    owned: [],
     createdAt: new Date(),
     ...p,
   });
@@ -109,9 +111,18 @@ export function memoryStore() {
       for (const id of s.newAchievements) ach.push({ userId: s.userId, id });
       const u = must(s.userId);
       u.xp += s.xpGained;
+      u.money += s.moneyGained;
+      for (const k of s.newOwned) if (!u.owned.includes(k)) u.owned.push(k);
       u.runsPlayed += 1;
       if (s.mode === 'daily') u.dailyPlays += 1;
       if (!u.endings.includes(s.endingId)) u.endings.push(s.endingId);
+      return u;
+    },
+    async buyItem(userId, key, price) {
+      const u = must(userId);
+      if (u.money < price || u.owned.includes(key)) return null;
+      u.money -= price;
+      u.owned.push(key);
       return u;
     },
     async rejectRun(runId, reason) {

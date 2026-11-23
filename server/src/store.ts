@@ -18,6 +18,8 @@ export interface UserRec {
   runsPlayed: number;
   dailyPlays: number;
   endings: string[];
+  money: number;
+  owned: string[];
   createdAt: Date;
 }
 
@@ -47,6 +49,9 @@ export interface ScoreInput {
   titleId: string;
   actionCount: number;
   xpGained: number;
+  moneyGained: number;
+  /** ของที่ได้ฟรีจากออดิชั่นในรอบนี้ */
+  newOwned: string[];
   /** เหรียญใหม่ที่ปลดล็อกในรอบนี้ */
   newAchievements: string[];
 }
@@ -89,6 +94,8 @@ export interface Store {
   countRecentRuns(userId: string, since: Date): Promise<number>;
   /** บันทึกคะแนน + อัปเดตแต้มแก๊งและเหรียญของผู้เล่น (ใน transaction เดียว) */
   saveScore(s: ScoreInput): Promise<UserRec>;
+  /** หักเงินใต้ดินแล้วเพิ่มของ (ถ้าเงินไม่พอหรือมีแล้ว คืน null) */
+  buyItem(userId: string, key: string, price: number): Promise<UserRec | null>;
   rejectRun(runId: string, reason: string, actionCount: number): Promise<void>;
   leaderboard(scope: Scope, board: Board, limit: number): Promise<BoardRow[]>;
   /** อันดับของคะแนนนี้ในกระดานคะแนนสูงสุด (นับผู้เล่นที่ทำได้ดีกว่า) */
