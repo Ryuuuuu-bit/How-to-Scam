@@ -3,7 +3,7 @@ import { GoogleButton } from '../net/GoogleButton';
 import { useAuth } from '../net/auth';
 import { t } from '../i18n';
 import { Art } from '../components/ui';
-import { SceneBackdrop } from '../components/SceneBackdrop';
+import wordmark from '../assets/img/login-wordmark.webp';
 import './login.css';
 
 export function LoginScreen() {
@@ -20,12 +20,10 @@ export function LoginScreen() {
 
   return (
     <main className="caper-entry">
-      <SceneBackdrop id="menu" />
       <div className="entry-layout">
         <header className="entry-poster">
           <h1 aria-label="How to Scam">
-            <span>HOW TO</span>
-            <strong>SCAM</strong>
+            <img src={wordmark} alt="" />
           </h1>
           <p className="entry-premise">จะรอดไปได้กี่วัน?</p>
           <div className="entry-crew" aria-hidden="true">
@@ -36,10 +34,10 @@ export function LoginScreen() {
         </header>
         <section className="entry-pass" aria-labelledby="entry-heading">
           <header className="pass-heading">
-            <img src="/caper-mask.png" width="44" height="44" alt="" />
+            <img src="/caper-bag.svg" width="44" height="44" alt="" />
             <h2 id="entry-heading">{t('auth.title')}</h2>
           </header>
-          <p className="pass-hint">{t('auth.hint')}</p>
+
           <div className="pass-actions" inert={busy} aria-busy={busy}>
             <button
               className="pass-start"
@@ -49,10 +47,11 @@ export function LoginScreen() {
               {busy ? t('auth.loading') : 'เริ่มเล่นทันที'}
               <span aria-hidden="true">↗</span>
             </button>
-            <p>{t('auth.guestHint')}</p>
+            <p>ผูก Google ทีหลังได้ คะแนนไม่หาย</p>
             <div className="pass-divider">หรือ</div>
             {auth.googleClientId ? (
               <GoogleButton
+                fill
                 clientId={auth.googleClientId}
                 onCredential={(c) => void run(() => auth.loginGoogle(c))}
               />

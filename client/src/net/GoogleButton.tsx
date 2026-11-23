@@ -34,10 +34,12 @@ export function GoogleButton({
   clientId,
   onCredential,
   text = 'signin_with',
+  fill = false,
 }: {
   clientId: string;
   onCredential: (credential: string) => void;
   text?: 'signin_with' | 'continue_with';
+  fill?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const cb = useRef(onCredential);
@@ -45,6 +47,7 @@ export function GoogleButton({
 
   useEffect(() => {
     let alive = true;
+    let observer: ResizeObserver | undefined;
     loadGsi()
       .then(() => {
         if (!alive || !ref.current || !window.google) return;
@@ -52,20 +55,35 @@ export function GoogleButton({
           client_id: clientId,
           callback: (r) => cb.current(r.credential),
         });
-        window.google.accounts.id.renderButton(ref.current, {
-          theme: 'outline',
-          size: 'large',
-          shape: 'pill',
-          text,
-          locale: 'th',
-          width: 280,
-        });
+        const host = ref.current;
+        const api = window.google.accounts.id;
+        let lastWidth = 0;
+        const render = () => {
+          const width = fill ? Math.min(400, Math.floor(host.clientWidth)) : 280;
+          if (width <= 0 || width === lastWidth) return;
+          lastWidth = width;
+          host.replaceChildren();
+          api.renderButton(host, {
+            theme: 'outline',
+            size: 'large',
+            shape: 'pill',
+            text,
+            locale: 'th',
+            width,
+          });
+        };
+        render();
+        if (fill) {
+          observer = new ResizeObserver(render);
+          observer.observe(host);
+        }
       })
       .catch(() => undefined);
     return () => {
       alive = false;
+      observer?.disconnect();
     };
-  }, [clientId, text]);
+  }, [clientId, text, fill]);
 
   return <div ref={ref} className="flex min-h-11 justify-center" />;
 }

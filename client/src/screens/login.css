@@ -1,210 +1,190 @@
 .caper-entry {
-  --ticket: #faf5e7;
-  --acid: #e7ff67;
-  --midnight: #181624;
-  position: relative;
-  isolation: isolate;
+  --paper: #fff5e2;
+  --ink: #100e16;
+  --lime: #e7fb09;
   min-height: 100svh;
   display: grid;
-  align-items: center;
-  padding: max(76px, env(safe-area-inset-top)) clamp(20px, 6vw, 104px)
-    max(42px, env(safe-area-inset-bottom));
-}
-.caper-entry .scene-image {
-  opacity: 1;
-  object-position: center 44%;
-}
-.caper-entry .scene-shade {
+  align-items: end;
+  padding: max(72px, env(safe-area-inset-top)) 4vw max(5svh, env(safe-area-inset-bottom));
   background:
-    linear-gradient(0deg, #100f21f7, #1713296b 54%, #1b153030),
-    linear-gradient(90deg, #24153060, transparent 62%);
+    linear-gradient(0deg, #260b3670, transparent 52%),
+    url('../assets/img/login-twilight.webp') center / cover;
 }
 .entry-layout {
-  position: relative;
-  margin: auto;
-  width: min(100%, 1160px);
+  width: min(100%, 1540px);
+  margin: auto auto 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 396px);
-  align-items: center;
-  gap: clamp(36px, 7vw, 104px);
+  grid-template-columns: 1.22fr 1fr;
+  align-items: end;
+  gap: clamp(24px, 3vw, 64px);
 }
 .entry-poster {
-  position: relative;
-  width: fit-content;
+  display: grid;
+  justify-items: center;
+  align-content: end;
 }
 .entry-poster h1 {
-  width: fit-content;
-  transform: rotate(-5deg) skew(-7deg);
-  font:
-    1000 clamp(88px, 10.4vw, 156px)/0.79 'Arial Black',
-    Impact,
-    system-ui,
-    sans-serif;
-  letter-spacing: -0.075em;
-  color: var(--ticket);
-  -webkit-text-stroke: 1.5px var(--midnight);
-  paint-order: stroke fill;
-  text-shadow: 4px 6px var(--midnight);
+  width: min(93%, 66svh);
 }
-.entry-poster h1 span,
-.entry-poster h1 strong {
+.entry-poster h1 img {
   display: block;
-}
-.entry-poster h1 span {
-  font-size: 0.55em;
-  letter-spacing: -0.055em;
-  margin: 0 0 0.09em 0.05em;
-}
-.entry-poster h1 strong {
-  color: var(--acid);
-  font-weight: inherit;
+  width: 100%;
+  height: auto;
 }
 .entry-premise {
   position: relative;
-  width: fit-content;
-  margin: 12px 0 0 14%;
-  padding: 3px 15px;
-  transform: rotate(-5deg);
-  background: var(--midnight);
-  border-left: 4px solid #ff75a1;
-  color: white;
-  font: 500 clamp(14px, 1.4vw, 21px)/1.6 var(--font-display);
+  z-index: 1;
+  margin: -2% 0 0 10%;
+  padding: 0.05em 0.6em 0.14em;
+  color: #fff9e9;
+  background: var(--ink);
+  border-bottom: 0.12em solid var(--lime);
+  transform: rotate(-6deg) skew(-7deg);
+  font: 600 clamp(18px, 2.5vw, 43px)/1.32 var(--font-display);
 }
 .entry-crew {
+  width: min(96%, 76svh);
+  margin-top: clamp(10px, 2.5svh, 30px);
   display: flex;
   align-items: end;
-  margin: 16px 0 0 1%;
-  filter: drop-shadow(0 8px 4px #0d0b1c88);
+  justify-content: center;
+  filter: drop-shadow(0 5px 3px #1a072481);
 }
 .entry-crew img {
-  width: 43%;
+  width: 42%;
   height: auto;
+  max-height: 31svh;
 }
 .entry-crew img + img {
-  width: 39%;
-  margin-left: -9%;
+  width: 38%;
+  margin-left: -5%;
+  max-height: 26svh;
 }
 .entry-crew img:last-child {
-  width: 30%;
+  width: 29%;
+  max-height: 18svh;
 }
 .entry-pass {
-  position: relative;
-  color: var(--midnight);
-  background: var(--ticket);
-  border: 2px solid var(--midnight);
-  border-radius: 20px;
+  color: var(--ink);
+  background: linear-gradient(135deg, #fff8eb, #fbefdb);
+  border: 3px solid var(--ink);
+  border-radius: clamp(16px, 1.55vw, 26px);
+  box-shadow: 3px 8px 0 var(--ink);
   overflow: hidden;
-  box-shadow:
-    6px 8px 0 var(--midnight),
-    0 20px 70px #100e2540;
 }
 .entry-pass::before {
   content: '';
   display: block;
-  height: 8px;
-  background: repeating-linear-gradient(120deg, var(--acid) 0 16px, var(--midnight) 16px 22px);
+  height: clamp(14px, 1.9vw, 30px);
+  background: repeating-linear-gradient(130deg, var(--ink) 0 20px, var(--lime) 20px 43px);
+  border-bottom: 2px solid var(--ink);
 }
 .pass-heading {
   display: flex;
-  gap: 12px;
   align-items: center;
-  margin: 28px 26px 0;
+  justify-content: center;
+  gap: 0.3em;
+  padding: clamp(20px, 3vw, 42px) 12px clamp(16px, 2.15vw, 32px);
+  font-size: clamp(32px, 4.1vw, 67px);
+}
+.pass-heading img {
+  width: 1.43em;
+  height: 1.43em;
 }
 .pass-heading h2 {
-  font: 600 clamp(26px, 3vw, 36px)/1.35 var(--font-display);
-}
-.pass-hint,
-.pass-actions p {
-  color: #524e5b;
-  line-height: 1.6;
-}
-.pass-hint {
-  margin: 9px 26px 21px;
-  font-size: 15px;
+  font: 600 1em/1.35 var(--font-display);
+  letter-spacing: -0.045em;
 }
 .pass-actions {
-  padding: 0 18px 24px;
+  padding: 0 clamp(16px, 2.05vw, 35px) clamp(24px, 2.7vw, 43px);
   text-align: center;
 }
 .pass-start {
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.45em;
   width: 100%;
-  min-height: 56px;
-  padding: 6px 18px;
-  background: var(--acid);
-  border: 2px solid var(--midnight);
-  border-radius: 10px;
-  box-shadow: 0 4px var(--midnight);
-  font: 600 18px var(--font-display);
+  min-height: clamp(58px, 6.25vw, 91px);
+  border: 3px solid var(--ink);
+  border-radius: clamp(12px, 1.35vw, 22px);
+  background: var(--lime);
+  box-shadow: 0 6px var(--ink);
+  font: 600 clamp(24px, 2.8vw, 45px)/1.35 var(--font-display);
 }
 .pass-start:hover {
-  background: #ddfa43;
+  background: #efff41;
 }
 .pass-start:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px var(--midnight);
+  transform: translateY(3px);
+  box-shadow: 0 3px var(--ink);
 }
 .pass-start span {
-  font: bold 28px/1 system-ui;
+  font: bold 1.15em/1 system-ui;
 }
 .pass-actions p {
-  font-size: 13px;
-  margin: 11px 0 0;
+  margin: clamp(16px, 1.5vw, 24px) 0 0;
+  color: #51463e;
+  font: 700 clamp(15px, 1.5vw, 22px)/1.5 var(--font-body);
 }
 .pass-divider {
   display: flex;
-  gap: 12px;
   align-items: center;
-  margin: 14px 0;
-  color: #655f68;
-  font-size: 12px;
+  gap: 12px;
+  margin: clamp(12px, 1.5vw, 23px) 0;
+  font: 600 clamp(16px, 1.5vw, 22px)/1.4 var(--font-display);
 }
 .pass-divider::before,
 .pass-divider::after {
   content: '';
-  height: 1px;
-  background: #d3cdbe;
   flex: 1;
+  height: 1px;
+  background: #a89887;
 }
 .pass-error {
-  padding: 0 18px 15px;
-  color: #9c153c;
+  padding: 0 20px 20px;
+  text-align: center;
+  color: #981a3f;
 }
 @media (max-width: 740px) {
   .caper-entry {
-    padding: 66px 14px max(24px, env(safe-area-inset-bottom));
+    padding: max(55px, env(safe-area-inset-top)) 4vw max(24px, env(safe-area-inset-bottom));
+    background-position: 54% center;
   }
   .entry-layout {
-    max-width: 420px;
+    width: min(100%, 440px);
     grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
+    gap: 10px;
   }
   .entry-poster {
-    width: 100%;
+    justify-items: start;
   }
   .entry-poster h1 {
-    font-size: clamp(64px, 17vw, 82px);
+    width: min(57%, 30svh);
   }
   .entry-premise {
-    margin: 7px 0 0;
-    font-size: 12px;
+    margin: -1% 0 0 4%;
+    font-size: clamp(15px, 4vw, 21px);
   }
   .entry-crew {
-    position: absolute;
-    bottom: 4px;
-    right: -2px;
-    width: 44%;
-    margin: 0;
+    justify-self: center;
+    width: min(84%, 39svh);
+    margin-top: 10px;
+  }
+  .entry-crew img {
+    max-height: 21svh;
+  }
+  .entry-crew img + img {
+    max-height: 18svh;
+  }
+  .entry-crew img:last-child {
+    max-height: 13svh;
   }
   .pass-heading {
-    margin: 19px 18px 0;
+    padding: 16px 8px;
+    font-size: clamp(32px, 8vw, 42px);
   }
-  .pass-hint {
-    margin: 7px 18px 16px;
-  }
-  .pass-actions {
-    padding-inline: 10px;
+  .pass-start {
+    min-height: 54px;
   }
 }
