@@ -2,11 +2,21 @@ import { content } from '../data';
 import { currentOffer, escapeOf, newGame, step, unlockedMethods } from '../src';
 import type { Action, GameState } from '../src';
 
+/** ตอบเรื่องในซอยที่ต้องตัดสินใจก่อนเริ่มงาน (รุ่น 1.0) */
+export function soiAction(s: GameState): Action | null {
+  if (s.phase !== 'plan') return null;
+  if (s.soi?.pendingShape) return { t: 'shapePlace', place: s.soi.pendingShape, form: s.day % 2 ? 'patron' : 'show' };
+  if (s.soi?.appointment?.day === s.day) return { t: 'appointment', npc: s.soi.appointment.npcs[0] };
+  return null;
+}
+
 /** บอทเล่นอัตโนมัติแบบตายตัว (ไม่มีสุ่มของตัวเอง) ใช้ทดสอบทั้งรอบ */
 export function botAction(s: GameState): Action {
   const money = s.dirtyCash + s.cleanCash;
   switch (s.phase) {
     case 'plan': {
+      const soi = soiAction(s);
+      if (soi) return soi;
       if (s.day === s.maxDays && s.cleanCash > 0 && s.heat > 90) return { t: 'retire' };
       if (s.heat > 85) return { t: 'choosePlan', methodId: null };
       const options = unlockedMethods(s, content).filter((m) => m.cost <= money);
@@ -28,8 +38,16 @@ export function botAction(s: GameState): Action {
       return { t: 'eventChoice', choiceIdx: 0 };
     case 'launder':
       return { t: 'launder', cardId: s.launderOffer[0] ?? null };
-    case 'shop':
+    case 'shop': {
+      // รอบ 1.0: ช้อปตลาดมืดกับห้องลับบ้าง ให้ทดสอบร้านใหม่ไปพร้อมกัน
+      const m = s.market;
+      if (m && m.day === s.day) {
+        const offer = m.offers.find((id) => !m.bought.includes(id) && (s.upgrades[id] ?? 0) === 0);
+        if (offer && money > 20_000) return { t: 'buy', itemId: offer };
+        if ((s.upgrades.hideout ?? 0) < 3 && money > 60_000) return { t: 'buy', itemId: 'hideout' };
+      }
       return { t: 'endDay' };
+    }
     case 'escape': {
       const e = escapeOf(s);
       if (e.step === 'disguise') return { t: 'escapeDisguise', id: 'none' };

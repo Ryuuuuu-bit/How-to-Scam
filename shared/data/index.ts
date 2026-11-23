@@ -25,6 +25,7 @@ import { unluckyEvents } from './events/unlucky';
 import { launderCards } from './launderCards';
 import { methods } from './methods';
 import { shopItems } from './shop';
+import { shopV1Items } from './shopV1';
 import { titles } from './titles';
 import { achievements } from './achievements';
 import { offers } from './offers';
@@ -53,7 +54,7 @@ export const content: GameContent = {
     ...lifeMilestones,
   ],
   characters,
-  shopItems,
+  shopItems: [...shopItems, ...shopV1Items],
   victims,
   victimParts,
   pitches,
@@ -67,3 +68,4 @@ export const content: GameContent = {
   disguises,
   routes,
 };
+export { hideoutTiers } from './shopV1';

@@ -4,6 +4,8 @@ import type { EndReason, GameContent } from '../types/content';
 import type { Action, GameState } from '../types/state';
 import {
   buy,
+  buyDeal,
+  holdMarket,
   callHangup,
   callPitch,
   choosePlan,
@@ -34,6 +36,8 @@ import { acceptOffer, rollOffer } from './offers';
 import { getCharacter } from './lookup';
 import { hashSeed, Rng } from './rng';
 import { computeScore, pickDangerSigns, pickEnding } from './score';
+import { openShop, owns } from './shop';
+import { caseAction, caseEscapePenalty, finishSoi, isLivingSoi, keepAppointment, newCase, newSoi, shapePlace, soiBlocker } from './soi';
 
 /** เริ่มรอบใหม่ — seed มาจาก server (หรือสุ่มเองตอนเล่น offline) */
 export function newGame(seed: string, characterId: string, c: GameContent): GameState {
@@ -84,6 +88,10 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
     lastResults: [],
     end: null,
   };
+  if (isLivingSoi(seed)) {
+    s.soi = newSoi();
+    s.case = newCase();
+  }
   rollNews(s, c, rng);
   rollOffer(s, c, rng);
   s.rng = rng.state;
@@ -92,6 +100,7 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
 
 function finish(s: GameState, c: GameContent, rng: Rng, reason: EndReason): void {
   if (reason === 'caught') applyCaught(s, c);
+  finishSoi(s);
   s.phase = 'ended';
   s.end = {
     reason,
@@ -116,6 +125,20 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
   const rng = new Rng(s.rng);
 
   switch (action.t) {
+    case 'shapePlace':
+      expectPhase(s, 'plan');
+      shapePlace(s, action.place, action.form);
+      break;
+    case 'appointment':
+      expectPhase(s, 'plan');
+      invariant(s.soi?.pendingShape === undefined, 'decide the place first');
+      keepAppointment(s, action.npc);
+      break;
+    case 'caseMove':
+      expectPhase(s, 'plan');
+      caseAction(s, rng, action.kind, action.evidenceId);
+      if (s.heat >= HEAT_MAX) s.phase = 'escape';
+      break;
     case 'specialize': {
       expectPhase(s, 'plan');
       const status = careerStatus(s, action.methodId);
@@ -161,6 +184,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
     }
     case 'relief': {
       expectPhase(s, 'plan');
+      invariant(action.job === 'advance' || soiBlocker(s) === null, 'the neighbourhood is waiting for you');
       const cost = minimumJobCost(s, c);
       const favorDue = s.favorDay !== undefined && s.day >= s.favorDay;
       if (action.job === 'favor') invariant(favorDue, 'no favor due');
@@ -215,6 +239,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
     case 'choosePlan':
       expectPhase(s, 'plan');
       invariant(s.favorDay === undefined || s.day < s.favorDay, 'return the market favor first');
+      invariant(soiBlocker(s) === null, 'the neighbourhood is waiting for you');
       choosePlan(s, c, action.methodId, action.opening);
       break;
     case 'invest':
@@ -251,6 +276,14 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
     case 'buy':
       expectPhase(s, 'shop');
       buy(s, c, action.itemId);
+      break;
+    case 'shopDeal':
+      expectPhase(s, 'shop');
+      buyDeal(s, c);
+      break;
+    case 'shopHold':
+      expectPhase(s, 'shop');
+      holdMarket(s, action.itemId);
       break;
     case 'endDay':
       expectPhase(s, 'shop');
@@ -319,7 +352,8 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
     }
   }
 
-  if (s.phase === 'escape' && !s.escape) s.escape = { step: 'disguise', bonus: 0 };
+  if (s.phase === 'escape' && !s.escape) s.escape = { step: 'disguise', bonus: -caseEscapePenalty(s) + (owns(s, 'app_case') ? 10 : 0) };
+  if (s.phase === 'shop') openShop(s, c);
   s.rng = rng.state;
   return s;
 }

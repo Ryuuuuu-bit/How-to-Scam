@@ -51,6 +51,8 @@ export function PlayScreen({
       'exposed',
       'ponziCrash',
       'romanceFled',
+      'raid',
+      'soiShaped',
     ].includes(kind),
   );
   const showResults = bigResult && dismissedTick !== tick && resultLines.length > 0;
@@ -99,7 +101,7 @@ export function PlayScreen({
   return (
     <div className="play-shell relative min-h-dvh">
       <SceneBackdrop id={scene} />
-      <Hud state={state} />
+      <Hud state={state} dispatch={props.dispatch} />
       <aside className="scene-caption">
         <span className="eyebrow">HOW TO SCAM / แฟ้มประจำวันที่ {state.day}</span>
         <h1>{state.phase === 'ended' ? '' : t(`phase.${state.phase}`)}</h1>

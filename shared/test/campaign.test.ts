@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { content } from '../data';
 import { campaignSeed, choiceAvailable, durations, newGame, replay, step, type Action } from '../src';
-import { botAction } from './helpers';
+import { botAction, soiAction } from './helpers';
 import { Rng } from '../src/engine/rng';
 
 it.each(durations)('finishes and replays a %i-day campaign with its own story chapters', days => {
@@ -10,7 +10,7 @@ it.each(durations)('finishes and replays a %i-day campaign with its own story ch
   let state = newGame(seed, character, content);
   const actions: Action[] = [];
   while (state.phase !== 'ended' && actions.length < 3000) {
-    const action = state.phase === 'plan' ? { t: 'choosePlan' as const, methodId: null } : botAction(state);
+    const action = state.phase === 'plan' ? (soiAction(state) ?? { t: 'choosePlan' as const, methodId: null }) : botAction(state);
     actions.push(action);
     state = step(state, action, content);
   }
@@ -54,7 +54,7 @@ it('plays every new scene across seeded runs with different life choices', () =>
     let s = newGame(seed, character.id, content);
     while (s.phase !== 'ended') {
       let action: Action;
-      if (s.phase === 'plan') action = { t: 'choosePlan', methodId: null };
+      if (s.phase === 'plan') action = soiAction(s) ?? { t: 'choosePlan', methodId: null };
       else if (s.phase === 'event') {
         const ev = catalog.get(s.pendingEvents[0] ?? '');
         if (!ev) throw Error('Missing pending event');

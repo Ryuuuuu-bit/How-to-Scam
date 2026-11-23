@@ -1,6 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { activeFestivals, dateOf } from '@hts/shared';
-import type { GameState } from '@hts/shared';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { activeFestivals, caseStrength, dateOf, raidThreshold, soiBlocker } from '@hts/shared';
+import type { Action, GameState } from '@hts/shared';
+import { PhoneSheet } from './PhoneSheet';
+import { SoiMap } from './SoiMap';
+import { CaseBoard } from './CaseBoard';
+import './phone.css';
+import './shop.css';
 import { content } from '@hts/shared/data';
 import { fmt, lt, monthName, t } from '../i18n';
 import { Art } from './ui';
@@ -138,14 +143,72 @@ export function HeatBar({ heat }: { heat: number }) {
   );
 }
 
-export function Hud({ state }: { state: GameState }) {
+/** แถบสถานะมือถือ: สัญญาณตก Heat ขึ้น แบตลดตามวันที่เหลือ */
+function PhoneStatus({ state }: { state: GameState }) {
+  const date = dateOf(state, state.day);
+  const bars = Math.max(0, 4 - Math.floor(state.heat / 25));
+  const battery = Math.max(0, Math.round(((state.maxDays - state.day + 1) / state.maxDays) * 100));
+  return (
+    <div className="phone-status" aria-label={`มือถือ · สัญญาณ ${bars}/4 · แบต ${battery}%`}>
+      <span className="phone-clock">{String(date.date).padStart(2, '0')} {monthName(date.month)}</span>
+      <span className="phone-carrier">ซอยเน็ต</span>
+      <span className="phone-signal" aria-hidden="true">
+        {[1, 2, 3, 4].map((n) => <i key={n} data-on={n <= bars || undefined} style={{ height: `${n * 3 + 2}px` }} />)}
+      </span>
+      <span className="phone-battery" data-low={battery <= 15 || undefined} aria-hidden="true">
+        <i style={{ width: `${battery}%` }} />
+      </span>
+      <small>{battery}%</small>
+    </div>
+  );
+}
+
+type App = 'soi' | 'case' | 'gear';
+
+const appIds = content.shopItems.filter((it) => it.line === 'app').map((it) => it.id);
+
+function PhoneDock({ state, open }: { state: GameState; open: (app: App) => void }) {
+  if (!state.soi || !state.case) return null;
+  const strength = caseStrength(state);
+  const threshold = raidThreshold(state);
+  const waiting = soiBlocker(state);
+  const installed = appIds.filter((id) => (state.upgrades[id] ?? 0) > 0);
+  return (
+    <nav className="phone-dock" aria-label="แอปในมือถือ">
+      <button type="button" onClick={() => open('soi')} data-alert={waiting || undefined}>
+        <span className="phone-app-icon app-soi" aria-hidden="true">🗺️</span>
+        <span>แผนที่ซอย</span>
+        {waiting && <b className="phone-badge">!</b>}
+      </button>
+      <button type="button" onClick={() => open('case')} data-alert={strength >= threshold - 2 || undefined}>
+        <span className="phone-app-icon app-case" aria-hidden="true">📌</span>
+        <span>บอร์ดคดี</span>
+        <b className="phone-badge" data-hot={strength >= threshold - 2 || undefined}>{strength}</b>
+      </button>
+      {installed.length > 0 && (
+        <button type="button" className="phone-dock-gear" onClick={() => open('gear')} aria-label={`แอปที่ติดตั้ง ${installed.length} แอป`}>
+          <span className="phone-gear-stack" aria-hidden="true">
+            {installed.slice(0, 3).map((id) => (
+              <Art key={id} id={`shop:${id}`} size={26} />
+            ))}
+          </span>
+        </button>
+      )}
+    </nav>
+  );
+}
+
+export function Hud({ state, dispatch }: { state: GameState; dispatch?: (a: Action) => void }) {
   const date = dateOf(state, state.day);
   const fests = activeFestivals(state, content);
+  const [app, setApp] = useState<App | null>(null);
+  const close = useCallback(() => setApp(null), []);
   return (
-    <header className="game-hud sticky top-0 z-20 px-3 pt-[max(env(safe-area-inset-top),12px)] pb-3">
+    <header className="game-hud phone-hud sticky top-0 z-20 px-3 pt-[max(env(safe-area-inset-top),12px)] pb-3" data-cracked={state.heat >= 75 || undefined}>
       <div className="hud-inner mx-auto flex flex-col gap-2">
-        <div className="flex">
+        <div className="phone-top flex items-center gap-2">
           <OnlineCount />
+          {state.soi && <PhoneStatus state={state} />}
         </div>
         <div className="hud-meta font-display flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-1">
@@ -197,7 +260,38 @@ export function Hud({ state }: { state: GameState }) {
             ))}
           </div>
         )}
+        <PhoneDock state={state} open={setApp} />
       </div>
+      {app === 'soi' && (
+        <PhoneSheet title="แผนที่ซอย" app="soi" onClose={close}>
+          <SoiMap state={state} />
+        </PhoneSheet>
+      )}
+      {app === 'case' && (
+        <PhoneSheet title="บอร์ดคดีของสารวัตรหมูกระทะ" app="case" onClose={close}>
+          <CaseBoard state={state} {...(dispatch ? { dispatch } : {})} />
+        </PhoneSheet>
+      )}
+      {app === 'gear' && (
+        <PhoneSheet title="แอปที่ติดตั้ง" app="gear" onClose={close}>
+          <ul className="gear-list">
+            {appIds
+              .filter((id) => (state.upgrades[id] ?? 0) > 0)
+              .map((id) => {
+                const it = content.shopItems.find((x) => x.id === id);
+                return (
+                  <li key={id}>
+                    <Art id={`shop:${id}`} size={52} />
+                    <div>
+                      <strong>{it ? lt(it.name) : id}</strong>
+                      <span>{it ? lt(it.desc) : ''}</span>
+                    </div>
+                  </li>
+                );
+              })}
+          </ul>
+        </PhoneSheet>
+      )}
     </header>
   );
 }

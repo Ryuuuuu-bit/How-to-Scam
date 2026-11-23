@@ -30,6 +30,9 @@ export class HttpError extends Error {
 const id = z.string().min(1).max(64);
 /** รูปแบบ action ที่รับจาก client (ตรวจก่อนเอาไป replay) */
 export const actionSchema: z.ZodType<Action> = z.discriminatedUnion('t', [
+  z.object({ t: z.literal('shapePlace'), place: z.enum(['market', 'temple', 'field', 'dorm', 'mookata']), form: z.enum(['patron', 'local', 'show']) }),
+  z.object({ t: z.literal('appointment'), npc: z.enum(['jae', 'uncle', 'coach', 'auntie', 'hia']) }),
+  z.object({ t: z.literal('caseMove'), kind: z.enum(['burn', 'decoy', 'tipoff']), evidenceId: z.number().int().min(1).max(10_000).optional() }),
   z.object({ t: z.literal('specialize'), methodId: id, branch: z.enum(['face', 'boss']) }),
   z.object({ t: z.literal('careerFinale'), methodId: id, choice: z.enum(['fee', 'credit']) }),
   z.object({ t: z.literal('careerDecision'), methodId: id, choice: z.enum(['patron', 'local', 'talent']) }),
@@ -45,6 +48,8 @@ export const actionSchema: z.ZodType<Action> = z.discriminatedUnion('t', [
   z.object({ t: z.literal('eventChoice'), choiceIdx: z.number().int().min(0).max(10) }),
   z.object({ t: z.literal('launder'), cardId: id.nullable() }),
   z.object({ t: z.literal('buy'), itemId: id }),
+  z.object({ t: z.literal('shopDeal') }),
+  z.object({ t: z.literal('shopHold'), itemId: id }),
   z.object({ t: z.literal('endDay') }),
   z.object({ t: z.literal('escapeDisguise'), id: z.string().max(40) }),
   z.object({ t: z.literal('escapeRoute'), id: z.string().max(40) }),

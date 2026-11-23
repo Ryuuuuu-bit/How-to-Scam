@@ -11,6 +11,7 @@ import { Art, Button, Panel } from '../components/ui';
 import { EndingCard } from '../components/EndingCard';
 import { DailyNewspaper } from '../components/DailyNewspaper';
 import { ClosingEdition } from '../components/ClosingEdition';
+import { LifeDocumentary } from '../components/LifeDocumentary';
 
 export function EndScreen({
   state,
@@ -78,6 +79,8 @@ export function EndScreen({
           {t('end.clean', { n: state.cleanCash })} · {t('end.days', { n: days })} · รอบ {state.maxDays} วัน
         </div>
       </Panel>
+
+      <LifeDocumentary state={state} />
 
       {!practice && <SubmitBanner maxDays={state.maxDays} state={submit.state} onRetry={() => void submit.retry()} />}
       <div className="grid grid-cols-2 gap-3">
