@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { escapeOf, newGame, replay, step, unlockedMethods } from '@hts/shared';
+import { campaignSeed, careerStatus, escapeOf, newGame, replay, step, unlockedMethods } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { createApp } from '../src/app';
@@ -92,7 +92,7 @@ it('counts recent accounts once across tabs and expires inactive players', async
 });
 
 /** บอทง่ายๆ เล่นจนจบ */
-function play(seed: string, characterId: string): Action[] {
+function play(seed: string, characterId: string, plan?: (s: GameState) => Action): Action[] {
   let s: GameState = newGame(seed, characterId, content);
   const actions: Action[] = [];
   for (let i = 0; i < 3000 && s.phase !== 'ended'; i++) {
@@ -100,6 +100,7 @@ function play(seed: string, characterId: string): Action[] {
     let a: Action;
     switch (s.phase) {
       case 'plan': {
+        if (plan) { a = plan(s); break; }
         const m = unlockedMethods(s, content).find((x) => x.cost <= money);
         a =
           s.heat > 80 || !m
@@ -136,6 +137,29 @@ function play(seed: string, characterId: string): Action[] {
   }
   return actions;
 }
+
+it('submits and ranks a completed career with the selected occupation signature', async () => {
+  const g = await guest();
+  const seed = campaignSeed(60, 'first-album');
+  const characterId = 'orange_cat';
+  const run = await store.createRun({ userId: g.user.uid, characterId, seed, mode: 'normal60', dailyDate: null });
+  const methodId = 'cat_dub';
+  const actions = play(seed, characterId, s => {
+    const track = careerStatus(s, methodId);
+    if (track.finale) return { t: 'retire' };
+    if (!track.branch && track.shifts >= track.needed) return { t: 'specialize', methodId, branch: 'face' };
+    if (track.commissions && !s.careers?.[methodId]?.decision) return { t: 'careerDecision', methodId, choice: 'talent' };
+    if (track.commissions >= 3) return { t: 'careerFinale', methodId, choice: 'fee' };
+    return { t: 'choosePlan', methodId };
+  });
+  const local = replay(seed, characterId, actions, content);
+  expect(local.careers?.[methodId]?.finale).toBe('fee');
+  const submitted = await api(`/api/runs/${run.id}/submit`, { token: g.token, body: { actions } });
+  expect(submitted.status).toBe(200);
+  expect(submitted.body.score).toBe(local.end?.score);
+  const board = await api('/api/leaderboard?days=60');
+  expect(board.body.rows).toEqual(expect.arrayContaining([expect.objectContaining({ userId: g.user.uid, score: local.end?.score })]));
+});
 
 it('keeps scores on the board chosen at start, including early endings', async () => {
   const characterId = 'ex_insurance';

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { careerTracks } from '@hts/shared';
 import type { GameState } from '@hts/shared';
 import { content, day30Ending } from '@hts/shared/data';
 import { sceneUrl } from '../assets/art';
@@ -30,6 +31,13 @@ export function EndingCard({ state, portrait = 'char:' + state.characterId }: { 
     </div>}
     <h2 className="mt-3 text-2xl font-semibold">{lt(ending.title)}</h2>
     <p className="mt-2 text-left leading-relaxed">{lt(ending.body)}</p>
+    {Object.entries(state.careers ?? {}).map(([id, career]) => {
+      const path = careerTracks[id]?.[career.branch];
+      return path && <div key={id} className="mt-3 rounded-xl bg-white p-3 text-left text-ink">
+        <strong>{path.title}</strong><p>{career.finale ? path.finale : path.commission}</p>
+        {career.finale && <small>{career.finale === 'credit' ? 'ยกเครดิตให้คนในซอย' : 'รับค่าตัวปิดงาน'}</small>}
+      </div>;
+    })}
     {future && <div className="mt-4 rounded-2xl bg-paper p-3 text-left text-ink">
       <strong>รอดครบ {state.maxDays} วัน · เงินสะอาด ฿{state.cleanCash.toLocaleString('th-TH')}</strong>
       {future.id !== ending.id && <><h3 className="mt-2 font-bold">{lt(future.title)}</h3><p>{lt(future.body)}</p></>}

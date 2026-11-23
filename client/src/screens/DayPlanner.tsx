@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { careerStatus } from '@hts/shared';
+import { CareerDesk, CareerDirectory, ReliefDesk } from '../components/CareerDesk';
 import type { Action, GameState } from '@hts/shared';
 import { currentOffer, methodBlock, newsScout, openingFor, originStage, priceOf, questSeedPrefix } from '@hts/shared';
 import { openingStories } from '../game/openingStories';
@@ -122,10 +124,14 @@ export function DayPlanner({
     block: methodBlock(state, content, method),
   }));
   const locked = methods.filter(({ block }) => block === 'level');
+  const recent = new Map(state.history.map(h => [h.methodId, h.day]));
   const available = methods.filter(({ block }) => block !== 'level').sort((a, b) => {
     if (order === 'cost') return a.method.cost - b.method.cost;
     if (order === 'heat') return planEstimate(state, a.method, {}).heat[1] - planEstimate(state, b.method, {}).heat[1];
-    return Number(!!b.method.debutEvent) - Number(!!a.method.debutEvent);
+    const playable = (job: typeof a) => Number(!job.block && job.method.cost <= money(state));
+    const lastWorked = (job: typeof a) => recent.get(job.method.id) ?? 0;
+    const rotated = (job: typeof a) => (content.methods.indexOf(job.method) + content.methods.length - state.day % content.methods.length) % content.methods.length;
+    return playable(b) - playable(a) || lastWorked(a) - lastWorked(b) || rotated(a) - rotated(b);
   });
 
   const method = content.methods.find((m) => m.id === methodId);
@@ -170,6 +176,7 @@ export function DayPlanner({
 
   const opening = state.day === 1 && !skipped && openingFor(state.seed, state.characterId);
   if (originStage(state)) return <OriginChat state={state} dispatch={dispatch} />;
+  if (state.favorDay !== undefined && state.day >= state.favorDay) return <ReliefDesk state={state} dispatch={dispatch} />;
   const shop = methods.find(({ method }) => method.id === 'fake_shop');
   if (opening && shop) {
     const story = openingStories[opening];
@@ -196,11 +203,18 @@ export function DayPlanner({
     );
   }
   const yesterday = state.day === 2 ? state.history.find(log => log.day === 1) : undefined;
+  const previousShift = state.history.at(-1);
 
   return (
     <>
       <ScreenTitle title={t('phase.plan')} hint="เลือกงานที่อยากลอง แล้วดูว่าเสี่ยงแค่ไหนก่อนลงมือ" />
       <CareerJournal state={state} />
+      <CareerDirectory state={state} />
+      <ReliefDesk state={state} dispatch={dispatch} />
+      {previousShift?.relief && previousShift.day === state.day - 1 && <p role="status" className="mb-3 rounded-xl bg-paper p-3 text-ink">
+        {previousShift.relief === 'favor' ? 'เมื่อวานเฝ้าตลาดครบกะแล้ว คุณคืนบุญคุณเจ๊เรียบร้อย'
+          : `จบกะ${previousShift.relief === 'mascot' ? 'มาสคอต' : 'ขึ้นเวที'} · ได้ทุนกลับมาทำงาน ฿${fmt(previousShift.income)}`}
+      </p>}
       {yesterday?.opening && <aside className="mb-3 rounded-xl border-2 border-ink bg-sun p-3 text-ink">
         <small>ข่าวหน้าหนึ่งเช้านี้</small>
         <p className="font-display">{openingStories[yesterday.opening][yesterday.methodId ? 'workNews' : 'quietNews']}</p>
@@ -236,6 +250,7 @@ export function DayPlanner({
                   <small>ทุน ฿{fmt(m.cost)}</small>{picked && <b aria-hidden="true">✓</b>}
                 </span>
                 <span className="job-copy"><strong>{lt(m.name)}</strong>
+                  <small>{careerStatus(state, m.id).shifts} วันในสายงานนี้</small>
                   <span>{m.cleanIncome ? 'เงินสะอาด' : 'รายได้'} ฿{fmt(estimate.income[0])}–{fmt(estimate.income[1])}</span>
                   <small>{block === 'banned' ? t('plan.banned') : block === 'cooldown'
                     ? t('plan.cooldown', { n: state.methodState[m.id]?.cooldownUntil ?? 0 })
@@ -291,6 +306,7 @@ export function DayPlanner({
           <div className="job-brief"><strong>{lt(method.name)}</strong><p>{lt(method.desc)}</p>
             <div className="flex flex-wrap gap-1"><MethodChips state={state} m={method} /></div>
           </div>
+          <CareerDesk state={state} method={method.id} dispatch={dispatch} />
           <div className="kit-heading"><h3>ของช่วยงานวันนี้</h3><span>ไม่ซื้อก็เริ่มได้</span></div>
           <div className="kit-switch" role="group" aria-label="ประเภทของช่วยงาน">
             <button type="button" aria-pressed={itemGroup === 'daily'} onClick={() => setItemGroup('daily')}>ของรายวัน</button>

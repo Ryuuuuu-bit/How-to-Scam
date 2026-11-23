@@ -1,4 +1,5 @@
 import { campaignDays } from './campaign';
+import { careerFee, careerSignatures, careerStatus, minimumJobCost } from './careerPaths';
 import type { EndReason, GameContent } from '../types/content';
 import type { Action, GameState } from '../types/state';
 import {
@@ -115,6 +116,86 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
   const rng = new Rng(s.rng);
 
   switch (action.t) {
+    case 'specialize': {
+      expectPhase(s, 'plan');
+      const status = careerStatus(s, action.methodId);
+      invariant(!status.branch && status.shifts >= status.needed, 'career branch unavailable');
+      invariant(action.branch === 'face' || action.branch === 'boss', 'unknown career branch');
+      (s.careers ??= {})[action.methodId] = { branch: action.branch, since: s.day };
+      break;
+    }
+    case 'careerDecision': {
+      expectPhase(s, 'plan');
+      const status = careerStatus(s, action.methodId);
+      const selected = s.careers?.[action.methodId];
+      invariant(selected && !selected.decision && status.commissions >= 1, 'career decision unavailable');
+      invariant(['patron', 'local', 'talent'].includes(action.choice), 'unknown decision');
+      if (action.choice === 'talent') invariant(!Object.values(s.careers ?? {}).some(r => r.decision === 'talent'), 'signature already used');
+      selected.decision = action.choice;
+      if (action.choice === 'patron') {
+        s.dirtyCash += 350;
+        s.heat = Math.min(100, s.heat + 4);
+      } else if (action.choice === 'talent') {
+        const talent = careerSignatures[s.characterId];
+        invariant(talent, 'missing career signature');
+        s.heat = Math.max(0, Math.min(HEAT_MAX, s.heat + talent.heat));
+        s.dirtyCash += talent.cash;
+        s.fame += talent.fame;
+      } else {
+        s.karma += 2;
+        s.fame += 2;
+      }
+      if (s.heat >= HEAT_MAX) s.phase = 'escape';
+      break;
+    }
+    case 'careerFinale': {
+      expectPhase(s, 'plan');
+      const status = careerStatus(s, action.methodId);
+      const selected = s.careers?.[action.methodId];
+      invariant(selected?.decision && !selected.finale && status.commissions >= 3, 'career finale unavailable');
+      invariant(action.choice === 'fee' || action.choice === 'credit', 'unknown finale');
+      selected.finale = action.choice;
+      if (action.choice === 'fee') s.dirtyCash += careerFee(c, action.methodId);
+      else { s.fame += 4; s.heat = Math.max(0, s.heat - 6); }
+      break;
+    }
+    case 'relief': {
+      expectPhase(s, 'plan');
+      const cost = minimumJobCost(s, c);
+      const favorDue = s.favorDay !== undefined && s.day >= s.favorDay;
+      if (action.job === 'favor') invariant(favorDue, 'no favor due');
+      else invariant(!favorDue && cost !== null && s.dirtyCash + s.cleanCash < cost, 'relief unavailable');
+      if (action.job === 'advance') {
+        invariant(s.favorDay === undefined && s.advanceDay !== s.day && s.day + 2 <= s.maxDays, 'advance unavailable');
+        s.dirtyCash += cost ?? 0;
+        s.advanceDay = s.day;
+        s.favorDay = s.day + 2;
+        break;
+      }
+      invariant(action.job === 'mascot' || action.job === 'stage' || action.job === 'favor', 'unknown relief job');
+      choosePlan(s, c, null);
+      const log = s.history.at(-1);
+      invariant(log, 'missing relief shift');
+      log.relief = action.job;
+      if (action.job === 'favor') delete s.favorDay;
+      const extra = action.job === 'stage' ? 250 : 0;
+      if (extra) { s.fame += 1; s.heat = Math.min(100, s.heat + 5); }
+      s.workStreak = 0;
+      if (action.job !== 'favor') s.dirtyCash += s.henchmen.reduce((total, h) => total + h.wage, 0);
+      if (s.heat >= HEAT_MAX && extra) {
+        log.income = (cost ?? 0) + extra;
+        s.dirtyCash += log.income;
+        s.phase = 'escape';
+        break;
+      }
+      const lastDay = endDay(s, c, rng);
+      if (action.job !== 'favor') {
+        log.income = (minimumJobCost(s, c) ?? cost ?? 0) + extra;
+        s.dirtyCash += log.income;
+      }
+      if (lastDay) finish(s, c, rng, 'survived');
+      break;
+    }
     case 'replyOrigin':
       invariant(originStage(s) === 'opening' && (action.reply === 'help' || action.reply === 'later'), 'invalid origin reply');
       s.originStory = { reply: action.reply };
@@ -133,6 +214,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       break;
     case 'choosePlan':
       expectPhase(s, 'plan');
+      invariant(s.favorDay === undefined || s.day < s.favorDay, 'return the market favor first');
       choosePlan(s, c, action.methodId, action.opening);
       break;
     case 'invest':

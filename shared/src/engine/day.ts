@@ -142,6 +142,8 @@ export function incomeBonusPct(s: GameState, c: GameContent, methodId: string): 
     .filter((p) => p.methodId === methodId)
     .reduce((n, p) => n + p.pct, 0);
   pct += modifierPct(s, c, 'income', methodId);
+  if (s.careers?.[methodId]?.branch === 'face') pct += 15;
+  if (s.careers?.[methodId]?.branch === 'boss') pct += Math.min(3, s.henchmen.length) * 8;
   pct += s.henchmen.reduce((sum, h) => sum + h.skill, 0);
   pct += itemPct(s, c, s.dailyItems, 'incomePct', methodId);
   pct += itemPct(s, c, s.upgrades, 'incomePct', methodId);
@@ -150,6 +152,8 @@ export function incomeBonusPct(s: GameState, c: GameContent, methodId: string): 
 
 export function heatBonusPct(s: GameState, c: GameContent, methodId: string): number {
   let pct = modifierPct(s, c, 'heat', methodId);
+  if (s.careers?.[methodId]?.branch === 'face') pct += 10;
+  if (s.careers?.[methodId]?.branch === 'boss') pct -= 10;
   pct += perksOfKind(s, c, 'methodHeat')
     .filter((p) => p.methodId === methodId)
     .reduce((n, p) => n + p.pct, 0);

@@ -30,6 +30,10 @@ export class HttpError extends Error {
 const id = z.string().min(1).max(64);
 /** รูปแบบ action ที่รับจาก client (ตรวจก่อนเอาไป replay) */
 export const actionSchema: z.ZodType<Action> = z.discriminatedUnion('t', [
+  z.object({ t: z.literal('specialize'), methodId: id, branch: z.enum(['face', 'boss']) }),
+  z.object({ t: z.literal('careerFinale'), methodId: id, choice: z.enum(['fee', 'credit']) }),
+  z.object({ t: z.literal('careerDecision'), methodId: id, choice: z.enum(['patron', 'local', 'talent']) }),
+  z.object({ t: z.literal('relief'), job: z.enum(['mascot', 'stage', 'advance', 'favor']) }),
   z.object({ t: z.literal('choosePlan'), methodId: id.nullable(), opening: z.literal(true).optional() }),
   z.object({ t: z.literal('replyOrigin'), reply: z.enum(['help', 'later']) }),
   z.object({ t: z.literal('readOrigin') }),

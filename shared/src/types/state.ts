@@ -92,6 +92,7 @@ export interface MethodState {
 }
 
 export interface DayLog {
+  relief?: 'mascot' | 'stage' | 'favor';
   liveCat?: 'lift' | 'stay' | 'sale';
   natFirstPay?: boolean;
   opening?: 'mother' | 'guild' | 'parcel';
@@ -136,6 +137,9 @@ export interface LastResult {
 }
 
 export interface GameState {
+  careers?: Record<string, { branch: 'face' | 'boss'; since: number; decision?: 'patron' | 'local' | 'talent'; finale?: 'fee' | 'credit' }>;
+  favorDay?: number;
+  advanceDay?: number;
   maxDays: number;
   scoutedDay?: number;
   version: 2;
@@ -201,6 +205,10 @@ export interface GameState {
 
 /** การกระทำของผู้เล่น — server เก็บเป็น action log เพื่อ replay */
 export type Action =
+  | { t: 'specialize'; methodId: string; branch: 'face' | 'boss' }
+  | { t: 'careerFinale'; methodId: string; choice: 'fee' | 'credit' }
+  | { t: 'careerDecision'; methodId: string; choice: 'patron' | 'local' | 'talent' }
+  | { t: 'relief'; job: 'mascot' | 'stage' | 'advance' | 'favor' }
   | { t: 'replyOrigin'; reply: 'help' | 'later' }
   | { t: 'readOrigin' }
   | { t: 'choosePlan'; methodId: MethodId | null; opening?: true | undefined }

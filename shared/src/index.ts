@@ -1,4 +1,5 @@
 export * from './engine/campaign';
+export * from './engine/careerPaths';
 export * from './types/content';
 export * from './types/state';
 export { Rng, hashSeed } from './engine/rng';

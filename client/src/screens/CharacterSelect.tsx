@@ -1,4 +1,4 @@
-import { durations, type Duration } from '@hts/shared';
+import { careerAffinities, durations, type Duration } from '@hts/shared';
 import { useState } from 'react';
 import { content } from '@hts/shared/data';
 import { isUnlocked, progressFor } from '../game/meta';
@@ -76,6 +76,7 @@ export function CharacterSelect({
                 {open ? (
                   <>
                     <div className="text-xs text-ink-soft">{lt(c.desc)}</div>
+                    <div className="mt-1 text-xs">{careerAffinities[c.id]?.talent} · เลือกสาย{content.methods.find(m => m.id === careerAffinities[c.id]?.method)?.name.th}ได้หลังทำงาน 2 วัน</div>
                     <div className="mt-1 text-xs">
                       <span className="font-semibold text-clean">{t('character.pros')}:</span>{' '}
                       {lt(c.pros)}
