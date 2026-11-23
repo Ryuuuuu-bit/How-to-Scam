@@ -22,7 +22,6 @@ import { PresenceProvider } from './components/OnlineCount';
 import { api } from './net/api';
 import { AuthProvider, useAuth } from './net/auth';
 import { t } from './i18n';
-import { WardrobeScreen } from './screens/WardrobeScreen';
 import { MarketScreen } from './screens/MarketScreen';
 import { EndingsGallery } from './screens/EndingsGallery';
 import './components/phone.css';
@@ -35,7 +34,6 @@ type Screen =
   | 'dailyBoard'
   | 'daily'
   | 'achievements'
-  | 'wardrobe'
   | 'market'
   | 'endings';
 
@@ -114,7 +112,6 @@ function GameScreens() {
     return <AchievementsScreen onBack={() => setScreen('menu')} />;
   }
 
-  if (screen === 'wardrobe') return <WardrobeScreen onBack={() => setScreen('menu')} onMarket={() => setScreen('market')} />;
   if (screen === 'market') return <MarketScreen onBack={() => setScreen('menu')} />;
   if (screen === 'endings') return <EndingsGallery onBack={() => setScreen('menu')} />;
 
@@ -200,7 +197,6 @@ function GameScreens() {
   return (
     <>
       <MainMenu
-        onWardrobe={() => setScreen('wardrobe')}
         onMarket={() => setScreen('market')}
         onEndings={() => setScreen('endings')}
         saved={saved}

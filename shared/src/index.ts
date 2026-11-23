@@ -30,7 +30,6 @@ export {
   bountyRank,
   bountyRanks,
   charKey,
-  cosmeticPrices,
   isStarter,
   legacyCharacterKeys,
   marketPrice,

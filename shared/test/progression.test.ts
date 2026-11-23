@@ -47,8 +47,8 @@ describe('ค่าหัวและเงินใต้ดิน', () => {
   it('ราคาตลาดมาจากข้อมูลเท่านั้น', () => {
     expect(marketPrice(content, 'char:live_seller')).toBe(1500);
     expect(marketPrice(content, 'char:ex_insurance')).toBeNull();
-    expect(marketPrice(content, 'skin:ex_insurance_gold')).toBe(2000);
-    expect(marketPrice(content, 'skin:nope')).toBeNull();
+    expect(marketPrice(content, 'skin:ex_insurance_gold')).toBeNull();
+    expect(marketPrice(content, 'scene:condo')).toBeNull();
     expect(marketPrice(content, 'toString')).toBeNull();
   });
 

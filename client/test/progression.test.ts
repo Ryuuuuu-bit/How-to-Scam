@@ -1,13 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { newGame, step } from '@hts/shared';
 import { content } from '@hts/shared/data';
-import {
-  characterArt,
-  cosmeticUnlocked,
-  loadCosmetics,
-  menuScenes,
-  saveCosmetics,
-} from '../src/game/cosmetics';
+import { loadMeta } from '../src/game/meta';
 import { dailyArticles, markPaperRead, paperWasRead } from '../src/game/newspaper';
 import { reactionMeme } from '../src/game/memes';
 
@@ -21,37 +15,31 @@ beforeEach(() => {
   });
 });
 
-describe('cross-run cosmetics', () => {
-  it('keeps account preferences isolated and rejects locked selections', () => {
-    const rich = { xp: 1000, endings: ['jailed'] };
-    saveCosmetics({ scene: 'jail', skins: { ex_insurance: 'ex_insurance_gold' } }, 'alice');
-    expect(loadCosmetics(rich, 'alice').scene).toBe('jail');
-    expect(characterArt('ex_insurance', loadCosmetics(rich, 'alice'))).toBe(
-      'skin:ex_insurance_gold',
+describe('offline meta after the wardrobe was removed', () => {
+  it('refunds bought scenes and skins and keeps characters', () => {
+    localStorage.setItem(
+      'hts.meta.v1',
+      JSON.stringify({
+        xp: 10,
+        runs: 2,
+        endings: [],
+        awarded: [],
+        achievements: [],
+        money: 200,
+        owned: ['char:live_seller', 'skin:gamer_kid_pro', 'scene:condo'],
+      }),
     );
-    expect(loadCosmetics(rich, 'bob')).toEqual({ scene: 'menu', skins: {} });
-    expect(loadCosmetics({ xp: 0, endings: [] }, 'alice')).toEqual({ scene: 'menu', skins: {} });
+    const m = loadMeta();
+    expect(m.money).toBe(5_700);
+    expect(m.owned).toEqual(['char:live_seller']);
+    expect(loadMeta().money).toBe(5_700);
   });
-  it('unlocks the reform studio through each reform ending', () => {
-    const studio = menuScenes[5];
-    for (const ending of ['redeemed', 'whistleblower', 'scam_hunter']) {
-      expect(cosmeticUnlocked(studio, { xp: 0, endings: [ending] })).toBe(true);
-    }
-    expect(cosmeticUnlocked(studio, { xp: 9999, endings: ['jailed'] })).toBe(false);
-  });
-  it('recovers from malformed saves and denied storage', () => {
-    localStorage.setItem('hts.cosmetics.v1.offline', '{broken');
-    expect(loadCosmetics({ xp: 0, endings: [] })).toEqual({ scene: 'menu', skins: {} });
-    vi.stubGlobal('localStorage', {
-      getItem: () => {
-        throw new Error('denied');
-      },
-      setItem: () => {
-        throw new Error('denied');
-      },
-    });
-    expect(() => saveCosmetics({ scene: 'menu', skins: {} })).not.toThrow();
-    expect(loadCosmetics({ xp: 0, endings: [] }).scene).toBe('menu');
+  it('gives veterans from before the market every character they had', () => {
+    localStorage.setItem(
+      'hts.meta.v1',
+      JSON.stringify({ xp: 10, runs: 3, endings: [], awarded: [], achievements: [] }),
+    );
+    expect(loadMeta().owned).toHaveLength(8);
   });
 });
 

@@ -5,10 +5,8 @@ import { isUnlocked } from '../game/meta';
 import { useMarket } from '../game/market';
 import { bountyText } from '../game/bounty';
 import { AuditionNote, BuyButton, WalletBar } from '../components/Underground';
-import { useAuth } from '../net/auth';
 import { lt, t } from '../i18n';
 import { Art, Button, ScreenTitle } from '../components/ui';
-import { characterArt, loadCosmetics } from '../game/cosmetics';
 
 export function CharacterSelect({
   onStart,
@@ -22,10 +20,8 @@ export function CharacterSelect({
   startError?: boolean;
 }) {
   const [days, setDays] = useState<Duration>(30);
-  const { user } = useAuth();
   const market = useMarket();
   const meta = market.progress;
-  const cosmetics = loadCosmetics(meta, user?.uid);
   const [picked, setPicked] = useState(content.characters[0]?.id ?? '');
   const [showLocked, setShowLocked] = useState(false);
   const unlocked = content.characters.filter(c => isUnlocked(c, meta));
@@ -65,7 +61,7 @@ export function CharacterSelect({
                 style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}
               >
                 <div className="character-portrait relative shrink-0">
-                  <Art id={characterArt(c.id, cosmetics)} size={100} className="character-figure" />
+                  <Art id={`char:${c.id}`} size={100} className="character-figure" />
                   <Art id="icon:lock" size={34} className="absolute right-0 bottom-0" />
                 </div>
                 <div className="min-w-0">
@@ -92,7 +88,7 @@ export function CharacterSelect({
             >
               <div className="character-portrait relative shrink-0">
                 <Art
-                  id={characterArt(c.id, cosmetics)}
+                  id={`char:${c.id}`}
                   size={100}
                   className={`character-figure ${open ? '' : 'brightness-0 opacity-40'}`}
                 />

@@ -30,6 +30,16 @@ export interface Meta {
   owned: string[];
 }
 
+/** ราคาฉากและสกินที่เคยขาย ใช้คืนเงินหลังเอาห้องแต่งตัวออก */
+const retiredCosmeticPrices: Record<string, number> = {
+  'scene:condo': 3_000,
+  'skin:ex_insurance_gold': 2_000,
+  'skin:gamer_kid_pro': 2_500,
+  'skin:temple_kid_fair': 3_000,
+  'skin:live_seller_idol': 4_000,
+  'skin:phone_tech_hacker': 5_000,
+};
+
 const empty: Meta = {
   xp: 0,
   runs: 0,
@@ -55,6 +65,13 @@ export function loadMeta(): Meta {
     // คนที่เคยเล่นก่อนมีตลาดใต้ดิน ได้ตัวละครที่เคยเปิดครบเหมือนเดิม
     if (!Array.isArray(saved.owned)) {
       m.owned = m.runs > 0 ? legacyCharacterKeys(content) : [];
+      saveMeta(m);
+    }
+    // ห้องแต่งตัวถูกเอาออก: คืนเงินค่าฉากและสกินที่เคยซื้อ
+    const retired = m.owned.filter((k) => !k.startsWith('char:'));
+    if (retired.length > 0) {
+      m.money += retired.reduce((sum, k) => sum + (retiredCosmeticPrices[k] ?? 0), 0);
+      m.owned = m.owned.filter((k) => k.startsWith('char:'));
       saveMeta(m);
     }
     return m;

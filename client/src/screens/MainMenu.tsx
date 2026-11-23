@@ -6,7 +6,6 @@ import { t } from '../i18n';
 import { Art, Button } from '../components/ui';
 import { sceneUrl } from '../assets/art';
 import { useAuth } from '../net/auth';
-import { loadCosmetics, menuScenes } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
 import { WalletBar } from '../components/Underground';
 import { HowToPlay } from './HowToPlay';
@@ -22,7 +21,6 @@ export function MainMenu({
   onProfile,
   onDaily,
   onAchievements,
-  onWardrobe,
   onMarket,
   onEndings,
 }: {
@@ -33,7 +31,6 @@ export function MainMenu({
   onProfile?: (() => void) | undefined;
   onDaily?: (() => void) | undefined;
   onAchievements?: (() => void) | undefined;
-  onWardrobe: () => void;
   onMarket: () => void;
   onEndings?: (() => void) | undefined;
 }) {
@@ -42,8 +39,6 @@ export function MainMenu({
   const helpButton = useRef<HTMLButtonElement>(null);
   const { user, status } = useAuth();
   const progress = progressFor(user);
-  const cosmetics = loadCosmetics(progress, user?.uid);
-  const menuScene = menuScenes.find((s) => s.id === cosmetics.scene) ?? menuScenes[0];
   if (help) {
     return (
       <HowToPlay
@@ -155,13 +150,6 @@ export function MainMenu({
                 <span aria-hidden>↗</span>
               </Button>
             )}
-            <Button tone="paper" block onClick={onWardrobe}>
-              <span className="flex items-center gap-2">
-                <Art id="icon:wardrobe" size={25} className="shrink-0" />
-                ห้องแต่งตัว
-              </span>
-              <span aria-hidden>↗</span>
-            </Button>
             <Button ref={helpButton} tone="paper" block onClick={() => setHelp(true)}>
               <span className="flex items-center gap-2">
                 <Art id="icon:news" size={25} className="shrink-0" />
@@ -188,7 +176,7 @@ export function MainMenu({
           </div>
         </section>
         <section className="menu-art" aria-label="ภาพเมืองและตัวละคร How to Scam">
-          <img src={sceneUrl(menuScene.scene)} alt={menuScene.name} />
+          <img src={sceneUrl('menu')} alt="ฐานบัญชาการในซอย" />
           <div className="art-stamp">
             แฟ้มคดี #001 <span>เริ่มต้นใหม่ได้เสมอ</span>
           </div>
