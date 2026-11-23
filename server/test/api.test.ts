@@ -343,7 +343,7 @@ describe('ส่งคะแนน (anti-cheat)', () => {
     const user = sub.body.user as { money: number; xp: number; owned: string[] };
     expect(sub.body.moneyGained).toBe(user.xp * 10);
     expect(user.money).toBe(user.xp * 10);
-    expect(shifts).toBeGreaterThanOrEqual(5);
+    expect(shifts).toBeGreaterThanOrEqual(6);
     expect(sub.body.auditions).toContain('live_seller');
     expect(user.owned).toContain('char:live_seller');
   });

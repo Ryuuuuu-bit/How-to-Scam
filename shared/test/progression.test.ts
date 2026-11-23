@@ -65,9 +65,9 @@ describe('ค่าหัวและเงินใต้ดิน', () => {
     const { state } = autoPlay(campaignSeed(30, 'meta-audition'));
     const shifts = state.history.filter((h) => h.methodId === 'fake_shop').length;
     const p = auditionProgress(state, ch('live_seller'));
-    expect(p?.done).toBe(Math.min(shifts, 5));
+    expect(p?.done).toBe(Math.min(shifts, 6));
     const passed = auditionsPassed(state, content, []);
-    expect(passed.includes('live_seller')).toBe(shifts >= 5);
+    expect(passed.includes('live_seller')).toBe(shifts >= 6);
     expect(auditionsPassed(state, content, legacyCharacterKeys(content))).toEqual([]);
     const first = state.history[0];
     if (!first) throw new Error('no history');
@@ -75,7 +75,7 @@ describe('ค่าหัวและเงินใต้ดิน', () => {
       ...state,
       history: [
         ...state.history,
-        ...Array.from({ length: 5 }, () => ({ ...first, methodId: 'fake_shop' })),
+        ...Array.from({ length: 6 }, () => ({ ...first, methodId: 'fake_shop' })),
       ],
     };
     expect(auditionsPassed(forced, content, [])).toContain('live_seller');
