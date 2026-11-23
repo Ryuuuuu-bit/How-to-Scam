@@ -188,6 +188,7 @@ export interface LaunderCard {
 
 /** ความสามารถ/ข้อเสียของอาชีพ */
 export type Perk =
+  | { kind: 'earlyMethod'; methodId: MethodId }
   | { kind: 'methodIncome'; methodId: MethodId; pct: number }
   | { kind: 'methodHeat'; methodId: MethodId; pct: number }
   | { kind: 'startFame'; value: number }

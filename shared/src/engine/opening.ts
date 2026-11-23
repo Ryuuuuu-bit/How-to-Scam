@@ -10,6 +10,7 @@ export const careerOrigins = {
   ex_insurance: 'policy', gamer_kid: 'arcade', temple_kid: 'fair', live_seller: 'studio',
   phone_tech: 'workbench', fortune_teller: 'horoscope', rich_coach: 'seminar',
   fallen_star: 'cinema', ex_banker: 'counter', share_auntie: 'ledger', orange_cat: 'parcelCat',
+  foundation_chief: 'depot', grey_lawyer: 'brief', ex_inmate: 'woodshop',
 } as const;
 export type Origin = typeof origins[number] | (typeof careerOrigins)[keyof typeof careerOrigins];
 export const originRewards = { help: { fame: 3 }, later: { cleanCash: 150 } } as const;

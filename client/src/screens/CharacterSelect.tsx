@@ -54,7 +54,7 @@ export function CharacterSelect({
               </div>
               <div className="min-w-0">
                 <div className="font-display text-lg leading-tight font-semibold">
-                  {open ? lt(c.name) : '???'}
+                  {lt(c.name)}
                 </div>
                 {open ? (
                   <>

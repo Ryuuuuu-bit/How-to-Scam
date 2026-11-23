@@ -2,6 +2,20 @@ import { expect, it } from 'vitest';
 import { content, day30Ending } from '../data';
 import { careerOrigins, careerSeedPrefix, isEventEligible, newGame, openingFor, originFor, originStage, step } from '../src';
 import { pickEnding } from '../src/engine/score';
+import { isCharacterUnlocked } from '../src/engine/titles';
+import { unlockedMethods } from '../src/engine/day';
+
+it('opens eleven starters and unlocks the three new careers at their XP thresholds', () => {
+  const available = (xp: number) => content.characters.filter(ch => isCharacterUnlocked(ch, { xp, endings: [] }));
+  expect(content.characters.slice(11).map(ch => ch.id)).toEqual(['foundation_chief', 'grey_lawyer', 'ex_inmate']);
+  for (const [xp, count] of [[0, 11], [59, 11], [60, 12], [119, 12], [120, 13], [179, 13], [180, 14]] as const) {
+    expect(available(xp)).toHaveLength(count);
+  }
+  for (const ch of content.characters) {
+    const methods = unlockedMethods(newGame('start', ch.id, content), content);
+    expect(methods.some(m => m.id === 'foundation')).toBe(ch.id === 'foundation_chief');
+  }
+});
 
 const seed = careerSeedPrefix + 'preview-0';
 const classic = 'v3:soi:live:origin:preview-4';

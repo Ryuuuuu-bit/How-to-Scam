@@ -28,7 +28,7 @@ export function methodBlock(
   c: GameContent,
   m: ScamMethod,
 ): 'level' | 'banned' | 'cooldown' | null {
-  if (m.level > s.gangLevel) return 'level';
+  if (m.level > s.gangLevel && !perksOfKind(s, c, 'earlyMethod').some(p => p.methodId === m.id)) return 'level';
   if (perksOfKind(s, c, 'bannedMethod').some((p) => p.methodId === m.id)) return 'banned';
   if ((s.methodState[m.id]?.cooldownUntil ?? 0) >= s.day) return 'cooldown';
   return null;

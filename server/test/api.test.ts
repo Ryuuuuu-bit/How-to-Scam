@@ -256,7 +256,7 @@ describe('ส่งคะแนน (anti-cheat)', () => {
 
   it('อาชีพที่ยังไม่ปลดล็อกเริ่มรอบไม่ได้', async () => {
     const g = await guest();
-    const r = await api('/api/runs', { token: g.token, body: { characterId: 'ex_banker' } });
+    const r = await api('/api/runs', { token: g.token, body: { characterId: 'foundation_chief' } });
     expect(r.status).toBe(403);
   });
 

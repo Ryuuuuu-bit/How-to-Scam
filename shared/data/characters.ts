@@ -62,7 +62,6 @@ export const characters: Character[] = [
   },
   {
     id: 'fortune_teller',
-    unlockXp: 60,
     perks: [
       { kind: 'revealWeakness', weaknesses: ['faith', 'fear'] },
       { kind: 'methodIncome', methodId: 'merit', pct: 10 },
@@ -75,7 +74,6 @@ export const characters: Character[] = [
   },
   {
     id: 'rich_coach',
-    unlockXp: 120,
     perks: [
       { kind: 'methodIncome', methodId: 'ponzi', pct: 25 },
       { kind: 'startFame', value: 30 },
@@ -88,7 +86,6 @@ export const characters: Character[] = [
   },
   {
     id: 'fallen_star',
-    unlockXp: 180,
     perks: [
       { kind: 'methodIncome', methodId: 'foundation', pct: 50 },
       { kind: 'startFame', value: 25 },
@@ -101,7 +98,6 @@ export const characters: Character[] = [
   },
   {
     id: 'ex_banker',
-    unlockXp: 250,
     perks: [
       { kind: 'launderOffer', extra: 1 },
       { kind: 'launderSuccess', pct: 10 },
@@ -114,7 +110,6 @@ export const characters: Character[] = [
   },
   {
     id: 'share_auntie',
-    unlockXp: 320,
     perks: [
       { kind: 'methodIncome', methodId: 'ponzi', pct: 15 },
       { kind: 'victimWealth', pct: 25 },
@@ -127,7 +122,6 @@ export const characters: Character[] = [
   },
   {
     id: 'orange_cat',
-    unlockEnding: 'redeemed',
     perks: [
       { kind: 'chaos', min: 0.4, max: 3 },
       { kind: 'bannedMethod', methodId: 'call_center' },
@@ -136,5 +130,33 @@ export const characters: Character[] = [
     desc: { th: 'แมวส้มที่เดินบนคีย์บอร์ดแล้วบังเอิญเปิดเพจขายของได้ ไม่มีใครรู้ว่ามันคิดอะไร' },
     pros: { th: 'รายได้ทุกงานสุ่ม ×0.4 ถึง ×3' },
     cons: { th: 'อุ้งเท้ากดโทรออกได้ แต่ปลายสายฟังภาษาแมวไม่ออก ทำงานคอลเซ็นเตอร์ไม่ได้' },
+  },
+  {
+    id: 'foundation_chief', unlockXp: 60,
+    name: { th: 'พี่เก่งบ้าพลัง' },
+    desc: { th: 'ผู้ก่อตั้งมูลนิธิแรงเหลือ แค่ถามว่าช่วยยกโต๊ะหน่อยได้ไหม พี่ยกมาทั้งโต๊ะทั้งคนกินข้าว' },
+    pros: { th: 'เปิดมูลนิธิได้ตั้งแต่วันแรก รายได้จากมูลนิธิเพิ่ม 20%' },
+    cons: { th: 'ออกกล้องทุกงาน ทำงานมูลนิธิแล้ว Heat เพิ่มมากขึ้น 20%' },
+    perks: [
+      { kind: 'earlyMethod', methodId: 'foundation' },
+      { kind: 'methodIncome', methodId: 'foundation', pct: 20 },
+      { kind: 'methodHeat', methodId: 'foundation', pct: 20 },
+    ],
+  },
+  {
+    id: 'grey_lawyer', unlockXp: 120,
+    name: { th: 'ทนายสายเทา' },
+    desc: { th: 'พกแฟ้มขึ้นศาลสามเล่ม เล่มแรกใส่สำนวน เล่มสองใส่ใบเสร็จ เล่มสามรวมร้านข้าวรอบศาล' },
+    pros: { th: 'โอกาสฟอกเงินสำเร็จเพิ่ม 10 จุดเปอร์เซ็นต์' },
+    cons: { th: 'ถ้าฟอกเงินพลาด Heat จากความล้มเหลวเพิ่มเป็น 1.5 เท่า' },
+    perks: [{ kind: 'launderSuccess', pct: 10 }, { kind: 'launderFailHeat', mul: 1.5 }],
+  },
+  {
+    id: 'ex_inmate', unlockXp: 180,
+    name: { th: 'อดีตนักโทษ' },
+    desc: { th: 'ฝึกงานไม้จนได้เรื่อง พอกลับบ้านตั้งใจจะทำเก้าอี้ขาย เจอลูกค้าคนแรกขอผ่อนสิบงวด' },
+    pros: { th: 'ตั้งแผงกล่องสุ่มได้เงินเพิ่ม 25%' },
+    cons: { th: 'พูดตรงจนหยอดใครไม่เป็น รายได้จากงานหลอกรักลดลง 15%' },
+    perks: [{ kind: 'methodIncome', methodId: 'mystery_stall', pct: 25 }, { kind: 'methodIncome', methodId: 'romance', pct: -15 }],
   },
 ];

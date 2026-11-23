@@ -9,7 +9,10 @@ export function bangkokDate(now: Date): string {
 
 /** อาชีพประจำวัน: ทุกคนเล่นอาชีพเดียวกัน เลือกจากอาชีพที่เปิดตั้งแต่แรก */
 export function dailyCharacter(date: string, c: GameContent): Character {
-  const pool = c.characters.filter((ch) => !ch.unlockXp && !ch.unlockEnding);
+  // Preserve the original roster for challenges already issued before the expanded roster.
+  const original = ['ex_insurance', 'gamer_kid', 'temple_kid', 'live_seller', 'phone_tech'];
+  const pool = c.characters.filter(ch => date < '2026-11-24'
+    ? original.includes(ch.id) : !ch.unlockXp && !ch.unlockEnding);
   const ch = pool[hashSeed(`daily-char:${date}`) % pool.length];
   if (!ch) throw new Error('no starter characters');
   return ch;
