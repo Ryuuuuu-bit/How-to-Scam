@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+@layer components {
+  .game-chip {
+    color: var(--color-ink);
+  }
+}
+
 /* โทนสีสดแบบการ์ตูน — ใช้ผ่านคลาส เช่น bg-cream, text-ink, bg-pink */
 @theme {
   --color-cream: #17191d;
