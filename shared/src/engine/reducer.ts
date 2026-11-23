@@ -4,6 +4,8 @@ import type { EndReason, GameContent } from '../types/content';
 import type { Action, GameState } from '../types/state';
 import {
   buy,
+  buyDeal,
+  holdMarket,
   callHangup,
   callPitch,
   choosePlan,
@@ -34,6 +36,7 @@ import { acceptOffer, rollOffer } from './offers';
 import { getCharacter } from './lookup';
 import { hashSeed, Rng } from './rng';
 import { computeScore, pickDangerSigns, pickEnding } from './score';
+import { openShop, owns } from './shop';
 import { caseAction, caseEscapePenalty, finishSoi, isLivingSoi, keepAppointment, newCase, newSoi, shapePlace, soiBlocker } from './soi';
 
 /** เริ่มรอบใหม่ — seed มาจาก server (หรือสุ่มเองตอนเล่น offline) */
@@ -274,6 +277,14 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       expectPhase(s, 'shop');
       buy(s, c, action.itemId);
       break;
+    case 'shopDeal':
+      expectPhase(s, 'shop');
+      buyDeal(s, c);
+      break;
+    case 'shopHold':
+      expectPhase(s, 'shop');
+      holdMarket(s, action.itemId);
+      break;
     case 'endDay':
       expectPhase(s, 'shop');
       if (endDay(s, c, rng)) finish(s, c, rng, 'survived');
@@ -341,7 +352,8 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
     }
   }
 
-  if (s.phase === 'escape' && !s.escape) s.escape = { step: 'disguise', bonus: -caseEscapePenalty(s) };
+  if (s.phase === 'escape' && !s.escape) s.escape = { step: 'disguise', bonus: -caseEscapePenalty(s) + (owns(s, 'app_case') ? 10 : 0) };
+  if (s.phase === 'shop') openShop(s, c);
   s.rng = rng.state;
   return s;
 }

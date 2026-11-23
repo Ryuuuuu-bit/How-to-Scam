@@ -168,6 +168,8 @@ const soiFallback: Record<string, string> = {
 };
 export const soiArtUrl = (place: string, form?: string): string | undefined =>
   (form && ART[`soi:${place}_${form}`]?.src) || ART[`soi:${place}`]?.src || (form ? undefined : ART[soiFallback[place] ?? '']?.src);
+// ห้องลับ 4 ขั้น: hideout--0.webp ถึง hideout--3.webp
+export const hideoutArtUrl = (tier: number): string | undefined => ART[`hideout:${tier}`]?.src;
 // ตอนจบใหม่ใช้ภาพโต๊ะยาวทั้งซอยก่อน ถ้าไม่มีค่อยใช้ฉากเดิม
 for (const [scene, sets] of Object.entries({ end_soi_for_all: ['soi:mookata_local', 'scene:ev_auntie_neighbors_unite'], end_case_cold: ['scene:ev_inspector_2'] })) {
   const art = sets.map((id) => ART[id]).find(Boolean);

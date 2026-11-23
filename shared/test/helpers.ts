@@ -38,8 +38,16 @@ export function botAction(s: GameState): Action {
       return { t: 'eventChoice', choiceIdx: 0 };
     case 'launder':
       return { t: 'launder', cardId: s.launderOffer[0] ?? null };
-    case 'shop':
+    case 'shop': {
+      // รอบ 1.0: ช้อปตลาดมืดกับห้องลับบ้าง ให้ทดสอบร้านใหม่ไปพร้อมกัน
+      const m = s.market;
+      if (m && m.day === s.day) {
+        const offer = m.offers.find((id) => !m.bought.includes(id) && (s.upgrades[id] ?? 0) === 0);
+        if (offer && money > 20_000) return { t: 'buy', itemId: offer };
+        if ((s.upgrades.hideout ?? 0) < 3 && money > 60_000) return { t: 'buy', itemId: 'hideout' };
+      }
       return { t: 'endDay' };
+    }
     case 'escape': {
       const e = escapeOf(s);
       if (e.step === 'disguise') return { t: 'escapeDisguise', id: 'none' };

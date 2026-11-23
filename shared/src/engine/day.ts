@@ -12,6 +12,7 @@ import { getMethod, getPitch, getShopItem } from './lookup';
 import { karmaDelta, perksOfKind, priceOf } from './perks';
 import type { Rng } from './rng';
 import { addEvidence, afterShift, endOfDaySoi, isAlly, placeBonus, quietDayBonus } from './soi';
+import { applyNow, basePrice, contrabandWeight, dealDiscount, famePerShift, henchmanCap, hideoutPct, holdPrice, owns, placeUnlocked } from './shop';
 
 export const newsScout = { firstDay: 2, price: 350 } as const;
 
@@ -95,7 +96,7 @@ export function invest(s: GameState, c: GameContent, rng: Rng, itemId: string): 
   invariant(!offerBans(s, c, item.id), `${itemId} is banned today`);
   const price = priceOf(s, c, item.id, item.price);
   if (item.kind === 'henchman') {
-    invariant(s.henchmen.length < getShopItem(c, 'henchman').maxStack, 'henchman limit reached');
+    invariant(s.henchmen.length < henchmanCap(s, c), 'henchman limit reached');
     const named = itemId === 'intern_nat' || itemId === 'host_tuk';
     invariant(!named || !s.henchmen.some((h) => h.recruit === itemId), 'already hired');
     spend(s, price);
@@ -133,6 +134,7 @@ function itemPct(
   for (const [id, n] of Object.entries(owned)) {
     const it = getShopItem(c, id);
     if (it.methodId && it.methodId !== methodId) continue;
+    if (it.methodIds && !it.methodIds.includes(methodId)) continue;
     pct += (it[key] ?? 0) * n;
   }
   return pct;
@@ -149,6 +151,7 @@ export function incomeBonusPct(s: GameState, c: GameContent, methodId: string): 
   pct += s.henchmen.reduce((sum, h) => sum + h.skill, 0);
   pct += itemPct(s, c, s.dailyItems, 'incomePct', methodId);
   pct += itemPct(s, c, s.upgrades, 'incomePct', methodId);
+  pct += hideoutPct(s, 'incomePct');
   return pct;
 }
 
@@ -165,6 +168,7 @@ export function heatBonusPct(s: GameState, c: GameContent, methodId: string): nu
   );
   pct += itemPct(s, c, s.dailyItems, 'heatPct', methodId);
   pct += itemPct(s, c, s.upgrades, 'heatPct', methodId);
+  pct += hideoutPct(s, 'heatPct');
   return Math.max(-90, pct);
 }
 
@@ -389,6 +393,7 @@ function applyIncome(
   }
   s.lastResults.push({ kind: 'resolve', [wallet]: income, heat: s.heat - before });
   afterShift(s, m.id, s.heat - before);
+  s.fame += famePerShift(s, c, m.id);
   for (const h of s.henchmen) if (h.recruit === 'intern_nat') h.skill = Math.min(15, h.skill + 1);
 }
 
@@ -440,12 +445,48 @@ export function buy(s: GameState, c: GameContent, itemId: string): void {
   invariant(!item.minLevel || s.gangLevel >= item.minLevel, `${itemId} is locked`);
   const owned = s.upgrades[itemId] ?? 0;
   invariant(owned < item.maxStack, `${itemId} max reached`);
-  spend(s, priceOf(s, c, item.id, item.price));
-  s.upgrades[itemId] = owned + 1;
+  if (item.line) {
+    // ของรุ่น 1.0 มีเฉพาะรอบซอยมีชีวิต
+    invariant(s.soi && s.market?.day === s.day, `${itemId} is not on sale`);
+    if (item.line === 'market') invariant(s.market.offers.includes(itemId) && !s.market.bought.includes(itemId), `${itemId} is not on tonight's market`);
+    if (item.line === 'place') invariant(placeUnlocked(s, item), `${itemId} is not unlocked yet`);
+  }
+  spend(s, priceOf(s, c, item.id, basePrice(s, item)));
+  takeItem(s, item);
+}
+
+function takeItem(s: GameState, item: GameContent['shopItems'][number]): void {
+  const owned = s.upgrades[item.id] ?? 0;
+  s.upgrades[item.id] = owned + 1;
   if (item.heatNow) {
     s.heat -= item.heatNow;
     clampHeat(s);
   }
+  applyNow(s, item);
+  if (item.id === 'hideout' && owned + 1 === 2) s.fame += 3;
+  s.market?.bought.push(item.id);
+}
+
+/** ดีลเถื่อนของเฮียโต้ง: ลดครึ่งราคา แต่ทิ้งใบเสร็จไว้บนบอร์ดคดี (ถ้าเฮียไม่ใช่พวกเรา) */
+export function buyDeal(s: GameState, c: GameContent): void {
+  const m = s.market;
+  invariant(s.soi && m?.day === s.day && m.deal && !m.dealBought, 'no deal tonight');
+  const item = getShopItem(c, m.deal);
+  invariant((s.upgrades[item.id] ?? 0) < item.maxStack, `${item.id} max reached`);
+  spend(s, Math.round((basePrice(s, item) * (100 - dealDiscount)) / 100));
+  takeItem(s, item);
+  m.dealBought = true;
+  if (!isAlly(s, 'hia')) addEvidence(s, 'contraband', contrabandWeight);
+}
+
+/** จองของในตลาดมืดให้วางอีกคืน */
+export function holdMarket(s: GameState, itemId: string): void {
+  const m = s.market;
+  invariant(s.soi && m?.day === s.day, 'market is closed');
+  invariant(m.offers.includes(itemId) && !m.bought.includes(itemId), `${itemId} is not on tonight's market`);
+  invariant(!m.hold, 'already holding an item');
+  spend(s, holdPrice);
+  m.hold = itemId;
 }
 
 /** สุ่มข่าวประจำสัปดาห์ */
@@ -467,7 +508,7 @@ export function endDay(s: GameState, c: GameContent, rng: Rng): boolean {
         const today = s.history.at(-1);
         if (today) today.natFirstPay = true;
       }
-      if (s.heat > 70 && !isAlly(s, 'coach')) h.loyalty = Math.max(0, h.loyalty - 5);
+      if (s.heat > 70 && !isAlly(s, 'coach')) h.loyalty = Math.max(0, h.loyalty - (owns(s, 'app_chat') ? 2 : 5));
     } else {
       // จ่ายไม่ไหว ลูกน้องเดินออก
       s.henchmen = s.henchmen.filter((x) => x.id !== h.id);

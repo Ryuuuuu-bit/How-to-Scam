@@ -146,7 +146,7 @@ export interface LastResult {
 export type SoiPlaceId = 'market' | 'temple' | 'field' | 'dorm' | 'mookata';
 export type SoiForm = 'patron' | 'local' | 'show';
 export type SoiNpcId = 'jae' | 'uncle' | 'coach' | 'auntie' | 'hia';
-export type EvidenceKind = 'shift' | 'sting' | 'clip' | 'exposed' | 'crash' | 'paper' | 'witness' | 'decoy';
+export type EvidenceKind = 'shift' | 'sting' | 'clip' | 'exposed' | 'crash' | 'paper' | 'witness' | 'decoy' | 'contraband';
 
 /** 1.0: ซอยมีชีวิต สถานที่เปลี่ยนตามการตัดสินใจ และคนในซอยจำได้ */
 export interface SoiState {
@@ -181,9 +181,22 @@ export interface SoiCase {
   tipoffDay?: number;
 }
 
+/** 1.0: ตลาดมืดของคืนนี้ */
+export interface MarketState {
+  day: number;
+  offers: ShopItemId[];
+  /** ดีลเถื่อนของเฮียโต้ง */
+  deal: ShopItemId | null;
+  dealBought?: boolean;
+  bought: ShopItemId[];
+  /** ของที่จองไว้ให้วางคืนพรุ่งนี้ */
+  hold?: ShopItemId;
+}
+
 export interface GameState {
   soi?: SoiState;
   case?: SoiCase;
+  market?: MarketState;
   careers?: Record<string, { branch: 'face' | 'boss'; since: number; decision?: 'patron' | 'local' | 'talent'; finale?: 'fee' | 'credit' }>;
   favorDay?: number;
   advanceDay?: number;
@@ -271,6 +284,8 @@ export type Action =
   | { t: 'eventChoice'; choiceIdx: number }
   | { t: 'launder'; cardId: CardId | null }
   | { t: 'buy'; itemId: ShopItemId }
+  | { t: 'shopDeal' }
+  | { t: 'shopHold'; itemId: ShopItemId }
   | { t: 'endDay' }
   | { t: 'escapeDisguise'; id: string }
   | { t: 'escapeRoute'; id: string }

@@ -5,6 +5,7 @@ import { campaignDays } from './campaign';
 import { clampHeat, HEAT_MAX } from './effects';
 import { invariant } from './errors';
 import type { Rng } from './rng';
+import { owns, quietGearBonus, raidGearBonus } from './shop';
 
 export const editionMarker = 'v1:';
 
@@ -162,6 +163,7 @@ export const evidenceInfo: Record<EvidenceKind, { name: string; note: string }> 
   paper: { name: 'สลิปโอนไม่ตรงบัญชี', note: 'ฟอกพลาด ทิ้งรอยไว้ในสมุดธนาคาร' },
   witness: { name: 'คำให้การเพื่อนบ้าน', note: 'คนในซอยเริ่มพูด' },
   decoy: { name: 'เบาะแสปลอม', note: 'แผนที่ไปโกดังร้างที่คุณวาดเอง' },
+  contraband: { name: 'ใบเสร็จของเถื่อน', note: 'ดีลใต้โต๊ะกับร้านหมูกระทะ มีคนถ่ายรูปไว้' },
 };
 
 export const raidAt = 7;
@@ -178,7 +180,7 @@ export function caseStrength(s: GameState): number {
 }
 
 export function raidThreshold(s: GameState): number {
-  return raidAt + (isAlly(s, 'hia') ? 2 : 0);
+  return raidAt + (isAlly(s, 'hia') ? 2 : 0) + raidGearBonus(s);
 }
 
 export function repOf(s: GameState, npc: NpcId): number {
@@ -249,7 +251,7 @@ export function afterShift(s: GameState, methodId: string, heatGained: number): 
 
 /** วันพัก: คนในซอยเห็นคุณอยู่บ้าน */
 export function quietDayBonus(s: GameState): number {
-  return s.soi && isAlly(s, 'uncle') ? 3 : 0;
+  return s.soi ? (isAlly(s, 'uncle') ? 3 : 0) + quietGearBonus(s) : 0;
 }
 
 /** จบวัน: หลักฐานเก่าจางลง สารวัตรอาจบุก และนัดชนกันของวันพรุ่งนี้ */
@@ -290,7 +292,7 @@ function maybeRaid(s: GameState): void {
   c.raids++;
   const warned = isAlly(s, 'jae');
   const heat = Math.round((10 + strength * 2) * (warned ? 0.5 : 1));
-  const seized = Math.round(s.dirtyCash * (warned ? 0.1 : 0.2));
+  const seized = Math.round(s.dirtyCash * (warned ? 0.1 : 0.2) * (owns(s, 'app_scanner') ? 0.5 : 1));
   const before = s.heat;
   s.heat = Math.min(HEAT_MAX - 1, s.heat + heat);
   s.dirtyCash -= seized;
@@ -307,6 +309,13 @@ function maybeRaid(s: GameState): void {
   c.evidence = c.evidence.filter((e) => !filedIds.has(e.id));
   if (log) log.raid = warned ? 'warned' : 'raid';
   s.lastResults.push({ kind: 'raid', textKey: warned ? 'warned' : 'raid', heat: s.heat - before, dirtyCash: -seized, success: false });
+}
+
+/** คืนนี้สารวัตรจะบุกไหม (แอปสายในโรงพักเตือนก่อน) */
+export function raidTonight(s: GameState): boolean {
+  const c = s.case;
+  if (!c || caseStrength(s) < raidThreshold(s)) return false;
+  return c.lastRaidDay === undefined || s.day - c.lastRaidDay >= raidCooldownDays;
 }
 
 /** โอกาสหนีลดลงตามน้ำหนักคดีบนบอร์ด */
@@ -410,7 +419,7 @@ export function caseAction(s: GameState, rng: Rng, kind: string, evidenceId?: nu
 }
 
 export function burnCost(s: GameState, weight: number): number {
-  return Math.round(caseActions.burn.perWeight * weight * (isAlly(s, 'auntie') ? 0.5 : 1));
+  return Math.round(caseActions.burn.perWeight * weight * (isAlly(s, 'auntie') ? 0.5 : 1) * (owns(s, 'app_shredder') ? 0.5 : 1));
 }
 
 /** ต้องตัดสินใจเรื่องซอยก่อนเริ่มงานวันนี้ไหม */

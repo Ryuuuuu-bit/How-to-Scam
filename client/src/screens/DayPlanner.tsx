@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { careerStatus, soiBlocker } from '@hts/shared';
+import { careerStatus, henchmanCap, soiBlocker } from '@hts/shared';
 import { SoiDecision } from '../components/SoiMap';
 import { CareerDesk, CareerDirectory, ReliefDesk } from '../components/CareerDesk';
 import type { Action, GameState } from '@hts/shared';
@@ -156,7 +156,7 @@ export function DayPlanner({
     dispatch({ t: 'confirmInvest' });
   };
   const cartList = Object.entries(cart).flatMap(([id, n]) => Array<string>(n).fill(id));
-  const crewLimit = content.shopItems.find((it) => it.id === 'henchman')?.maxStack ?? 3;
+  const crewLimit = henchmanCap(state, content);
   const crewCount =
     state.henchmen.length +
     items.reduce((n, it) => n + (it.kind === 'henchman' ? (cart[it.id] ?? 0) : 0), 0);

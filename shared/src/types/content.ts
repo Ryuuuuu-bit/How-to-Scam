@@ -246,6 +246,20 @@ export interface ShopItem {
   heatNow?: number;
   /** ค่าจ้างลูกน้องต่อวัน */
   wage?: number;
+  /** 1.0: สายของร้านอัปเกรด (ไม่ใส่ = ของเดิม) */
+  line?: 'app' | 'market' | 'place' | 'hideout';
+  /** ผลเฉพาะงานกลุ่มนี้ (ของประจำสถานที่) */
+  methodIds?: MethodId[];
+  /** ปลดเมื่อสถานที่นี้เปลี่ยนเป็นร่างนี้ */
+  unlock?: { place: string; form: 'patron' | 'local' | 'show' };
+  /** ของหายากในตลาดมืด */
+  rare?: boolean;
+  /** ผลทันทีตอนซื้อ */
+  now?: { fame?: number; karma?: number; clearEvidence?: number; rep?: 'all' | 'lowest' };
+  /** ชื่อเสียงเพิ่มทุกกะที่ทำงานกลุ่มนี้ */
+  famePerShift?: number;
+  /** ราคาแต่ละขั้น (ห้องลับ) */
+  tierPrices?: number[];
   name: LocalizedText;
   desc: LocalizedText;
 }

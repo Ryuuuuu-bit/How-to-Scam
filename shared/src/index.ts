@@ -55,7 +55,19 @@ export {
   coldCaseDays,
   raidCooldownDays,
   caseEscapePenalty,
+  raidTonight,
   type PlaceId,
   type PlaceForm,
   type NpcId,
 } from './engine/soi';
+export {
+  owns,
+  hideoutTier,
+  henchmanCap,
+  basePrice,
+  placeUnlocked,
+  marketSlots,
+  holdPrice,
+  dealDiscount,
+  contrabandWeight,
+} from './engine/shop';

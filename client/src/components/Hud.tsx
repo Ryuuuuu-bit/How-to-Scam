@@ -5,6 +5,7 @@ import { PhoneSheet } from './PhoneSheet';
 import { SoiMap } from './SoiMap';
 import { CaseBoard } from './CaseBoard';
 import './phone.css';
+import './shop.css';
 import { content } from '@hts/shared/data';
 import { fmt, lt, monthName, t } from '../i18n';
 import { Art } from './ui';
@@ -162,13 +163,16 @@ function PhoneStatus({ state }: { state: GameState }) {
   );
 }
 
-type App = 'soi' | 'case';
+type App = 'soi' | 'case' | 'gear';
+
+const appIds = content.shopItems.filter((it) => it.line === 'app').map((it) => it.id);
 
 function PhoneDock({ state, open }: { state: GameState; open: (app: App) => void }) {
   if (!state.soi || !state.case) return null;
   const strength = caseStrength(state);
   const threshold = raidThreshold(state);
   const waiting = soiBlocker(state);
+  const installed = appIds.filter((id) => (state.upgrades[id] ?? 0) > 0);
   return (
     <nav className="phone-dock" aria-label="แอปในมือถือ">
       <button type="button" onClick={() => open('soi')} data-alert={waiting || undefined}>
@@ -181,6 +185,15 @@ function PhoneDock({ state, open }: { state: GameState; open: (app: App) => void
         <span>บอร์ดคดี</span>
         <b className="phone-badge" data-hot={strength >= threshold - 2 || undefined}>{strength}</b>
       </button>
+      {installed.length > 0 && (
+        <button type="button" className="phone-dock-gear" onClick={() => open('gear')} aria-label={`แอปที่ติดตั้ง ${installed.length} แอป`}>
+          <span className="phone-gear-stack" aria-hidden="true">
+            {installed.slice(0, 3).map((id) => (
+              <Art key={id} id={`shop:${id}`} size={26} />
+            ))}
+          </span>
+        </button>
+      )}
     </nav>
   );
 }
@@ -257,6 +270,26 @@ export function Hud({ state, dispatch }: { state: GameState; dispatch?: (a: Acti
       {app === 'case' && (
         <PhoneSheet title="บอร์ดคดีของสารวัตรหมูกระทะ" app="case" onClose={close}>
           <CaseBoard state={state} {...(dispatch ? { dispatch } : {})} />
+        </PhoneSheet>
+      )}
+      {app === 'gear' && (
+        <PhoneSheet title="แอปที่ติดตั้ง" app="gear" onClose={close}>
+          <ul className="gear-list">
+            {appIds
+              .filter((id) => (state.upgrades[id] ?? 0) > 0)
+              .map((id) => {
+                const it = content.shopItems.find((x) => x.id === id);
+                return (
+                  <li key={id}>
+                    <Art id={`shop:${id}`} size={52} />
+                    <div>
+                      <strong>{it ? lt(it.name) : id}</strong>
+                      <span>{it ? lt(it.desc) : ''}</span>
+                    </div>
+                  </li>
+                );
+              })}
+          </ul>
         </PhoneSheet>
       )}
     </header>

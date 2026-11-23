@@ -3,12 +3,14 @@ import { sceneUrl } from '../assets/art';
 import { LiveCounter } from './LiveCounter';
 import { CatDesk } from './CatDesk';
 import { SoiSketchScene } from './SoiSketchScene';
+import { ShopV1 } from './ShopV1';
 import type { Action, GameState, ScamMethod } from '@hts/shared';
 import {
   activeFestivals,
   choiceAvailable,
   currentNews,
   currentOffer,
+  henchmanCap,
   launderSuccessPct,
   methodBlock,
   perksOfKind,
@@ -220,7 +222,7 @@ function ItemRow({
   const maxed =
     owned >= it.maxStack ||
     (it.kind === 'henchman' &&
-      state.henchmen.length >= (content.shopItems.find((x) => x.id === 'henchman')?.maxStack ?? 3));
+      state.henchmen.length >= henchmanCap(state, content));
   const only = it.methodId ? content.methods.find((m) => m.id === it.methodId) : undefined;
   return (
     <Panel className="flex items-center gap-3 p-3">
@@ -466,12 +468,14 @@ export function LaunderPhase({ state, dispatch }: PhaseProps) {
 // ---------- ร้านอัปเกรด ----------
 export function ShopPhase({ state, dispatch }: PhaseProps) {
   const items = content.shopItems.filter(
-    (it) => it.kind === 'permanent' && (!it.minLevel || it.minLevel <= state.gangLevel),
+    (it) => it.kind === 'permanent' && !it.line && (!it.minLevel || it.minLevel <= state.gangLevel),
   );
   const last = state.day >= state.maxDays;
   return (
     <>
-      <ScreenTitle title={t('phase.shop')} hint={t('shop.hint')} />
+      <ScreenTitle title={t('phase.shop')} hint={state.soi ? 'คืนนี้ตลาดมืดเปิด เฮียโต้งมีดีล และห้องลับรอย้ายฐาน' : t('shop.hint')} />
+      {state.soi && <ShopV1 state={state} dispatch={dispatch} />}
+      {state.soi && <h3 className="shop-classic-title">ของประจำร้านเดิม</h3>}
       <div className="flex flex-col gap-3">
         {items.map((it) => (
           <ItemRow
