@@ -367,10 +367,11 @@ export function EventPhase({ state, dispatch }: PhaseProps) {
   const tones = ['pink', 'mint', 'grape'] as const;
   return (
     <>
-      <ScreenTitle title={t('phase.event')} />
+        <ScreenTitle title={ev.careerQuest ? 'เควสเสริมประจำอาชีพ' : t('phase.event')}
+          hint={ev.careerQuest ? `${content.characters.find(ch => ch.id === state.characterId)?.name.th ?? ''} · งานที่ ${ev.careerQuest.chapter}/3 · เลือกทำหรือข้ามได้` : ''} />
       <Panel tone="paper" className="anim-rise-in" key={ev.id}>
         <div className="flex items-center gap-3">
-            <Art id={ev.id === 'cf_orange_cat' ? 'char:orange_cat' : `event:${ev.category}`} size={52} className="shrink-0" />
+              <Art id={ev.careerQuest ? 'icon:news' : ev.id === 'cf_orange_cat' ? 'char:orange_cat' : `event:${ev.category}`} size={52} className="shrink-0" />
           <h3 className="text-xl leading-snug font-semibold">{lt(ev.title)}</h3>
         </div>
         <p className="mt-2">{lt(ev.body)}</p>

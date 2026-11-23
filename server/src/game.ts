@@ -6,7 +6,7 @@ import {
   dailyCharacter,
   InvalidActionError,
   isCharacterUnlocked,
-  sketchSeedPrefix,
+  questSeedPrefix,
   replay,
   titleFor,
   xpForRun,
@@ -56,7 +56,7 @@ const RUN_TTL_MS = 48 * 60 * 60 * 1000;
 const MAX_RUNS_PER_HOUR = 60;
 
 export function newSeed(): string {
-  return sketchSeedPrefix + randomBytes(16).toString('hex');
+  return questSeedPrefix + randomBytes(16).toString('hex');
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */
@@ -79,6 +79,7 @@ export async function startRun(store: Store, c: GameContent, user: UserRec, char
 /** seed ของ Daily Challenge: ทุกคนได้ seed เดียวกันในวันนั้น แต่เดาล่วงหน้าไม่ได้ */
 export function dailySeed(date: string, secret: string): string {
   const seed = createHmac('sha256', secret).update(`daily:${date}`).digest('hex').slice(0, 32);
+  if (date >= '2026-11-25') return questSeedPrefix + seed;
   if (date >= '2026-11-24') return 'v3:soi:live:' + seed;
   return date >= '2026-11-23' ? 'v3:soi:' + seed : seed;
 }

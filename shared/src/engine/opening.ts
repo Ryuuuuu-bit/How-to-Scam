@@ -4,6 +4,7 @@ import type { GameState } from '../types/state';
 export const originSeedPrefix = 'v3:soi:live:origin:';
 export const careerSeedPrefix = originSeedPrefix + 'career:';
 export const sketchSeedPrefix = careerSeedPrefix + 'sketch:';
+export const questSeedPrefix = sketchSeedPrefix + 'quests:';
 export const origins = ['curry', 'arcade', 'dorm'] as const;
 export const careerOrigins = {
   ex_insurance: 'policy', gamer_kid: 'arcade', temple_kid: 'fair', live_seller: 'studio',

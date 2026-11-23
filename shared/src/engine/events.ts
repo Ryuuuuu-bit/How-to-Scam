@@ -6,12 +6,12 @@ import { invariant } from './errors';
 import { getEvent } from './lookup';
 import { perksOfKind } from './perks';
 import type { Rng } from './rng';
-import { careerSeedPrefix, sketchSeedPrefix } from './opening';
+import { careerSeedPrefix, questSeedPrefix, sketchSeedPrefix } from './opening';
 
 const inRange = (v: number, r?: readonly [number, number]) => !r || (v >= r[0] && v <= r[1]);
 
 export function isEventEligible(s: GameState, c: GameContent, ev: GameEvent): boolean {
-  if (ev.chainOnly) return false;
+  if (ev.chainOnly || ev.careerQuest) return false;
   if (ev.id === 'counter_live' && !s.seed.startsWith('v3:soi:live:')) return false;
   if (ev.id === 'cf_orange_cat' && s.seed.startsWith('v3:soi:live:')) return false;
   if ((ev.once ?? true) && s.seenEvents.includes(ev.id)) return false;
@@ -84,6 +84,14 @@ export function rollDailyEvents(s: GameState, c: GameContent, rng: Rng): void {
   if (debut && s.pendingEvents.length < 2 && !s.seenEvents.includes(debut)) {
     s.pendingEvents.push(debut);
     s.seenEvents.push(debut);
+  }
+  if (s.seed.startsWith(questSeedPrefix) && s.pendingEvents.length < 2) {
+    const quest = c.events.find(ev => ev.careerQuest && ev.careerQuest.fromDay <= s.day &&
+      ev.when.characters?.includes(s.characterId) && !s.seenEvents.includes(ev.id));
+    if (quest) {
+      s.pendingEvents.push(quest.id);
+      s.seenEvents.push(quest.id);
+    }
   }
   const count = Math.max(0, rng.weightedIndex(c.config.eventCountWeights) - s.pendingEvents.length);
   for (let i = 0; i < count; i++) {

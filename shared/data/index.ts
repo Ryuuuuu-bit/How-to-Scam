@@ -7,6 +7,7 @@ import { dangerSigns } from './dangerSigns';
 import { endings } from './endings';
 export { day30Ending } from './endings';
 import { characterEvents } from './events/characters';
+import { careerQuests } from './events/careerQuests';
 import { cyberEvents } from './events/cyber';
 import { karmaEvents } from './events/karma';
 import { newsEvents } from './events/news';
@@ -45,6 +46,7 @@ export const content: GameContent = {
     ...soiPressEvents,
     ...sketchEvents,
     ...firstShift,
+    ...careerQuests,
   ],
   characters,
   shopItems,

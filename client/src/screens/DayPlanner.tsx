@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Action, GameState } from '@hts/shared';
-import { currentOffer, methodBlock, newsScout, openingFor, originStage, priceOf } from '@hts/shared';
+import { currentOffer, methodBlock, newsScout, openingFor, originStage, priceOf, questSeedPrefix } from '@hts/shared';
 import { openingStories } from '../game/openingStories';
 import { OriginChat } from './OriginChat';
 import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
@@ -34,6 +34,20 @@ export function lastPlanFrom(actions: Action[]): LastPlan | null {
 }
 
 const money = (s: GameState) => s.dirtyCash + s.cleanCash;
+
+function CareerJournal({ state }: { state: GameState }) {
+  if (!state.seed.startsWith(questSeedPrefix)) return null;
+  const quests = content.events.filter(e => e.careerQuest && e.when.characters?.includes(state.characterId));
+  const done = quests.filter(e => state.flags.includes(e.id + '_done')).length;
+  return <details className="mb-3 rounded-xl border-2 border-ink bg-paper px-3 py-2 text-sm text-ink">
+    <summary className="cursor-pointer font-bold">สมุดงานประจำอาชีพ · ทำแล้ว {done}/{quests.length}</summary>
+    <ul className="mt-2 space-y-2">{quests.map(e => <li key={e.id}>
+      <strong>{lt(e.title)}</strong><br />
+      {state.flags.includes(e.id + '_done') ? 'ทำแล้ว' : state.seenEvents.includes(e.id) ? 'ผ่านงานนี้'
+        : `เริ่มเสนอได้ตั้งแต่วันที่ ${e.careerQuest?.fromDay}`}
+    </li>)}</ul>
+  </details>;
+}
 
 /** การ์ดข้อเสนอ/ภารกิจของวันนี้ */
 function OfferCard({ state, dispatch }: { state: GameState; dispatch: (a: Action) => void }) {
@@ -186,6 +200,7 @@ export function DayPlanner({
   return (
     <>
       <ScreenTitle title={t('phase.plan')} hint="เลือกงานที่อยากลอง แล้วดูว่าเสี่ยงแค่ไหนก่อนลงมือ" />
+      <CareerJournal state={state} />
       {yesterday?.opening && <aside className="mb-3 rounded-xl border-2 border-ink bg-sun p-3 text-ink">
         <small>ข่าวหน้าหนึ่งเช้านี้</small>
         <p className="font-display">{openingStories[yesterday.opening][yesterday.methodId ? 'workNews' : 'quietNews']}</p>

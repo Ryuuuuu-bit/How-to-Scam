@@ -77,8 +77,9 @@ export function validateContent(c: GameContent): string[] {
 
   for (const ev of c.events) {
     const normal = ev.choices.filter((x) => !x.requires).length;
-    if (normal < 1 || normal > 3 || ev.choices.length > 5) {
-      errors.push(`event ${ev.id}: must have 1–3 normal choices (max 5 total)`);
+    const maxNormal = ev.careerQuest ? 4 : 3;
+    if (normal < 1 || normal > maxNormal || ev.choices.length > 5) {
+      errors.push(`event ${ev.id}: must have 1–${maxNormal} normal choices (max 5 total)`);
     }
     for (const [i, ch] of ev.choices.entries()) {
       if (ch.outcomes.length === 0) errors.push(`event ${ev.id} choice ${i}: no outcomes`);

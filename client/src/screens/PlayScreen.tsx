@@ -4,6 +4,8 @@ import { Hud } from '../components/Hud';
 import { DayPlanner, lastPlanFrom } from './DayPlanner';
 import { ResultSheet } from '../components/ResultSheet';
 import { SceneBackdrop } from '../components/SceneBackdrop';
+import { careerOrigins } from '@hts/shared';
+import { originStories } from '../game/origins';
 import { sceneUrl } from '../assets/art';
 import { describeResult } from '../game/results';
 import type { ResultLine } from '../game/results';
@@ -80,9 +82,11 @@ export function PlayScreen({
       dispatch(action);
     },
   };
+  const careerScene = state.pendingEvents[0]?.startsWith('side_') &&
+    careerOrigins[state.characterId as keyof typeof careerOrigins];
   const scene =
     state.phase === 'event' && state.pendingEvents[0]
-      ? `ev_${state.pendingEvents[0]}`
+      ? (careerScene ? originStories[careerScene].scene : `ev_${state.pendingEvents[0]}`)
       : state.phase === 'escape' &&
           state.escape?.routeId &&
           sceneUrl(`escape_${state.escape.routeId}`)
