@@ -11,6 +11,7 @@ import { offerBans, rollOffer, tickMission } from './offers';
 import { getMethod, getPitch, getShopItem } from './lookup';
 import { karmaDelta, perksOfKind, priceOf } from './perks';
 import type { Rng } from './rng';
+import { addEvidence, afterShift, endOfDaySoi, isAlly, placeBonus, quietDayBonus } from './soi';
 
 export const newsScout = { firstDay: 2, price: 350 } as const;
 
@@ -142,6 +143,7 @@ export function incomeBonusPct(s: GameState, c: GameContent, methodId: string): 
     .filter((p) => p.methodId === methodId)
     .reduce((n, p) => n + p.pct, 0);
   pct += modifierPct(s, c, 'income', methodId);
+  pct += placeBonus(s, methodId).income;
   if (s.careers?.[methodId]?.branch === 'face') pct += 15;
   if (s.careers?.[methodId]?.branch === 'boss') pct += Math.min(3, s.henchmen.length) * 8;
   pct += s.henchmen.reduce((sum, h) => sum + h.skill, 0);
@@ -151,7 +153,7 @@ export function incomeBonusPct(s: GameState, c: GameContent, methodId: string): 
 }
 
 export function heatBonusPct(s: GameState, c: GameContent, methodId: string): number {
-  let pct = modifierPct(s, c, 'heat', methodId);
+  let pct = modifierPct(s, c, 'heat', methodId) + placeBonus(s, methodId).heat;
   if (s.careers?.[methodId]?.branch === 'face') pct += 10;
   if (s.careers?.[methodId]?.branch === 'boss') pct -= 10;
   pct += perksOfKind(s, c, 'methodHeat')
@@ -196,7 +198,7 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
   tickMission(s, c, rng, methodId);
   if (methodId === null) {
     // วันพัก: Heat ลดเอง
-    s.heat -= c.config.heatDecayQuietDay;
+    s.heat -= c.config.heatDecayQuietDay + quietDayBonus(s);
     clampHeat(s);
     s.workStreak = 0;
     tickIdle(s, c, null);
@@ -246,6 +248,7 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
         ms.exposure = 0;
         ms.cooldownUntil = s.day + f.exposedCooldown;
         s.lastResults.push({ kind: 'exposed' });
+        addEvidence(s, 'exposed', 2, m.id);
       }
       break;
     }
@@ -260,6 +263,7 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
         ms.streak = 0;
         s.dirtyCash = Math.round(s.dirtyCash * 0.7);
         s.lastResults.push({ kind: 'ponziCrash' });
+        addEvidence(s, 'crash', 2, m.id);
       } else {
         base = Math.round(base * Math.pow(1 + p.growthPct / 100, ms.streak));
         ms.streak++;
@@ -343,12 +347,15 @@ function trapCall(s: GameState, c: GameContent, rng: Rng, kind: 'baiter' | 'unde
     s.fame += 5;
     if (!s.flags.includes('met_baiter')) s.flags.push('met_baiter');
     s.lastResults.push({ kind: 'baited', dirtyCash: -loss, success: false });
+    addEvidence(s, 'clip', 1, 'call_center');
   } else {
     s.heat += cfg.undercoverHeat;
     clampHeat(s);
     if (!s.flags.includes('stung')) s.flags.push('stung');
     s.lastResults.push({ kind: 'sting', heat: cfg.undercoverHeat, success: false });
+    addEvidence(s, 'sting', 3, 'call_center');
   }
+  afterShift(s, 'call_center', 0);
   afterResolve(s, c, rng);
 }
 
@@ -381,6 +388,7 @@ function applyIncome(
     log.heatGained = s.heat - before;
   }
   s.lastResults.push({ kind: 'resolve', [wallet]: income, heat: s.heat - before });
+  afterShift(s, m.id, s.heat - before);
   for (const h of s.henchmen) if (h.recruit === 'intern_nat') h.skill = Math.min(15, h.skill + 1);
 }
 
@@ -459,7 +467,7 @@ export function endDay(s: GameState, c: GameContent, rng: Rng): boolean {
         const today = s.history.at(-1);
         if (today) today.natFirstPay = true;
       }
-      if (s.heat > 70) h.loyalty = Math.max(0, h.loyalty - 5);
+      if (s.heat > 70 && !isAlly(s, 'coach')) h.loyalty = Math.max(0, h.loyalty - 5);
     } else {
       // จ่ายไม่ไหว ลูกน้องเดินออก
       s.henchmen = s.henchmen.filter((x) => x.id !== h.id);
@@ -471,6 +479,7 @@ export function endDay(s: GameState, c: GameContent, rng: Rng): boolean {
   s.dailyItems = {};
   s.todayMethodId = null;
   updateLevel(s, c);
+  endOfDaySoi(s, rng);
   if (s.day >= s.maxDays) return true;
   s.day++;
   if ((s.day - 1) % c.config.newsEveryDays === 0) rollNews(s, c, rng);

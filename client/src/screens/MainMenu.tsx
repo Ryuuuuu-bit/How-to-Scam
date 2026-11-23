@@ -21,6 +21,7 @@ export function MainMenu({
   onDaily,
   onAchievements,
   onWardrobe,
+  onEndings,
 }: {
   saved: Run | null;
   onNew: () => void;
@@ -30,6 +31,7 @@ export function MainMenu({
   onDaily?: (() => void) | undefined;
   onAchievements?: (() => void) | undefined;
   onWardrobe: () => void;
+  onEndings?: (() => void) | undefined;
 }) {
   const [help, setHelp] = useState(false);
   const [confirmNewRun, setConfirmNewRun] = useState(false);
@@ -131,6 +133,15 @@ export function MainMenu({
                   <Art id="icon:medal" size={25} className="shrink-0" />
                   {t('menu.achievements')}
                 </span>
+              </Button>
+            )}
+            {onEndings && (
+              <Button tone="paper" block onClick={onEndings}>
+                <span className="flex items-center gap-2">
+                  <Art id="icon:news" size={25} className="shrink-0" />
+                  หอฉากจบ
+                </span>
+                <span aria-hidden>↗</span>
               </Button>
             )}
             <Button tone="paper" block onClick={onWardrobe}>

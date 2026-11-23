@@ -92,6 +92,8 @@ export interface MethodState {
 }
 
 export interface DayLog {
+  evidence?: number;
+  raid?: 'raid' | 'warned' | 'decoy';
   relief?: 'mascot' | 'stage' | 'favor';
   liveCat?: 'lift' | 'stay' | 'sale';
   natFirstPay?: boolean;
@@ -128,7 +130,12 @@ export interface LastResult {
     | 'missionFail'
     | 'baited'
     | 'sting'
-    | 'hangup';
+    | 'hangup'
+    | 'evidence'
+    | 'raid'
+    | 'caseMove'
+    | 'soiShaped'
+    | 'soiMemory';
   textKey?: string;
   dirtyCash?: number;
   cleanCash?: number;
@@ -136,7 +143,47 @@ export interface LastResult {
   success?: boolean;
 }
 
+export type SoiPlaceId = 'market' | 'temple' | 'field' | 'dorm' | 'mookata';
+export type SoiForm = 'patron' | 'local' | 'show';
+export type SoiNpcId = 'jae' | 'uncle' | 'coach' | 'auntie' | 'hia';
+export type EvidenceKind = 'shift' | 'sting' | 'clip' | 'exposed' | 'crash' | 'paper' | 'witness' | 'decoy';
+
+/** 1.0: ซอยมีชีวิต สถานที่เปลี่ยนตามการตัดสินใจ และคนในซอยจำได้ */
+export interface SoiState {
+  places: Record<SoiPlaceId, { visits: number; form?: SoiForm }>;
+  /** ความรู้สึกของเพื่อนบ้าน −3 ถึง 3 */
+  rep: Record<SoiNpcId, number>;
+  /** สถานที่ที่รอให้ผู้เล่นเลือกว่าจะเปลี่ยนเป็นอะไร */
+  pendingShape?: SoiPlaceId;
+  /** นัดชนกันของวันนี้ */
+  appointment?: { day: number; npcs: [SoiNpcId, SoiNpcId] };
+  kept?: { day: number; npc: SoiNpcId; missed?: SoiNpcId }[];
+  shapedDays?: { day: number; place: SoiPlaceId; form: SoiForm }[];
+}
+
+export interface Evidence {
+  id: number;
+  kind: EvidenceKind;
+  weight: number;
+  day: number;
+  methodId?: string;
+}
+
+/** 1.0: บอร์ดหลักฐานของสารวัตรหมูกระทะ */
+export interface SoiCase {
+  evidence: Evidence[];
+  nextId: number;
+  /** น้ำหนักคดีสูงสุดที่เคยถึง */
+  peak: number;
+  raids: number;
+  lastRaidDay?: number;
+  actedDay?: number;
+  tipoffDay?: number;
+}
+
 export interface GameState {
+  soi?: SoiState;
+  case?: SoiCase;
   careers?: Record<string, { branch: 'face' | 'boss'; since: number; decision?: 'patron' | 'local' | 'talent'; finale?: 'fee' | 'credit' }>;
   favorDay?: number;
   advanceDay?: number;
@@ -205,6 +252,9 @@ export interface GameState {
 
 /** การกระทำของผู้เล่น — server เก็บเป็น action log เพื่อ replay */
 export type Action =
+  | { t: 'shapePlace'; place: SoiPlaceId; form: SoiForm }
+  | { t: 'appointment'; npc: SoiNpcId }
+  | { t: 'caseMove'; kind: 'burn' | 'decoy' | 'tipoff'; evidenceId?: number }
   | { t: 'specialize'; methodId: string; branch: 'face' | 'boss' }
   | { t: 'careerFinale'; methodId: string; choice: 'fee' | 'credit' }
   | { t: 'careerDecision'; methodId: string; choice: 'patron' | 'local' | 'talent' }

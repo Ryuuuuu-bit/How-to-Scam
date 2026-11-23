@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { content } from '../data';
 import { campaignSeed, careerAffinities, careerDecisions, careerFee, careerSignatures, careerStatus, careerTracks, durations, heatBonusPct, incomeBonusPct, minimumJobCost, newGame, replay, step, type Action } from '../src';
-import { botAction } from './helpers';
+import { soiAction, botAction } from './helpers';
 
 it('gives all jobs two authored routes and every starting character an aptitude', () => {
   const jobs = content.methods.map(m => m.id).sort();
@@ -67,7 +67,9 @@ it.each(durations)('replays the entire career action log in a %i-day game', days
   while (s.phase !== 'ended' && actions.length < 1500) {
     let action: Action;
     const status = careerStatus(s, id);
+    const soi = soiAction(s);
     if (s.phase !== 'plan') action = botAction(s);
+    else if (soi) action = soi;
     else if (status.finale) action = { t: 'retire' };
     else if (status.branch && status.commissions >= 3) action = { t: 'careerFinale', methodId: id, choice: 'credit' };
     else if (status.branch && status.commissions >= 1 && !s.careers?.[id]?.decision) action = { t: 'careerDecision', methodId: id, choice: 'local' };

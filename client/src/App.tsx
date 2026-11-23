@@ -23,6 +23,8 @@ import { api } from './net/api';
 import { AuthProvider, useAuth } from './net/auth';
 import { t } from './i18n';
 import { WardrobeScreen } from './screens/WardrobeScreen';
+import { EndingsGallery } from './screens/EndingsGallery';
+import './components/phone.css';
 
 type Screen =
   | 'menu'
@@ -32,7 +34,8 @@ type Screen =
   | 'dailyBoard'
   | 'daily'
   | 'achievements'
-  | 'wardrobe';
+  | 'wardrobe'
+  | 'endings';
 
 export function App() {
   const preview = new URLSearchParams(window.location.search).get('preview');
@@ -110,6 +113,7 @@ function GameScreens() {
   }
 
   if (screen === 'wardrobe') return <WardrobeScreen onBack={() => setScreen('menu')} />;
+  if (screen === 'endings') return <EndingsGallery onBack={() => setScreen('menu')} />;
 
   if (screen === 'daily') {
     return (
@@ -189,6 +193,7 @@ function GameScreens() {
     <>
       <MainMenu
         onWardrobe={() => setScreen('wardrobe')}
+        onEndings={() => setScreen('endings')}
         saved={saved}
         onNew={() => {
           setScreen('character');

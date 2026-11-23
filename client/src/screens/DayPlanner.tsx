@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { careerStatus } from '@hts/shared';
+import { careerStatus, soiBlocker } from '@hts/shared';
+import { SoiDecision } from '../components/SoiMap';
 import { CareerDesk, CareerDirectory, ReliefDesk } from '../components/CareerDesk';
 import type { Action, GameState } from '@hts/shared';
 import { currentOffer, methodBlock, newsScout, openingFor, originStage, priceOf, questSeedPrefix } from '@hts/shared';
@@ -176,6 +177,7 @@ export function DayPlanner({
 
   const opening = state.day === 1 && !skipped && openingFor(state.seed, state.characterId);
   if (originStage(state)) return <OriginChat state={state} dispatch={dispatch} />;
+  if (soiBlocker(state)) return <SoiDecision state={state} dispatch={dispatch} />;
   if (state.favorDay !== undefined && state.day >= state.favorDay) return <ReliefDesk state={state} dispatch={dispatch} />;
   const shop = methods.find(({ method }) => method.id === 'fake_shop');
   if (opening && shop) {

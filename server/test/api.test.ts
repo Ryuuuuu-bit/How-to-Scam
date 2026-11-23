@@ -100,6 +100,9 @@ function play(seed: string, characterId: string, plan?: (s: GameState) => Action
     let a: Action;
     switch (s.phase) {
       case 'plan': {
+        // รุ่น 1.0: ตอบเรื่องในซอยที่รออยู่ก่อนเริ่มงาน
+        if (s.soi?.pendingShape) { a = { t: 'shapePlace', place: s.soi.pendingShape, form: 'local' }; if (money >= 400) break; a = { t: 'shapePlace', place: s.soi.pendingShape, form: 'patron' }; break; }
+        if (s.soi?.appointment?.day === s.day) { a = { t: 'appointment', npc: s.soi.appointment.npcs[0] }; break; }
         if (plan) { a = plan(s); break; }
         const m = unlockedMethods(s, content).find((x) => x.cost <= money);
         a =

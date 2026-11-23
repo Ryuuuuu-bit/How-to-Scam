@@ -2,11 +2,21 @@ import { content } from '../data';
 import { currentOffer, escapeOf, newGame, step, unlockedMethods } from '../src';
 import type { Action, GameState } from '../src';
 
+/** ตอบเรื่องในซอยที่ต้องตัดสินใจก่อนเริ่มงาน (รุ่น 1.0) */
+export function soiAction(s: GameState): Action | null {
+  if (s.phase !== 'plan') return null;
+  if (s.soi?.pendingShape) return { t: 'shapePlace', place: s.soi.pendingShape, form: s.day % 2 ? 'patron' : 'show' };
+  if (s.soi?.appointment?.day === s.day) return { t: 'appointment', npc: s.soi.appointment.npcs[0] };
+  return null;
+}
+
 /** บอทเล่นอัตโนมัติแบบตายตัว (ไม่มีสุ่มของตัวเอง) ใช้ทดสอบทั้งรอบ */
 export function botAction(s: GameState): Action {
   const money = s.dirtyCash + s.cleanCash;
   switch (s.phase) {
     case 'plan': {
+      const soi = soiAction(s);
+      if (soi) return soi;
       if (s.day === s.maxDays && s.cleanCash > 0 && s.heat > 90) return { t: 'retire' };
       if (s.heat > 85) return { t: 'choosePlan', methodId: null };
       const options = unlockedMethods(s, content).filter((m) => m.cost <= money);

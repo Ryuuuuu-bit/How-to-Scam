@@ -29,3 +29,33 @@ export { bangkokDate, dailyCharacter, isDailyDate } from './engine/daily';
 export { currentOffer } from './engine/offers';
 export { newsScout } from './engine/day';
 export { bribeCost, dreamSequence, escapeChance, escapeOf } from './engine/escape';
+export {
+  isLivingSoi,
+  places,
+  placeIds,
+  formIds,
+  formCost,
+  npcs,
+  npcIds,
+  placeOfMethod,
+  placeBonus,
+  evidenceInfo,
+  caseStrength,
+  raidThreshold,
+  raidAt,
+  caseActions,
+  burnCost,
+  repOf,
+  isAlly,
+  isFoe,
+  allyAt,
+  foeAt,
+  soiBlocker,
+  shapeAfterShifts,
+  coldCaseDays,
+  raidCooldownDays,
+  caseEscapePenalty,
+  type PlaceId,
+  type PlaceForm,
+  type NpcId,
+} from './engine/soi';

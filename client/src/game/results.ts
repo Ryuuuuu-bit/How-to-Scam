@@ -1,4 +1,5 @@
-import type { GameState, LastResult } from '@hts/shared';
+import type { GameState, LastResult, NpcId, PlaceForm, PlaceId } from '@hts/shared';
+import { evidenceInfo, npcs, places } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { fmt, lt, t } from '../i18n';
 
@@ -137,6 +138,41 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
             body: t('result.hangupNormalBody'),
             art: 'icon:rest',
           };
+    case 'evidence': {
+      const info = evidenceInfo[(r.textKey ?? 'shift') as keyof typeof evidenceInfo];
+      return { tone: 'bad', title: `สารวัตรปักหมุดใหม่: ${info.name}`, body: info.note, art: 'icon:police' };
+    }
+    case 'raid':
+      if (r.textKey === 'decoy') return {
+        tone: 'good', title: 'สารวัตรตามเบาะแสปลอมไปโกดังร้าง',
+        body: 'ทีมบุกค้นเจอแต่แมวกับลังเปล่า ข่าวเย็นนี้ทั้งซอยหัวเราะกันทั้งคืน · ชื่อเสียง +2', art: 'icon:police',
+      };
+      return {
+        tone: 'bad',
+        title: r.textKey === 'warned' ? 'สารวัตรบุกค้น แต่เจ๊หมวยส่งข่าวทัน' : 'สารวัตรหมูกระทะบุกค้นกลางดึก',
+        body: `Heat +${r.heat ?? 0} · ยึดเงินสกปรก ฿${fmt(-(r.dirtyCash ?? 0))} · หลักฐานครึ่งบอร์ดเข้าแฟ้มคดีแล้ว`,
+        art: 'icon:police',
+      };
+    case 'caseMove':
+      return {
+        tone: 'good',
+        title: r.textKey === 'burn' ? 'หลักฐานชิ้นนั้นหายไปจากบอร์ด' : r.textKey === 'decoy' ? 'วางเบาะแสปลอมไว้แล้ว' : 'ป้อนข่าวแก๊งคู่แข่งให้สารวัตร',
+        body: r.textKey === 'burn' ? 'แต่การเคลื่อนไหวแบบนี้ทำให้ Heat ขึ้น 2' : r.textKey === 'decoy' ? 'ครั้งหน้าที่สารวัตรบุก เขาจะไปผิดที่' : 'สารวัตรไล่จับคนอื่นไปก่อน แต่ใจคุณหนักขึ้นนิดหน่อย',
+        art: 'icon:sting',
+      };
+    case 'soiShaped': {
+      const [place, form] = (r.textKey ?? '').split(':') as [PlaceId, PlaceForm];
+      const f = places[place]?.forms[form];
+      return f ? { tone: 'good', title: `${places[place].name} กลายเป็น “${f.name}”`, body: f.news, art: 'icon:festival' } : null;
+    }
+    case 'soiMemory': {
+      const [kind, npc] = (r.textKey ?? '').split(':') as [string, NpcId];
+      const n = npcs[npc];
+      if (!n) return null;
+      if (kind === 'ally') return { tone: 'good', title: `${n.name} อยู่ข้างคุณแล้ว`, body: n.ally, art: 'icon:fame' };
+      if (kind === 'foe') return { tone: 'bad', title: `${n.name} เริ่มพูดกับสารวัตร`, body: n.foe, art: 'icon:exposed' };
+      return { tone: 'good', title: `ไปช่วย${n.name}มาแล้ว`, body: n.thanks, art: 'icon:fame' };
+    }
     case 'escape':
       if (r.textKey === 'dream_escape') return {
         tone: 'good', title: 'จำถูกทั้งสามใบ! ส้มพากลับตลาดแล้ว',
