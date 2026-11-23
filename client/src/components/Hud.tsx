@@ -150,7 +150,7 @@ export function Hud({ state }: { state: GameState }) {
         <div className="hud-meta font-display flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-1">
             <Art id="icon:day" size={20} />
-            {t('hud.day', { day: state.day, max: content.config.maxDays })}
+            {t('hud.day', { day: state.day, max: state.maxDays })}
             <span className="hud-date text-ink-soft">
               · {date.date} {monthName(date.month)}
             </span>

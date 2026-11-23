@@ -84,9 +84,10 @@ export function PlayScreen({
   };
   const careerScene = state.pendingEvents[0]?.startsWith('side_') &&
     careerOrigins[state.characterId as keyof typeof careerOrigins];
+  const lifeScene = state.phase === 'event' ? content.events.find(ev => ev.id === state.pendingEvents[0])?.illustration?.scene : undefined;
   const scene =
     state.phase === 'event' && state.pendingEvents[0]
-      ? (careerScene ? originStories[careerScene].scene : `ev_${state.pendingEvents[0]}`)
+      ? (careerScene ? originStories[careerScene].scene : lifeScene ?? `ev_${state.pendingEvents[0]}`)
       : state.phase === 'escape' &&
           state.escape?.routeId &&
           sceneUrl(`escape_${state.escape.routeId}`)
@@ -94,7 +95,7 @@ export function PlayScreen({
         : state.phase;
   // ฉากเหตุการณ์/คอลเซ็นเตอร์/หนีตำรวจ เปิดภาพให้เห็นเยอะ หน้าที่เป็นรายการให้เห็นน้อยลง
   const tall = ['event', 'call', 'escape'].includes(state.phase);
-  const hasOwnScene = state.phase === 'event' && (state.pendingEvents[0] === 'counter_live' || soiSketches.some(s => s.id === state.pendingEvents[0]));
+  const hasOwnScene = state.phase === 'event' && (Boolean(lifeScene) || state.pendingEvents[0] === 'counter_live' || soiSketches.some(s => s.id === state.pendingEvents[0]));
   return (
     <div className="play-shell relative min-h-dvh">
       <SceneBackdrop id={scene} />

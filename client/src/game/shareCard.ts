@@ -128,7 +128,7 @@ export async function makeShareCard(info: ShareInfo): Promise<Blob> {
   ctx.fillStyle = INK;
   ctx.font = '600 34px Mitr';
   ctx.fillText(
-    t(`end.reason.${end.reason}`) + (info.daily ? ` · Daily ${info.daily}` : ''),
+    t(`end.reason.${end.reason}`) + (info.daily ? ` · ภารกิจประจำวัน ${info.daily}` : ''),
     90,
     780,
   );
@@ -153,9 +153,9 @@ export async function makeShareCard(info: ShareInfo): Promise<Blob> {
   ctx.fillText(fmt(end.score), 90, 1140);
   ctx.fillStyle = INK;
   ctx.font = '400 34px Sarabun';
-  const days = end.reason === 'survived' ? content.config.maxDays : state.day;
+  const days = end.reason === 'survived' ? state.maxDays : state.day;
   const rank = info.rank ? ` · อันดับ ${info.rank}` : '';
-  ctx.fillText(`คะแนน · อยู่รอด ${days} วัน${rank}`, 92, 1196);
+  ctx.fillText(`คะแนน · อยู่รอด ${days}/${state.maxDays} วัน${rank}`, 92, 1196);
   const headline = neighborhoodHeadline(state);
   if (headline) {
     ctx.font = '600 28px Sarabun';

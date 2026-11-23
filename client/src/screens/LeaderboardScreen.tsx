@@ -1,9 +1,10 @@
+import { durations, type Duration } from '@hts/shared';
 import { useEffect, useState } from 'react';
 import { content } from '@hts/shared/data';
 import { api } from '../net/api';
 import type { BoardRow } from '../net/api';
 import { useAuth } from '../net/auth';
-import { fmt, lt, t } from '../i18n';
+import { lt, t } from '../i18n';
 import { Art, Button, ScreenTitle } from '../components/ui';
 
 type Board = 'top' | 'longest' | 'fastest' | 'daily';
@@ -16,6 +17,7 @@ export function LeaderboardScreen({
   onBack: () => void;
   initialBoard?: Board;
 }) {
+  const [days, setDays] = useState<Duration>(30);
   const { user } = useAuth();
   const [board, setBoard] = useState<Board>(initialBoard);
   const [season, setSeason] = useState<string>('');
@@ -44,11 +46,11 @@ export function LeaderboardScreen({
     setRows(null);
     setError(false);
     api
-      .leaderboard(board, season)
+      .leaderboard(board, season, days)
       .then((r) => { if (active) setRows(r.rows); })
       .catch(() => { if (active) setError(true); });
     return () => { active = false; };
-  }, [board, season, retry]);
+  }, [board, season, days, retry]);
 
   const titleName = (id: string) => {
     const tt = content.titles.find((x) => x.id === id);
@@ -58,6 +60,12 @@ export function LeaderboardScreen({
   return (
     <main className="collection-screen mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
       <ScreenTitle title={t('leaderboard.title')} />
+      {board !== 'daily' && (<fieldset className="mb-3">
+        <legend className="mb-1 font-semibold">กระดานคะแนนแยกตามระยะเวลา</legend>
+        <div className="collection-filter">
+          {durations.map(n => <button type="button" key={n} aria-pressed={days === n} onClick={() => setDays(n)}>{n} วัน</button>)}
+        </div>
+      </fieldset>)}
       <div className="mb-2">
         {seasons.length > 0 && board !== 'daily' && (
           <select
@@ -115,11 +123,11 @@ export function LeaderboardScreen({
               <div className="text-right">
                 <div className="font-display font-semibold text-pink">
                   {board === 'top' || board === 'daily'
-                    ? fmt(r.score)
+                    ? t('leaderboard.points', { n: r.score })
                     : t('leaderboard.days', { n: r.days })}
                 </div>
                 {board !== 'top' && board !== 'daily' && (
-                  <div className="text-xs text-ink-soft">{fmt(r.score)}</div>
+                  <div className="text-xs text-ink-soft">{t('leaderboard.points', { n: r.score })}</div>
                 )}
               </div>
             </li>

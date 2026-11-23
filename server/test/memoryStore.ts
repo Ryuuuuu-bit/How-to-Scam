@@ -6,7 +6,7 @@ type ScoreRow = ScoreInput & { createdAt: Date };
 const inScope = (s: ScoreRow, scope: Scope) =>
   'dailyDate' in scope
     ? s.mode === 'daily' && s.dailyDate === scope.dailyDate
-    : s.mode === 'normal' && s.season.id === scope.seasonId;
+    : s.mode === (scope.mode ?? 'normal') && s.season.id === scope.seasonId;
 
 /** Store ในหน่วยความจำ สำหรับ test (พฤติกรรมเดียวกับ prismaStore) */
 export function memoryStore() {
@@ -167,7 +167,7 @@ export function memoryStore() {
     },
     async seasons() {
       const m: Record<string, Set<string>> = {};
-      for (const s of scores) if (s.mode === 'normal') (m[s.season.id] ??= new Set()).add(s.userId);
+      for (const s of scores) if (s.mode !== 'daily') (m[s.season.id] ??= new Set()).add(s.userId);
       return Object.entries(m).map(([id, set]) => ({ id, players: set.size }));
     },
   };

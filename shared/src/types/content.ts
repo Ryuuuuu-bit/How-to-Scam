@@ -152,6 +152,9 @@ export interface EventCondition {
 export type EventCategory = 'lucky' | 'unlucky' | 'silly' | 'karma';
 
 export interface GameEvent {
+  lifeStory?: boolean;
+  illustration?: { scene: string; title: string; alt: string };
+  lifeMilestone?: number;
   careerQuest?: { chapter: number; fromDay: number };
   id: EventId;
   category: EventCategory;

@@ -7,7 +7,7 @@ export function botAction(s: GameState): Action {
   const money = s.dirtyCash + s.cleanCash;
   switch (s.phase) {
     case 'plan': {
-      if (s.day === 30 && s.cleanCash > 0 && s.heat > 90) return { t: 'retire' };
+      if (s.day === s.maxDays && s.cleanCash > 0 && s.heat > 90) return { t: 'retire' };
       if (s.heat > 85) return { t: 'choosePlan', methodId: null };
       const options = unlockedMethods(s, content).filter((m) => m.cost <= money);
       if (options.length === 0) return { t: 'choosePlan', methodId: null };

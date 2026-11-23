@@ -136,6 +136,7 @@ export interface LastResult {
 }
 
 export interface GameState {
+  maxDays: number;
   scoutedDay?: number;
   version: 2;
   seed: string;

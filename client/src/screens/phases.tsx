@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sceneUrl } from '../assets/art';
 import { LiveCounter } from './LiveCounter';
 import { CatDesk } from './CatDesk';
 import { SoiSketchScene } from './SoiSketchScene';
@@ -370,6 +371,11 @@ export function EventPhase({ state, dispatch }: PhaseProps) {
         <ScreenTitle title={ev.careerQuest ? 'เควสเสริมประจำอาชีพ' : t('phase.event')}
           hint={ev.careerQuest ? `${content.characters.find(ch => ch.id === state.characterId)?.name.th ?? ''} · งานที่ ${ev.careerQuest.chapter}/3 · เลือกทำหรือข้ามได้` : ''} />
       <Panel tone="paper" className="anim-rise-in" key={ev.id}>
+        {ev.illustration && <figure className="mb-3">
+          <img className="block w-full rounded-xl border-2 border-ink" width={624} height={416}
+            src={sceneUrl(ev.illustration.scene)} alt={ev.illustration.alt} />
+          {ev.chainOnly && <figcaption className="mt-1 text-sm text-ink-soft">ภาพเปิดเรื่อง · {ev.illustration.title}</figcaption>}
+        </figure>}
         <div className="flex items-center gap-3">
               <Art id={ev.careerQuest ? 'icon:news' : ev.id === 'cf_orange_cat' ? 'char:orange_cat' : `event:${ev.category}`} size={52} className="shrink-0" />
           <h3 className="text-xl leading-snug font-semibold">{lt(ev.title)}</h3>
@@ -462,7 +468,7 @@ export function ShopPhase({ state, dispatch }: PhaseProps) {
   const items = content.shopItems.filter(
     (it) => it.kind === 'permanent' && (!it.minLevel || it.minLevel <= state.gangLevel),
   );
-  const last = state.day >= content.config.maxDays;
+  const last = state.day >= state.maxDays;
   return (
     <>
       <ScreenTitle title={t('phase.shop')} hint={t('shop.hint')} />

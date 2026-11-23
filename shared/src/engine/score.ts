@@ -5,7 +5,8 @@ import type { Rng } from './rng';
 
 /** คะแนน = เงินสะอาด × ตัวคูณวันที่รอด × ตัวคูณสไตล์ */
 export function computeScore(s: GameState, c: GameContent, reason: EndReason): number {
-  const { maxDays, score } = c.config;
+  const { score } = c.config;
+  const { maxDays } = s;
   const days = reason === 'survived' ? maxDays : s.day;
   const daysMult = 1 + (score.daysWeight * days) / maxDays;
   const total = score.varietyTarget;
@@ -66,6 +67,6 @@ export function pickDangerSigns(s: GameState, c: GameContent, rng: Rng): string[
 /** แต้มประสบการณ์แก๊งที่ได้จากรอบนี้ (ใช้ปลดล็อกอาชีพ) */
 export function xpForRun(s: GameState): number {
   if (!s.end) return 0;
-  const days = s.end.reason === 'survived' ? 30 : s.day;
+  const days = s.end.reason === 'survived' ? s.maxDays : s.day;
   return days + Math.floor(s.end.score / 5_000) + s.methodsUsed.length * 3;
 }

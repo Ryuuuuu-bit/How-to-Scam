@@ -34,8 +34,8 @@ export const achievements: Achievement[] = [
     id: 'survivor',
     icon: '🗓️',
     rule: { kind: 'reason', reason: 'survived' },
-    name: { th: 'รอดครบเดือน' },
-    desc: { th: 'อยู่รอดครบ 30 วัน' },
+    name: { th: 'รอดจนวันสุดท้าย' },
+    desc: { th: 'อยู่รอดจนครบจำนวนวันที่เลือก' },
   },
   {
     id: 'speedrun_jail',
@@ -147,7 +147,7 @@ export const achievements: Achievement[] = [
     icon: '🐈',
     rule: { kind: 'characterWin', characterId: 'orange_cat' },
     name: { th: 'แมวไม่เคยแพ้' },
-    desc: { th: 'รอดครบ 30 วันด้วยส้มซ่า' },
+    desc: { th: 'เล่นเป็นส้มซ่าและอยู่รอดจนครบรอบ' },
   },
   {
     id: 'sharp_ears',

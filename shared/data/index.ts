@@ -1,3 +1,5 @@
+import { lifeMilestones } from './events/lifeMilestones';
+import { lifeStories } from './events/lifeStories';
 import type { GameContent } from '../src/types/content';
 import { victims, pitches, victimParts } from './callCenter';
 import { festivals, news } from './calendar';
@@ -47,6 +49,8 @@ export const content: GameContent = {
     ...sketchEvents,
     ...firstShift,
     ...careerQuests,
+    ...lifeStories,
+    ...lifeMilestones,
   ],
   characters,
   shopItems,

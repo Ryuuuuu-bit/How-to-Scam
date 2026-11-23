@@ -46,7 +46,7 @@ export interface SubmitResult {
   xpGained: number;
   unlocked: string[];
   seasonId: string;
-  mode: 'normal' | 'daily';
+  mode: 'normal' | 'normal60' | 'normal90' | 'daily';
   dailyDate: string | null;
   rank: number;
   newAchievements: string[];
@@ -117,13 +117,13 @@ export const api = {
     }),
   rename: (displayName: string) =>
     call<{ user: PublicUser }>('/api/me', { method: 'PATCH', body: { displayName } }),
-  startRun: (characterId: string) =>
-    call<{ runId: string; seed: string }>('/api/runs', { body: { characterId } }),
+  startRun: (characterId: string, days = 30) =>
+    call<{ runId: string; seed: string }>('/api/runs', { body: { characterId, days } }),
   submitRun: (runId: string, actions: Action[]) =>
     call<SubmitResult>(`/api/runs/${runId}/submit`, { body: { actions } }),
-  leaderboard: (board: 'top' | 'longest' | 'fastest' | 'daily', season?: string) =>
+  leaderboard: (board: 'top' | 'longest' | 'fastest' | 'daily', season?: string, days = 30) =>
     call<{ seasonId: string; date?: string; board: string; rows: BoardRow[] }>(
-      `/api/leaderboard?board=${board}${season ? `&season=${season}` : ''}`,
+      `/api/leaderboard?board=${board}&days=${days}${season ? `&season=${season}` : ''}`,
     ),
   seasons: () =>
     call<{ current: string; seasons: { id: string; players: number }[] }>('/api/seasons'),

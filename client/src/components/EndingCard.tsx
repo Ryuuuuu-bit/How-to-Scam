@@ -31,7 +31,7 @@ export function EndingCard({ state, portrait = 'char:' + state.characterId }: { 
     <h2 className="mt-3 text-2xl font-semibold">{lt(ending.title)}</h2>
     <p className="mt-2 text-left leading-relaxed">{lt(ending.body)}</p>
     {future && <div className="mt-4 rounded-2xl bg-paper p-3 text-left text-ink">
-      <strong>รอดครบ 30 วัน · เงินสะอาด ฿{state.cleanCash.toLocaleString('th-TH')}</strong>
+      <strong>รอดครบ {state.maxDays} วัน · เงินสะอาด ฿{state.cleanCash.toLocaleString('th-TH')}</strong>
       {future.id !== ending.id && <><h3 className="mt-2 font-bold">{lt(future.title)}</h3><p>{lt(future.body)}</p></>}
     </div>}
   </Panel>;

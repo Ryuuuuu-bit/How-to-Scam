@@ -137,6 +137,26 @@ function play(seed: string, characterId: string): Action[] {
   return actions;
 }
 
+it('keeps scores on the board chosen at start, including early endings', async () => {
+  const characterId = 'ex_insurance';
+  const players = [];
+  for (const days of [30, 60, 90]) {
+    const g = await guest();
+    const start = await api('/api/runs', { token: g.token, body: { days, characterId } });
+    const { runId, seed } = start.body as { runId: string; seed: string };
+    expect(newGame(seed, characterId, content).maxDays).toBe(days);
+    const sub = await api(`/api/runs/${runId}/submit`, { token: g.token, body: { actions: play(seed, characterId), days: 30 } });
+    expect(sub.status).toBe(200);
+    players.push({ days, uid: g.user.uid });
+  }
+  for (const days of [30, 60, 90]) {
+    const board = await api('/api/leaderboard?board=top&days=' + days);
+    const ids = (board.body.rows as { userId: string }[]).map(r => r.userId);
+    for (const player of players) expect(ids.includes(player.uid)).toBe(days === player.days);
+  }
+  expect((await api('/api/leaderboard?days=75')).status).toBe(400);
+});
+
 describe('ผู้เล่น', () => {
   it('Guest ได้ UID ของตัวเอง และอ่านโปรไฟล์ได้', async () => {
     const g = await guest();

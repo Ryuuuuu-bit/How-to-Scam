@@ -119,7 +119,7 @@ export function escapeQte(s: GameState, c: GameContent, rng: Rng, hits: number):
   s.heat = route.heatAfter;
   s.pendingEvents = [];
   // กบดาน: ข้ามวัน (ไม่มีรายได้) แต่ไม่เกินวันสุดท้าย
-  s.day = Math.min(c.config.maxDays, s.day + route.hideDays);
+  s.day = Math.min(s.maxDays, s.day + route.hideDays);
   goToLaunder(s, c, rng);
   return false;
 }

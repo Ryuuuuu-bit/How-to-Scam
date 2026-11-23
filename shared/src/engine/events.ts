@@ -1,3 +1,4 @@
+import { campaignDays } from './campaign';
 import type { ChoiceRequirement, EventCondition, GameContent, GameEvent } from '../types/content';
 import type { GameState } from '../types/state';
 import { activeFestivals, dateOf } from './calendar';
@@ -11,7 +12,7 @@ import { careerSeedPrefix, questSeedPrefix, sketchSeedPrefix } from './opening';
 const inRange = (v: number, r?: readonly [number, number]) => !r || (v >= r[0] && v <= r[1]);
 
 export function isEventEligible(s: GameState, c: GameContent, ev: GameEvent): boolean {
-  if (ev.chainOnly || ev.careerQuest) return false;
+  if (ev.lifeStory || ev.chainOnly || ev.careerQuest) return false;
   if (ev.id === 'counter_live' && !s.seed.startsWith('v3:soi:live:')) return false;
   if (ev.id === 'cf_orange_cat' && s.seed.startsWith('v3:soi:live:')) return false;
   if ((ev.once ?? true) && s.seenEvents.includes(ev.id)) return false;
@@ -91,6 +92,27 @@ export function rollDailyEvents(s: GameState, c: GameContent, rng: Rng): void {
     if (quest) {
       s.pendingEvents.push(quest.id);
       s.seenEvents.push(quest.id);
+    }
+  }
+  // Give each arc room for both callbacks. Keep the legacy random stream intact.
+  const campaign = campaignDays(s.seed);
+  if (campaign && s.pendingEvents.length < 2) {
+    const turn = c.events.find(ev => ev.lifeMilestone && !s.seenEvents.includes(ev.id) && conditionMet(s, c, ev.when));
+    if (turn) {
+      s.pendingEvents.push(turn.id);
+      s.seenEvents.push(turn.id);
+    }
+  }
+  if (campaign && s.day % 4 === 3 && s.day + 2 <= s.maxDays && s.pendingEvents.length < 2) {
+    const pool = c.events.filter(ev => ev.lifeStory && !ev.lifeMilestone && !ev.chainOnly &&
+      !s.seenEvents.includes(ev.id) && conditionMet(s, c, ev.when));
+    const chapterStart = s.day > 60 ? 61 : s.day > 30 ? 31 : 1;
+    const premieres = pool.filter(ev => ev.when.day?.[0] === chapterStart);
+    const candidates = premieres.length ? premieres : pool;
+    if (candidates.length) {
+      const event = rng.pick(candidates);
+      s.pendingEvents.push(event.id);
+      s.seenEvents.push(event.id);
     }
   }
   const count = Math.max(0, rng.weightedIndex(c.config.eventCountWeights) - s.pendingEvents.length);

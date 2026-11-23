@@ -150,12 +150,12 @@ describe('วิธีโกงระดับสูง', () => {
 });
 
 describe('ความหลากหลาย', () => {
-  it('100 รอบเจอเหตุการณ์ไม่ซ้ำกันอย่างน้อยครึ่งหนึ่งของทั้งหมด', () => {
+  it('100 รอบจากเซฟรุ่นก่อนเจอเหตุการณ์ไม่ซ้ำกันอย่างน้อยครึ่งหนึ่งของทั้งหมด', () => {
     const seen = new Set<string>();
     for (let i = 0; i < 100; i++) {
       const ch = content.characters[i % content.characters.length]?.id ?? 'ex_insurance';
       for (const e of autoPlay(`variety-${i}`, ch).state.seenEvents) seen.add(e);
     }
-    expect(seen.size).toBeGreaterThan(content.events.length / 2);
+    expect(seen.size).toBeGreaterThan(content.events.filter(event => !event.lifeStory).length / 2);
   });
 });

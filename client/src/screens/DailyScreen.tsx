@@ -49,7 +49,7 @@ export function DailyScreen({
       {info && ch && (
         <Panel className="relative z-10 flex flex-col items-center gap-2 text-center text-ink">
           <div className="font-display text-sm text-ink-soft">
-            {t('daily.date', { d: info.date })}
+            {t('daily.date', { d: info.date })} · รอบ 30 วัน
           </div>
           <Art id={portrait} size={120} />
           <div className="text-xs text-ink-soft">{t('daily.job')}</div>

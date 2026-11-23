@@ -14,7 +14,7 @@ function ruleMet(r: AchievementRule, s: GameState, t: PlayerTotals, c: GameConte
     case 'ending':
       return end.endingId === r.endingId;
     case 'reason': {
-      const day = end.reason === 'survived' ? c.config.maxDays : s.day;
+      const day = end.reason === 'survived' ? s.maxDays : s.day;
       return (
         end.reason === r.reason &&
         (r.maxDay === undefined || day <= r.maxDay) &&

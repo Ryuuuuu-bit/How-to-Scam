@@ -157,8 +157,8 @@ export function createApp(d: AppDeps) {
     limit(10, 40),
     wrap(async (req) => {
       const user = requireUser(req);
-      const { characterId } = z.object({ characterId: z.string().min(1).max(64) }).parse(req.body);
-      return startRun(d.store, d.content, user, characterId);
+      const { characterId, days } = z.object({ days: z.union([z.literal(30), z.literal(60), z.literal(90)]).default(30), characterId: z.string().min(1).max(64) }).parse(req.body);
+      return startRun(d.store, d.content, user, characterId, days);
     }),
   );
 
@@ -193,6 +193,7 @@ export function createApp(d: AppDeps) {
       const q = z
         .object({
           board: z.enum(['top', 'longest', 'fastest', 'daily']).default('top'),
+          days: z.enum(['30','60','90']).default('30'),
           season: z.string().optional(),
           date: z.string().optional(),
         })
@@ -204,7 +205,7 @@ export function createApp(d: AppDeps) {
         const rows = await d.store.leaderboard(scope, 'top', 50);
         return { seasonId, date, board: q.board, rows };
       }
-      const rows = await d.store.leaderboard({ seasonId }, q.board as Board, 50);
+      const rows = await d.store.leaderboard({ seasonId, mode: q.days === '90' ? 'normal90' : q.days === '60' ? 'normal60' : 'normal' }, q.board as Board, 50);
       return { seasonId, board: q.board, rows };
     }),
   );

@@ -467,7 +467,7 @@ export function endDay(s: GameState, c: GameContent, rng: Rng): boolean {
   s.dailyItems = {};
   s.todayMethodId = null;
   updateLevel(s, c);
-  if (s.day >= c.config.maxDays) return true;
+  if (s.day >= s.maxDays) return true;
   s.day++;
   if ((s.day - 1) % c.config.newsEveryDays === 0) rollNews(s, c, rng);
   rollOffer(s, c, rng);

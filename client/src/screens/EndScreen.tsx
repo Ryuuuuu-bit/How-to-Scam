@@ -58,7 +58,7 @@ export function EndScreen({
   const signs = end.dangerSignIds
     .map((id) => content.dangerSigns.find((d) => d.id === id))
     .filter((d) => d !== undefined);
-  const days = end.reason === 'survived' ? content.config.maxDays : state.day;
+  const days = end.reason === 'survived' ? state.maxDays : state.day;
 
   return (
     <main className="end-screen mx-auto flex min-h-dvh flex-col gap-4 px-4 py-6">
@@ -75,11 +75,11 @@ export function EndScreen({
         <div className="text-sm text-ink-soft">{t('end.score')}</div>
         <div className="font-display text-5xl font-semibold text-pink">{fmt(end.score)}</div>
         <div className="mt-1 text-sm">
-          {t('end.clean', { n: state.cleanCash })} · {t('end.days', { n: days })}
+          {t('end.clean', { n: state.cleanCash })} · {t('end.days', { n: days })} · รอบ {state.maxDays} วัน
         </div>
       </Panel>
 
-      {!practice && <SubmitBanner state={submit.state} onRetry={() => void submit.retry()} />}
+      {!practice && <SubmitBanner maxDays={state.maxDays} state={submit.state} onRetry={() => void submit.retry()} />}
       <div className="grid grid-cols-2 gap-3">
         <Button tone="paper" onClick={onMenu}>{t('end.menu')}</Button>
         <Button tone="pink" onClick={onAgain}>{t('end.again')}</Button>
@@ -167,9 +167,11 @@ export function EndScreen({
 }
 
 function SubmitBanner({
+  maxDays,
   state,
   onRetry,
 }: {
+  maxDays: number;
   state: ReturnType<typeof useSubmitRun>['state'];
   onRetry: () => void;
 }) {
@@ -192,7 +194,7 @@ function SubmitBanner({
   const title = content.titles.find((x) => x.id === state.result.titleId);
   return (
     <div className="anim-rise-in rounded-2xl border-[3px] border-ink bg-mint p-3 text-center text-white shadow-pop">
-      <div className="font-display text-lg">🏆 {t('submit.ok', { n: state.result.rank })}</div>
+      <div className="font-display text-lg">🏆 {t('submit.ok', { n: state.result.rank })} · {state.result.mode === 'daily' ? 'ประจำวัน' : `กระดาน ${maxDays} วัน`}</div>
       {title && <div className="text-sm">{t('submit.title', { t: lt(title.name) })}</div>}
     </div>
   );

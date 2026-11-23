@@ -61,7 +61,7 @@ export function CustodyScene({ state, dispatch, portrait = 'char:' + state.chara
     </div>
     <div className="custody-copy">
       {cell && <><p>{available ? 'ส้มซ่าคาบการ์ดสามใบมาวางหน้าห้องขัง “จำให้ได้นะ เดี๋ยวส้มคว่ำไพ่ ถ้าจิ้มถูกทั้งสามใบ ส้มพากลับตลาดเอง”' : 'แมวส้มจองหมอนใบเดียวในห้องไปแล้ว คืนนี้คุณเลยได้ทั้งเตียง… ยกเว้นตรงหัว'}</p>
-        {available && <><Button tone="grape" block onClick={() => setPage('remember')}>เริ่มจำภาพ · {memorySeconds} วินาที</Button><small>ตอบถูกได้เล่นต่อวันที่ {Math.min(state.day + 1, content.config.maxDays)} เงินสกปรกถูกยึด เงินสะอาดเหลือ ฿{Math.round(state.cleanCash * contentKeep / 100).toLocaleString('th-TH')} และ Heat เหลือ 45 ถ้าตอบผิด รอบนี้จบในคุก</small></>}
+        {available && <><Button tone="grape" block onClick={() => setPage('remember')}>เริ่มจำภาพ · {memorySeconds} วินาที</Button><small>ตอบถูกได้เล่นต่อวันที่ {Math.min(state.day + 1, state.maxDays)} เงินสกปรกถูกยึด เงินสะอาดเหลือ ฿{Math.round(state.cleanCash * contentKeep / 100).toLocaleString('th-TH')} และ Heat เหลือ 45 ถ้าตอบผิด รอบนี้จบในคุก</small></>}
         {photo ? <p role="status">“รูปนี้ใช้ยื่นสมัครงานได้ไหมครับ” ทั้งห้องเงียบ… ได้ยินแต่เสียงแมวกรน</p> :
           <Button tone="sun" block onClick={() => setPhoto(true)}>ถ่ายรูปติดแฟ้มคดี</Button>}
         <Button tone="paper" block onClick={() => dispatch({ t: 'custodyVerdict', answer: null })}>จบรอบในคุก</Button></>}

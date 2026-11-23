@@ -1,6 +1,8 @@
 import { createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import {
+  campaignSeed,
+  type Duration,
   achievementsFor,
   bangkokDate,
   dailyCharacter,
@@ -13,7 +15,7 @@ import {
 } from '@hts/shared';
 import type { Action, GameContent } from '@hts/shared';
 import { seasonFor } from './season';
-import type { Store, UserRec } from './store';
+import type { Store, UserRec, Scope } from './store';
 
 export class HttpError extends Error {
   constructor(
@@ -55,30 +57,32 @@ export const MAX_ACTIONS = 4_000;
 const RUN_TTL_MS = 48 * 60 * 60 * 1000;
 const MAX_RUNS_PER_HOUR = 60;
 
-export function newSeed(): string {
-  return questSeedPrefix + randomBytes(16).toString('hex');
+export function newSeed(days: Duration = 30): string {
+  return campaignSeed(days, randomBytes(16).toString('hex'));
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */
-export async function startRun(store: Store, c: GameContent, user: UserRec, characterId: string) {
+export async function startRun(store: Store, c: GameContent, user: UserRec, characterId: string, days: Duration = 30) {
   const ch = c.characters.find((x) => x.id === characterId);
   if (!ch) throw new HttpError(400, 'unknown_character');
   if (!isCharacterUnlocked(ch, user)) throw new HttpError(403, 'character_locked');
   const recent = await store.countRecentRuns(user.id, new Date(Date.now() - 60 * 60 * 1000));
   if (recent >= MAX_RUNS_PER_HOUR) throw new HttpError(429, 'too_many_runs');
+  const mode = days === 90 ? 'normal90' : days === 60 ? 'normal60' : 'normal';
   const run = await store.createRun({
     userId: user.id,
     characterId,
-    seed: newSeed(),
-    mode: 'normal',
+    seed: newSeed(days),
+    mode,
     dailyDate: null,
   });
-  return { runId: run.id, seed: run.seed, characterId, mode: 'normal' as const };
+  return { runId: run.id, seed: run.seed, characterId, mode, days };
 }
 
 /** seed ของ Daily Challenge: ทุกคนได้ seed เดียวกันในวันนั้น แต่เดาล่วงหน้าไม่ได้ */
 export function dailySeed(date: string, secret: string): string {
   const seed = createHmac('sha256', secret).update(`daily:${date}`).digest('hex').slice(0, 32);
+  if (date >= '2026-11-26') return campaignSeed(30, seed);
   if (date >= '2026-11-25') return questSeedPrefix + seed;
   if (date >= '2026-11-24') return 'v3:soi:live:' + seed;
   return date >= '2026-11-23' ? 'v3:soi:' + seed : seed;
@@ -144,7 +148,7 @@ export async function submitRun(
   const run = await store.findRun(runId);
   if (!run || run.userId !== user.id) throw new HttpError(404, 'run_not_found');
   if (run.status !== 'started') throw new HttpError(409, 'run_already_submitted');
-  if (now.getTime() - run.createdAt.getTime() > RUN_TTL_MS) {
+  if (now.getTime() - run.createdAt.getTime() > RUN_TTL_MS * (run.mode === 'normal90' ? 3 : run.mode === 'normal60' ? 2 : 1)) {
     await store.rejectRun(run.id, 'expired', 0);
     throw new HttpError(410, 'run_expired');
   }
@@ -169,7 +173,7 @@ export async function submitRun(
   }
 
   const season = seasonFor(now);
-  const mode = run.mode === 'daily' ? 'daily' : 'normal';
+  const mode = run.mode === 'daily' || run.mode === 'normal90' || run.mode === 'normal60' ? run.mode : 'normal';
   const titleId = titleFor(state, c);
   const had = await store.achievementsOf(user.id);
   const newAchievements = achievementsFor(
@@ -179,7 +183,7 @@ export async function submitRun(
   ).filter((a) => !had.includes(a));
   const xpGained = xpForRun(state);
   const before = c.characters.filter((ch) => isCharacterUnlocked(ch, user)).map((ch) => ch.id);
-  const days = state.end.reason === 'survived' ? c.config.maxDays : state.day;
+  const days = state.end.reason === 'survived' ? state.maxDays : state.day;
   const updated = await store.saveScore({
     runId: run.id,
     userId: user.id,
@@ -200,8 +204,8 @@ export async function submitRun(
   const unlocked = c.characters
     .filter((ch) => isCharacterUnlocked(ch, updated) && !before.includes(ch.id))
     .map((ch) => ch.id);
-  const scope =
-    mode === 'daily' && run.dailyDate ? { dailyDate: run.dailyDate } : { seasonId: season.id };
+  const scope: Scope =
+    mode === 'daily' && run.dailyDate ? { dailyDate: run.dailyDate } : { seasonId: season.id, mode: mode === 'daily' ? 'normal' : mode };
   const rank = await store.rankOf(scope, state.end.score);
   return {
     score: state.end.score,

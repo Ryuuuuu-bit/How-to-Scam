@@ -2,10 +2,10 @@
 import type { SeasonInfo } from './season';
 
 export type Board = 'top' | 'longest' | 'fastest';
-export type RunMode = 'normal' | 'daily';
+export type RunMode = 'normal' | 'normal60' | 'normal90' | 'daily';
 
 /** ขอบเขตของกระดาน: ซีซั่นรายเดือน (รอบปกติ) หรือวัน (Daily Challenge) */
-export type Scope = { seasonId: string } | { dailyDate: string };
+export type Scope = { seasonId: string; mode?: Exclude<RunMode, 'daily'> } | { dailyDate: string };
 
 export interface UserRec {
   id: string;
@@ -109,4 +109,4 @@ export interface GoogleProfile {
 export const scopeWhere = (scope: Scope) =>
   'dailyDate' in scope
     ? { mode: 'daily', dailyDate: scope.dailyDate }
-    : { mode: 'normal', seasonId: scope.seasonId };
+    : { mode: scope.mode ?? 'normal', seasonId: scope.seasonId };

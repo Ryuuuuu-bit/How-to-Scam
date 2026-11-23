@@ -76,7 +76,7 @@ export function MainMenu({
           <div className="menu-actions">
             {saved && (
               <Button tone="mint" block onClick={onContinue}>
-                {t('menu.continue', { day: saved.state.day })}
+                {t('menu.continue', { day: `${saved.state.day}/${saved.state.maxDays}` })}
               </Button>
             )}
             <Button

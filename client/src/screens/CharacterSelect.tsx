@@ -1,3 +1,4 @@
+import { durations, type Duration } from '@hts/shared';
 import { useState } from 'react';
 import { content } from '@hts/shared/data';
 import { isUnlocked, progressFor } from '../game/meta';
@@ -10,9 +11,10 @@ export function CharacterSelect({
   onStart,
   onBack,
 }: {
-  onStart: (characterId: string) => void;
+  onStart: (characterId: string, days: Duration) => void;
   onBack: () => void;
 }) {
+  const [days, setDays] = useState<Duration>(30);
   const { user } = useAuth();
   const meta = progressFor(user);
   const cosmetics = loadCosmetics(meta, user?.uid);
@@ -26,6 +28,17 @@ export function CharacterSelect({
         <ScreenTitle title={t('character.title')} />
         <Chip className="mt-1 shrink-0">⭐ {t('character.xp', { n: meta.xp })}</Chip>
       </div>
+      <fieldset className="mb-3">
+        <legend className="mb-1 font-semibold">ระยะเวลาของรอบ</legend>
+        <div className="collection-filter">
+          {durations.map(n => <button type="button" key={n} aria-pressed={days === n} onClick={() => setDays(n)}>{n} วัน</button>)}
+        </div>
+        <p className="mt-2 text-sm text-ink-soft" aria-live="polite">
+          {days === 30 ? 'ตั้งตัวในซอย เลือกงานและตัดสินใจว่าจะใช้ห้องว่างอย่างไร' :
+            days === 60 ? 'เล่นต่อถึงเดือนที่สอง เลือกรับกะประจำ จัดรายการวิทยุ หรือทำงานอิสระ' :
+            'เล่นครบสามเดือน เลือกเปิดร้าน ถือหุ้นกับทีม หรือเปิดโรงเรียนวันหยุด'}
+        </p>
+      </fieldset>
       <div className="collection-filter" role="group" aria-label="แสดงอาชีพ">
         <button aria-pressed={!showLocked} onClick={() => setShowLocked(false)}>เลือกเล่นได้ · {unlocked.length}</button>
         <button aria-pressed={showLocked} onClick={() => setShowLocked(true)}>ทั้งหมด · {content.characters.length}</button>
@@ -85,7 +98,7 @@ export function CharacterSelect({
           <Button tone="paper" onClick={onBack}>
             {t('character.back')}
           </Button>
-          <Button tone="pink" block onClick={() => onStart(picked)}>
+          <Button tone="pink" block onClick={() => onStart(picked, days)}>
             {t('character.start')}
           </Button>
         </div>

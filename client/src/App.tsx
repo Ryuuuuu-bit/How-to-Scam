@@ -1,3 +1,4 @@
+import type { Duration } from '@hts/shared';
 import { useEffect, useState } from 'react';
 import { PlannerPractice } from './screens/PlannerPractice';
 import { LiveCounter } from './screens/LiveCounter';
@@ -74,17 +75,17 @@ function GameScreens() {
   useEffect(() => { window.scrollTo({ top: 0 }); }, [screen]);
 
   /** ออนไลน์: ขอ seed จาก server เพื่อให้ส่งคะแนนได้ / ออฟไลน์: สุ่มเอง */
-  const startRun = async (characterId: string) => {
+  const startRun = async (characterId: string, days: Duration) => {
     setStarting(true);
     let server: { runId: string; seed: string } | undefined;
     if (auth.status === 'ready') {
       try {
-        server = await api.startRun(characterId);
+        server = await api.startRun(characterId, days);
       } catch {
         server = undefined;
       }
     }
-    game.start(characterId, server);
+    game.start(characterId, server, days);
     setStarting(false);
     setScreen('play');
   };
@@ -124,8 +125,8 @@ function GameScreens() {
     return (
       <CharacterSelect
         onBack={() => setScreen('menu')}
-        onStart={(id) => {
-          if (!starting) void startRun(id);
+        onStart={(id, days) => {
+          if (!starting) void startRun(id, days);
         }}
       />
     );

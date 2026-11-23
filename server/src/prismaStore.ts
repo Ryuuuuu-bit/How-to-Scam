@@ -182,7 +182,7 @@ export function prismaStore(db: PrismaClient): Store {
     async seasons() {
       const rows = await db.score.groupBy({
         by: ['seasonId', 'userId'],
-        where: { mode: 'normal' },
+        where: { mode: { in: ['normal', 'normal60', 'normal90'] } },
       });
       const count: Record<string, number> = {};
       for (const r of rows) count[r.seasonId] = (count[r.seasonId] ?? 0) + 1;

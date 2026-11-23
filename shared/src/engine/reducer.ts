@@ -1,3 +1,4 @@
+import { campaignDays } from './campaign';
 import type { EndReason, GameContent } from '../types/content';
 import type { Action, GameState } from '../types/state';
 import {
@@ -40,6 +41,7 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
   const perk = <K extends 'startFame' | 'startCash'>(k: K) =>
     ch.perks.filter((p) => p.kind === k).reduce((n, p) => n + ('value' in p ? p.value : 0), 0);
   const s: GameState = {
+    maxDays: campaignDays(seed) ?? c.config.maxDays,
     version: 2,
     seed,
     rng: 0,
@@ -219,7 +221,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       s.flags.push('dream_escape');
       s.escapes++;
       s.heat = 45;
-      s.day = Math.min(c.config.maxDays, s.day + 1);
+      s.day = Math.min(s.maxDays, s.day + 1);
       s.pendingEvents = [];
       s.lastResults.push({ kind: 'escape', success: true, textKey: 'dream_escape' });
       goToLaunder(s, c, rng);
