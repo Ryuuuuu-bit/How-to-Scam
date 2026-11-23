@@ -140,16 +140,14 @@ export function prismaStore(db: PrismaClient): Store {
             : [{ days: 'asc' as const }, { createdAt: 'asc' as const }];
       const rows = await db.score.findMany({
         where,
-        orderBy,
-        take: limit * 6,
+        orderBy: [...orderBy, { id: 'asc' }],
+        distinct: ['userId'],
+        take: limit,
         include: { user: { select: { displayName: true, avatarUrl: true } } },
       });
       // เก็บสถิติดีที่สุดของแต่ละคนเท่านั้น
-      const seen = new Set<string>();
       const out: BoardRow[] = [];
       for (const r of rows) {
-        if (seen.has(r.userId)) continue;
-        seen.add(r.userId);
         out.push({
           rank: out.length + 1,
           userId: r.userId,
@@ -162,7 +160,6 @@ export function prismaStore(db: PrismaClient): Store {
           titleId: r.titleId,
           createdAt: r.createdAt,
         });
-        if (out.length >= limit) break;
       }
       return out;
     },

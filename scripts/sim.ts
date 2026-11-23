@@ -3,6 +3,8 @@
 import { content } from '../shared/data';
 import {
   choiceAvailable,
+  campaignSeed,
+  durations,
   currentOffer,
   dreamSequence,
   escapeOf,
@@ -12,7 +14,6 @@ import {
   ponziCrashPct,
   priceOf,
   step,
-  sketchSeedPrefix,
   unlockedMethods,
 } from '../shared/src';
 import type { Action, GameState } from '../shared/src';
@@ -33,7 +34,7 @@ function bot(s: GameState, style: Style, r: () => number): Action {
       if (stage === 'followup') return { t: 'readOrigin' };
       const restAt = style === 'careful' ? 60 : style === 'greedy' ? 88 : 75;
       if (s.heat > restAt) return { t: 'choosePlan', methodId: null };
-      if (style === 'careful' && s.day >= 28 && s.cleanCash > 0) return { t: 'retire' };
+      if (style === 'careful' && s.day >= s.maxDays - 2 && s.cleanCash > 0) return { t: 'retire' };
       let opts = unlockedMethods(s, content).filter((m) => m.cost <= money * 0.8);
       if (opts.some((m) => m.id === 'ponzi') && ponziCrashPct(s, content) > 30) {
         opts = opts.filter((m) => m.id !== 'ponzi');
@@ -134,13 +135,14 @@ const methodUse: Record<string, number> = {};
 
 for (let i = 0; i < runs; i++) {
   const ch = content.characters[i % content.characters.length] ?? content.characters[0];
-  const style = styles[i % styles.length] ?? 'random';
+  const style = styles[Math.floor(i / content.characters.length) % styles.length] ?? 'random';
+  const days = durations[Math.floor(i / (content.characters.length * styles.length)) % durations.length] ?? durations[0];
   if (!ch) break;
   const r = lcg(i * 7919 + 1);
-  let s = newGame(`${sketchSeedPrefix}sim-${i}`, ch.id, content);
+  let s = newGame(campaignSeed(days, 'sim-' + i), ch.id, content);
   for (let k = 0; k < 5000 && s.phase !== 'ended'; k++) s = step(s, bot(s, style, r), content);
   if (!s.end) throw Error(`Run ${i} did not finish (day ${s.day}, ${s.phase})`);
-  const key = `${ch.id}/${style}`;
+  const key = `${ch.id}/${style}/${days}`;
   const row = (rows[key] ??= { n: 0, score: [], caught: 0, lvl: [], days: [] });
   row.n++;
   row.score.push(s.end?.score ?? 0);

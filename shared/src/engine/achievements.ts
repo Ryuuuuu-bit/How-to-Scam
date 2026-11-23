@@ -7,7 +7,7 @@ export interface PlayerTotals {
   daily: boolean;
 }
 
-function ruleMet(r: AchievementRule, s: GameState, t: PlayerTotals, c: GameContent): boolean {
+function ruleMet(r: AchievementRule, s: GameState, t: PlayerTotals): boolean {
   const end = s.end;
   if (!end) return false;
   switch (r.kind) {
@@ -52,5 +52,5 @@ function ruleMet(r: AchievementRule, s: GameState, t: PlayerTotals, c: GameConte
 
 /** เหรียญที่รอบนี้ปลดล็อกได้ (ยังไม่ตัดอันที่มีอยู่แล้ว) */
 export function achievementsFor(s: GameState, totals: PlayerTotals, c: GameContent): string[] {
-  return c.achievements.filter((a) => ruleMet(a.rule, s, totals, c)).map((a) => a.id);
+  return c.achievements.filter((a) => ruleMet(a.rule, s, totals)).map((a) => a.id);
 }

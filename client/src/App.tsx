@@ -17,6 +17,7 @@ import { ProfileSheet } from './screens/ProfileSheet';
 import { ResultSheet } from './components/ResultSheet';
 import { describeResult } from './game/results';
 import { AudioControls } from './components/AudioControls';
+import { ConfirmPopup } from './components/PopupControls';
 import { PresenceProvider } from './components/OnlineCount';
 import { api } from './net/api';
 import { AuthProvider, useAuth } from './net/auth';
@@ -72,17 +73,22 @@ function GameScreens() {
   const [saved, setSaved] = useState(loadSavedRun);
   const [profile, setProfile] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState(false);
+  const [pendingDaily, setPendingDaily] = useState<Awaited<ReturnType<typeof api.dailyStart>> | null>(null);
   useEffect(() => { window.scrollTo({ top: 0 }); }, [screen]);
 
   /** ออนไลน์: ขอ seed จาก server เพื่อให้ส่งคะแนนได้ / ออฟไลน์: สุ่มเอง */
   const startRun = async (characterId: string, days: Duration) => {
     setStarting(true);
+    setStartError(false);
     let server: { runId: string; seed: string } | undefined;
     if (auth.status === 'ready') {
       try {
         server = await api.startRun(characterId, days);
       } catch {
-        server = undefined;
+        setStarting(false);
+        setStartError(true);
+        return;
       }
     }
     game.start(characterId, server, days);
@@ -107,24 +113,36 @@ function GameScreens() {
 
   if (screen === 'daily') {
     return (
-      <DailyScreen
+      <><DailyScreen
         onBack={() => setScreen('menu')}
         onBoard={() => setScreen('dailyBoard')}
         onPlay={(r) => {
           const previous = loadSavedRun();
           if (previous && previous.runId === r.runId && previous.seed === r.seed &&
               previous.characterId === r.characterId) game.resume(previous);
+          else if (previous) { setPendingDaily(r); return; }
           else game.start(r.characterId, { runId: r.runId, seed: r.seed });
           setScreen('play');
         }}
       />
+      {pendingDaily && <ConfirmPopup title="เปลี่ยนไปเล่นภารกิจประจำวัน?"
+        description="ภารกิจประจำวันจะใช้ช่องเซฟของรอบเดิม หากต้องการกลับไปเล่นรอบเดิม ให้เลือกยกเลิก"
+        confirmLabel="เปลี่ยนรอบ" icon="icon:day"
+        onCancel={() => setPendingDaily(null)}
+        onConfirm={() => {
+          game.start(pendingDaily.characterId, pendingDaily);
+          setPendingDaily(null);
+          setScreen('play');
+        }} />}</>
     );
   }
 
   if (screen === 'character') {
     return (
       <CharacterSelect
-        onBack={() => setScreen('menu')}
+        starting={starting}
+        startError={startError}
+        onBack={() => { setStartError(false); setScreen('menu'); }}
         onStart={(id, days) => {
           if (!starting) void startRun(id, days);
         }}
@@ -148,10 +166,10 @@ function GameScreens() {
             actions={game.run.actions}
             onMenu={() => {
               game.quit();
-              setSaved(null);
+              setSaved(loadSavedRun());
               setScreen('menu');
             }}
-            onAgain={() => setScreen('character')}
+            onAgain={() => { setSaved(loadSavedRun()); setScreen('character'); }}
           />
           {finalLines.length > 0 && <EndIntro key={game.tick} lines={finalLines} />}
         </>

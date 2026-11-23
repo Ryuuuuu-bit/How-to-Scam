@@ -37,7 +37,7 @@ function readSave(): SaveData | null {
 
 function writeSave(run: Run | null): void {
   try {
-    if (!run || run.state.phase === 'ended') localStorage.removeItem(SAVE_KEY);
+    if (!run || (run.state.phase === 'ended' && !run.runId)) localStorage.removeItem(SAVE_KEY);
     else {
       const data: SaveData = {
         seed: run.seed,
@@ -58,12 +58,16 @@ export function loadSavedRun(): Run | null {
   if (!data) return null;
   try {
     const state = replay(data.seed, data.characterId, data.actions, content);
-    if (state.phase === 'ended') return null;
+    if (state.phase === 'ended' && !data.runId) return null;
     return { ...data, state };
   } catch {
     writeSave(null);
     return null;
   }
+}
+
+export function clearSubmittedRun(runId: string) {
+  if (readSave()?.runId === runId) writeSave(null);
 }
 
 function randomSeed(): string {

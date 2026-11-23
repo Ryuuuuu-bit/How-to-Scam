@@ -437,17 +437,19 @@ function episodes(story: Story): GameEvent[] {
     when: { day: [story.fromDay, 90] },
   });
   story.paths.forEach(([action, consequence], index) => {
-    const style = styles[index]!;
+    const style = styles[index];
+    if (!style) throw Error('Missing life story style for ' + root);
     const branch = root + '_' + style.skill;
     const reward: Effect = { kind: 'add', stat: style.stat, value: style.gain };
     open.push(choice(action, consequence, [reward, next(branch)]));
-    events.push(scene(branch, consequence, `เมื่อครั้งก่อนคุณเลือก “${action}” คราวนี้จะลงมือเองหรือชวนคนมาช่วย?`, [
+    const followup = scene(branch, consequence, `เมื่อครั้งก่อนคุณเลือก “${action}” คราวนี้จะลงมือเองหรือชวนคนมาช่วย?`, [
       choice(style.solo, `คุณขอจัดการเอง ผู้จัดจดชื่อคุณไว้แล้ว`, [next(branch + '_solo')]),
       choice(style.crew, `ทีมรับช่วงต่อและตกลงว่าจะกลับมารายงานผล`, [next(branch + '_crew')]),
       choice('ปิดงานเท่านี้ คืนเวลาให้ตัวเอง', 'คุณส่งต่องานที่เหลือแล้วกลับไปพัก', [{ kind: 'add', stat: 'heat', value: -2 }]),
-    ]));
+    ]);
+    events.push(followup);
     if (story.fromDay >= 31) {
-      events[events.length - 1]!.choices.push({
+      followup.choices.push({
         ...choice('ใช้ประสบการณ์หน้าเวที เปิดไมค์ให้คนดู', 'เสียงจากคนดูช่วยให้ทีมได้ชื่อเสียงและค่าจัดเวที',
           [{ kind: 'add', stat: 'fame', value: 3 }, { kind: 'add', stat: 'cleanCash', value: 250 }, next(branch + '_crew')]),
         requires: { flags: ['life_host'] },

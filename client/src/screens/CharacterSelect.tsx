@@ -10,9 +10,13 @@ import { characterArt, loadCosmetics } from '../game/cosmetics';
 export function CharacterSelect({
   onStart,
   onBack,
+  starting = false,
+  startError = false,
 }: {
   onStart: (characterId: string, days: Duration) => void;
   onBack: () => void;
+  starting?: boolean;
+  startError?: boolean;
 }) {
   const [days, setDays] = useState<Duration>(30);
   const { user } = useAuth();
@@ -94,12 +98,13 @@ export function CharacterSelect({
         })}
       </div>
       <div className="character-footer fixed inset-x-0 bottom-0 z-10 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)] backdrop-blur">
+        {startError && <p role="alert" className="mx-auto mb-2 max-w-md rounded-xl bg-paper p-2 text-sm">เริ่มรอบเก็บคะแนนไม่สำเร็จ กรุณาลองอีกครั้ง</p>}
         <div className="mx-auto flex max-w-md gap-3">
-          <Button tone="paper" onClick={onBack}>
+          <Button tone="paper" disabled={starting} onClick={onBack}>
             {t('character.back')}
           </Button>
-          <Button tone="pink" block onClick={() => onStart(picked, days)}>
-            {t('character.start')}
+          <Button tone="pink" block disabled={starting} onClick={() => onStart(picked, days)}>
+            {starting ? 'กำลังเริ่มรอบ…' : t('character.start')}
           </Button>
         </div>
       </div>

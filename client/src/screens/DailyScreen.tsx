@@ -13,7 +13,7 @@ export function DailyScreen({
   onBoard,
   onBack,
 }: {
-  onPlay: (r: { runId: string; seed: string; characterId: string }) => void;
+  onPlay: (r: Awaited<ReturnType<typeof api.dailyStart>>) => void;
   onBoard: () => void;
   onBack: () => void;
 }) {
@@ -36,6 +36,7 @@ export function DailyScreen({
       onPlay(await api.dailyStart());
     } catch {
       setError(true);
+    } finally {
       setBusy(false);
     }
   };
@@ -75,10 +76,10 @@ export function DailyScreen({
         </p>
       )}
       <div className="relative z-10 grid grid-cols-2 gap-3">
-        <Button tone="paper" onClick={onBack}>
+        <Button tone="paper" disabled={busy} onClick={onBack}>
           {t('daily.back')}
         </Button>
-        <Button tone="grape" onClick={onBoard}>
+        <Button tone="grape" disabled={busy} onClick={onBoard}>
           🏆 {t('daily.board')}
         </Button>
       </div>

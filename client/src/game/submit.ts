@@ -3,6 +3,7 @@ import type { Action } from '@hts/shared';
 import { api, ApiError } from '../net/api';
 import type { SubmitResult } from '../net/api';
 import { useAuth } from '../net/auth';
+import { clearSubmittedRun } from './useGame';
 
 export type SubmitState =
   | { kind: 'offline' }
@@ -26,6 +27,7 @@ export function useSubmitRun(runId: string | undefined, actions: Action[]) {
     setState({ kind: 'sending' });
     try {
       const result = await api.submitRun(runId, actions);
+      clearSubmittedRun(runId);
       try {
         sessionStorage.setItem(sentKey(runId), JSON.stringify(result));
       } catch {
@@ -37,6 +39,7 @@ export function useSubmitRun(runId: string | undefined, actions: Action[]) {
     } catch (e) {
       // ส่งไปแล้วรอบก่อน (เช่นรีเฟรชหน้า) ให้แสดงผลเดิม
       if (e instanceof ApiError && e.code === 'run_already_submitted') {
+        clearSubmittedRun(runId);
         try {
           const saved = sessionStorage.getItem(sentKey(runId));
           if (saved) {

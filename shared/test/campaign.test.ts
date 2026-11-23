@@ -27,14 +27,16 @@ it('exposes each campaign scene through a playable root or a scheduled choice', 
     const scenes = content.events.filter(e => e.lifeStory && (e.when.day?.[0] ?? 1) <= days);
     const reachable = new Set(scenes.filter(e => !e.chainOnly).map(e => e.id));
     for (const id of reachable) {
-      const scene = scenes.find(e => e.id === id)!;
+      const scene = scenes.find(e => e.id === id);
+      if (!scene) throw Error('Missing linked scene ' + id);
       for (const choice of scene.choices) for (const outcome of choice.outcomes)
         for (const effect of outcome.effects) if (effect.kind === 'schedule') reachable.add(effect.eventId);
     }
     expect(reachable.size).toBe([322, 364, 406][i]);
     expect(reachable.size).toBe(scenes.length);
   }
-  const room = content.events.find(e => e.id === 'life_turn_24')!;
+  const room = content.events.find(e => e.id === 'life_turn_24');
+  if (!room) throw Error('Missing milestone');
   const player = newGame(campaignSeed(60, 'room'), 'ex_insurance', content);
   expect(room.choices.filter(c => choiceAvailable(player, c.requires))).toHaveLength(2);
   player.flags.push('life_lodger');
@@ -46,13 +48,16 @@ it('plays every new scene across seeded runs with different life choices', () =>
   const reached = new Set<string>();
   for (let i = 0; i < 600 && reached.size < 406; i++) {
     const rng = new Rng(i + 1);
-    const seed = campaignSeed(durations[i % 3]!, 'coverage-' + i);
-    let s = newGame(seed, content.characters[i % content.characters.length]!.id, content);
+    const seed = campaignSeed(durations[i % durations.length] ?? durations[0], 'coverage-' + i);
+    const character = content.characters[i % content.characters.length];
+    if (!character) throw Error('Missing character');
+    let s = newGame(seed, character.id, content);
     while (s.phase !== 'ended') {
       let action: Action;
       if (s.phase === 'plan') action = { t: 'choosePlan', methodId: null };
       else if (s.phase === 'event') {
-        const ev = catalog.get(s.pendingEvents[0]!)!;
+        const ev = catalog.get(s.pendingEvents[0] ?? '');
+        if (!ev) throw Error('Missing pending event');
         if (ev.lifeStory) reached.add(ev.id);
         const indices = ev.choices.flatMap((c, index) => choiceAvailable(s, c.requires) ? [index] : []);
         action = { t: 'eventChoice', choiceIdx: rng.pick(indices) };

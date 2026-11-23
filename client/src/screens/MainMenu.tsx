@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { durations } from '@hts/shared';
 import type { Run } from '../game/useGame';
 import { t } from '../i18n';
 import { Art, Button } from '../components/ui';
@@ -76,7 +77,7 @@ export function MainMenu({
           <div className="menu-actions">
             {saved && (
               <Button tone="mint" block onClick={onContinue}>
-                {t('menu.continue', { day: `${saved.state.day}/${saved.state.maxDays}` })}
+                {saved.state.end ? 'กลับไปดูผลและส่งคะแนน' : t('menu.continue', { day: `${saved.state.day}/${saved.state.maxDays}` })}
               </Button>
             )}
             <Button
@@ -105,7 +106,6 @@ export function MainMenu({
               </span>
             </Button>
             </div>
-            <a className="practice-link" href="?preview=planner">ลองเล่น 1 วัน · ไม่ทับเซฟ</a>
             {user && onProfile && (
               <button
                 type="button"
@@ -152,8 +152,8 @@ export function MainMenu({
           </div>
           <div className="menu-facts">
             <div>
-              <b>30</b>
-              <span>วันเปลี่ยนชีวิต</span>
+              <b>{durations.length}</b>
+              <span>โหมด · {durations.join(' / ')} วัน</span>
             </div>
             <div>
               <b>∞</b>
