@@ -1,3 +1,4 @@
+import { homeOf } from '@hts/shared';
 import { useEffect, useRef, useState } from 'react';
 import type { Action, GameState } from '@hts/shared';
 import { bribeCost, escapeChance, escapeOf } from '@hts/shared';
@@ -122,7 +123,7 @@ function RouteStep({ state, dispatch }: Props) {
               <div className="text-xs text-ink-soft">{lt(r.desc)}</div>
               <div className="mt-1 flex flex-wrap gap-x-2 text-xs font-semibold">
                 <span>{t('escape.base', { n: r.baseChance })}</span>
-                <span className="text-danger">{t('escape.heatAfter', { n: r.heatAfter })}</span>
+                <span className="text-danger">{t('escape.heatAfter', { n: Math.max(0, r.heatAfter - homeOf(state).escapeHeat) })}</span>
                 <span>{r.hideDays ? t('escape.hide', { n: r.hideDays }) : t('escape.noHide')}</span>
                 {match && (
                   <span className="text-clean">{t('escape.match', { n: d?.goodBonus ?? 0 })}</span>

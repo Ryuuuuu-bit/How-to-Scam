@@ -28,6 +28,18 @@ const EMOJI: Record<string, ArtEntry> = {
   'icon:undermoney': { emoji: '💴' },
   'icon:audition': { emoji: '🎤' },
   'icon:undermarket': { emoji: '🏮' },
+  'icon:home': { emoji: '🏠' },
+
+  // บ้านกับตู้เสื้อผ้า
+  'home:room': { emoji: '🛏️' },
+  'home:condo': { emoji: '🏢' },
+  'home:house': { emoji: '🏡' },
+  'outfit:casual': { emoji: '👕' },
+  'outfit:banker': { emoji: '👔' },
+  'outfit:white': { emoji: '🤍' },
+  'outfit:influencer': { emoji: '🕶️' },
+  'outfit:trader': { emoji: '💼' },
+  'outfit:rider': { emoji: '🛵' },
 
   // โหมดหนีตำรวจ
   'disguise:somtam': { emoji: '🥗' },

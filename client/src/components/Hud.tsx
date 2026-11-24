@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { activeFestivals, caseStrength, dateOf, raidThreshold, soiBlocker } from '@hts/shared';
+import { activeFestivals, caseStrength, dateOf, homeOf, loadoutOf, outfitOf, raidThreshold, soiBlocker } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
 import { PhoneSheet } from './PhoneSheet';
 import { SoiMap } from './SoiMap';
@@ -198,6 +198,20 @@ function PhoneDock({ state, open }: { state: GameState; open: (app: App) => void
   );
 }
 
+/** บ้านกับชุดที่ติดมาจากนอกรอบ (โชว์เฉพาะเมื่อมีของ) */
+function LoadoutChip({ state }: { state: GameState }) {
+  const l = loadoutOf(state.seed);
+  if (l.home === 'room' && l.outfit === 'casual') return null;
+  const fit = outfitOf(state);
+  return (
+    <span className="loadout-chip ml-auto" title={`${homeOf(state).name} · ${fit.name}: ${fit.effect}`}>
+      <Art id={`home:${l.home}`} size={20} />
+      <Art id={`outfit:${l.outfit}`} size={20} />
+      <span className="hidden sm:inline">{fit.name}</span>
+    </span>
+  );
+}
+
 export function Hud({ state, dispatch }: { state: GameState; dispatch?: (a: Action) => void }) {
   const date = dateOf(state, state.day);
   const fests = activeFestivals(state, content);
@@ -209,6 +223,7 @@ export function Hud({ state, dispatch }: { state: GameState; dispatch?: (a: Acti
         <div className="phone-top flex items-center gap-2">
           <OnlineCount />
           {state.soi && <PhoneStatus state={state} />}
+          <LoadoutChip state={state} />
         </div>
         <div className="hud-meta font-display flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-1">

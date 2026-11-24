@@ -25,6 +25,7 @@ export function EndScreen({
   onAgain,
   onMenu,
   onMarket,
+  onHome,
 }: {
   state: GameState;
   runId?: string | undefined;
@@ -33,6 +34,7 @@ export function EndScreen({
   onAgain: () => void;
   onMenu: () => void;
   onMarket?: () => void;
+  onHome?: () => void;
 }) {
   const portrait = usePlayerPortrait(state.characterId);
   const submit = useSubmitRun(practice ? undefined : runId, actions);
@@ -198,6 +200,13 @@ export function EndScreen({
             <Button tone="sun" block onClick={onMarket}>
               <span className="flex items-center justify-center gap-2">
                 <Art id="icon:undermarket" size={26} /> ไปตลาดใต้ดิน
+              </span>
+            </Button>
+          )}
+          {onHome && (
+            <Button tone="paper" block onClick={onHome}>
+              <span className="flex items-center justify-center gap-2">
+                <Art id="icon:home" size={26} /> กลับบ้าน อัปเกรดบ้านและซื้อชุด
               </span>
             </Button>
           )}

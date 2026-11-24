@@ -1,3 +1,4 @@
+import { homeOf } from '@hts/shared';
 import { useState } from 'react';
 import { sceneUrl } from '../assets/art';
 import { LiveCounter } from './LiveCounter';
@@ -168,7 +169,7 @@ export function PlanPhase({ state, dispatch }: PhaseProps) {
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Button tone="mint" onClick={() => dispatch({ t: 'choosePlan', methodId: null })}>
-          {t('plan.rest', { n: content.config.heatDecayQuietDay })}
+          {t('plan.rest', { n: content.config.heatDecayQuietDay + homeOf(state).quietHeat })}
         </Button>
         <RetireButton dispatch={dispatch} />
       </div>

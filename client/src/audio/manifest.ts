@@ -116,6 +116,24 @@ export const SFX: SfxSpec[] = [
     prompt: 'Small studio audience laughing, sitcom laugh track',
     seconds: 2,
   },
+  {
+    id: 'sfx_home_upgrade',
+    kind: 'sfx',
+    prompt: 'Keys jingling, front door unlocking and swinging open, short happy cartoon fanfare',
+    seconds: 2.5,
+  },
+  {
+    id: 'sfx_outfit_buy',
+    kind: 'sfx',
+    prompt: 'Shopping bag rustle and cash register ding, cartoon boutique purchase',
+    seconds: 1.5,
+  },
+  {
+    id: 'sfx_outfit_wear',
+    kind: 'sfx',
+    prompt: 'Clothes hanger sliding on rail and fabric swish, quick cartoon outfit change',
+    seconds: 1,
+  },
 ];
 
 // เสียงพากย์: ผู้เล่นขอไม่ใช้ (2026-11-22) เก็บโครงไว้เผื่ออนาคต
