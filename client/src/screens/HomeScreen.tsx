@@ -128,6 +128,9 @@ export function HomeScreen({ onBack, onPlay }: { onBack: () => void; onPlay?: ()
       <p className="-mt-2 text-sm text-ink-soft">
         ใส่ได้ทีละชุด ชุดที่ใช่ทำให้เหยื่อเชื่อง่ายขึ้น เลือกให้เข้ากับงานที่จะทำในรอบหน้า
       </p>
+      {ART['home:closet']?.src && (
+        <img className="wardrobe-banner" src={ART['home:closet']?.src} alt="" />
+      )}
       <div className="wardrobe-rack">
         {outfits.map((o) => {
           const has = ownsOutfit(p.owned, o.id);
