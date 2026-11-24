@@ -1,4 +1,5 @@
 // การ์ดแชร์ผลงานตอนจบรอบ (วาดด้วย canvas แล้วแชร์หรือบันทึกเป็น PNG)
+import { breakChunks } from '../i18n/thaiBreak';
 import { titleFor } from '@hts/shared';
 import type { GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
@@ -46,7 +47,7 @@ function roundRect(
   ctx.roundRect(x, y, w, h, r);
 }
 
-/** ตัดบรรทัดภาษาไทยตามความกว้าง (ตัดทีละตัวอักษร เพราะภาษาไทยไม่มีช่องว่างระหว่างคำ) */
+/** ตัดบรรทัดภาษาไทยตามความกว้างที่รอยต่อคำ บรรทัดสุดท้ายที่ล้นต่อท้ายด้วย … */
 function wrap(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -55,14 +56,29 @@ function wrap(
 ): string[] {
   const lines: string[] = [];
   let line = '';
-  for (const ch of Array.from(text)) {
-    if (ctx.measureText(line + ch).width > maxW && line) {
-      lines.push(line);
-      line = ch.trimStart();
-      if (lines.length === maxLines) break;
-    } else line += ch;
+  let cut = false;
+  const pieces = breakChunks(text).flatMap((w) =>
+    // คำเดียวที่ยาวเกินบรรทัด (แทบไม่มี) ค่อยแบ่งตามกลุ่มตัวอักษร
+    ctx.measureText(w).width > maxW
+      ? Array.from(new Intl.Segmenter('th', { granularity: 'grapheme' }).segment(w), (g) => g.segment)
+      : [w],
+  );
+  for (const w of pieces) {
+    if (ctx.measureText(line + w).width > maxW && line) {
+      lines.push(line.trimEnd());
+      line = w.trimStart();
+      if (lines.length === maxLines) {
+        cut = true;
+        break;
+      }
+    } else line += w;
   }
-  if (lines.length < maxLines && line) lines.push(line);
+  if (!cut && line) lines.push(line.trimEnd());
+  if (cut) {
+    let last = lines[maxLines - 1] ?? '';
+    while (last && ctx.measureText(`${last}…`).width > maxW) last = Array.from(last).slice(0, -1).join('');
+    lines[maxLines - 1] = `${last.trimEnd()}…`;
+  }
   return lines;
 }
 

@@ -32,7 +32,14 @@ export interface Career {
   honest: number;
 }
 
-export const emptyCareer = (): Career => ({ seeds: [], runs: 0, survived: 0, escapes: 0, bestScore: 0, honest: 0 });
+export const emptyCareer = (): Career => ({
+  seeds: [],
+  runs: 0,
+  survived: 0,
+  escapes: 0,
+  bestScore: 0,
+  honest: 0,
+});
 
 const MAX_SEEDS = 300;
 
@@ -43,7 +50,8 @@ export const cardIdsOf = (c: GameContent): string[] => [
 
 function cardFrom(r: LastResult, seed: string): [string, VictimCard] | null {
   if (r.kind === 'baited') return ['baiter', { portrait: 'baiter', won: false, firstSeed: seed }];
-  if (r.kind === 'sting') return ['undercover', { portrait: 'undercover', won: false, firstSeed: seed }];
+  if (r.kind === 'sting')
+    return ['undercover', { portrait: 'undercover', won: false, firstSeed: seed }];
   if (r.kind !== 'call' || !r.textKey) return null;
   const [portrait, pitchId, nameIdx] = r.textKey.split(':');
   if (!portrait || nameIdx === undefined) return null;

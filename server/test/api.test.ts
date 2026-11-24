@@ -254,9 +254,6 @@ describe('ส่งคะแนน (anti-cheat)', () => {
 
   it('เก็บสมุดภาพการ์ดเหยื่อและประวัติยศในซอยไว้ที่ server', async () => {
     const g = await guest();
-    const { runId, seed } = (
-      await api('/api/runs', { token: g.token, body: { characterId: 'ex_insurance' } })
-    ).body as { runId: string; seed: string };
     // บอทเลือกงานโทรหลอกเมื่อทำได้ จะได้มีการ์ดเหยื่อ
     const calls = (st: GameState): Action => {
       const money = st.dirtyCash + st.cleanCash;
@@ -264,13 +261,24 @@ describe('ส่งคะแนน (anti-cheat)', () => {
       const m = ms.find((x) => x.mechanic === 'callCenter') ?? ms[0];
       return st.heat > 80 || !m ? { t: 'choosePlan', methodId: null } : { t: 'choosePlan', methodId: m.id };
     };
-    const actions = play(seed, 'ex_insurance', calls);
-    // การ์ดที่ client เก็บระหว่างเล่น ต้องตรงกับที่ server เก็บจาก replay
-    let s = newGame(seed, 'ex_insurance', content);
+    // seed สุ่มจาก server บางรอบจบก่อนได้โทร ลองใหม่จนได้รอบที่มีการ์ด
+    let runId = '';
+    let seed = '';
+    let actions: Action[] = [];
     let book: Scrapbook = {};
-    for (const a of actions) {
-      s = step(s, a, content);
-      book = addCards(book, s.lastResults, seed).book;
+    for (let tries = 0; tries < 10 && Object.keys(book).length === 0; tries++) {
+      ({ runId, seed } = (await api('/api/runs', { token: g.token, body: { characterId: 'ex_insurance' } })).body as {
+        runId: string;
+        seed: string;
+      });
+      actions = play(seed, 'ex_insurance', calls);
+      // การ์ดที่ client เก็บระหว่างเล่น ต้องตรงกับที่ server เก็บจาก replay
+      let s = newGame(seed, 'ex_insurance', content);
+      book = {};
+      for (const a of actions) {
+        s = step(s, a, content);
+        book = addCards(book, s.lastResults, seed).book;
+      }
     }
     const sub = await api(`/api/runs/${runId}/submit`, { token: g.token, body: { actions } });
     expect(sub.status).toBe(200);
@@ -281,16 +289,17 @@ describe('ส่งคะแนน (anti-cheat)', () => {
     expect(u.career.seeds).toEqual([seed]);
 
     // ย้ายข้อมูลเดิมในเครื่องขึ้น server: รวมโดยไม่นับซ้ำ ทิ้งการ์ดปลอม และจำกัดจำนวนรอบ
+    const oldId = ['baiter', 'undercover', 'n0', 'n1', 'n2'].find((id) => !book[id]) ?? 'n3';
     const local = {
-      scrapbook: { baiter: { portrait: 'baiter', won: false, firstSeed: 'old' }, fake: { portrait: 'x', won: true, firstSeed: 'x' } },
+      scrapbook: { [oldId]: { portrait: 'baiter', won: false, firstSeed: 'old' }, fake: { portrait: 'x', won: true, firstSeed: 'x' } },
       career: { seeds: ['old', seed], runs: 999, survived: 2, escapes: 3, bestScore: 5, honest: 0 },
     };
     const imp = await api('/api/me/collection', { token: g.token, body: local });
     expect(imp.status).toBe(200);
     const after = imp.body.user as { scrapbook: Scrapbook; career: { runs: number; survived: number; seeds: string[] } };
-    expect(after.scrapbook.baiter?.firstSeed).toBe('old');
+    expect(after.scrapbook[oldId]?.firstSeed).toBe('old');
     expect(after.scrapbook.fake).toBeUndefined();
-    expect(Object.keys(after.scrapbook).length).toBe(Object.keys({ ...book, baiter: 1 }).length);
+    expect(Object.keys(after.scrapbook).length).toBe(Object.keys(book).length + 1);
     expect(after.career.runs).toBe(51);
     expect(after.career.survived).toBeGreaterThanOrEqual(2);
     expect(after.career.seeds).toEqual([seed, 'old']);

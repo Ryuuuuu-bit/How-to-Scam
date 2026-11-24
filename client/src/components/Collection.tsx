@@ -14,6 +14,7 @@ import {
   type VictimCard,
 } from '../game/collection';
 import { lt } from '../i18n';
+import { clipWords } from '../i18n/thaiBreak';
 import { useAuth } from '../net/auth';
 import { Art } from './ui';
 import './collection.css';
@@ -58,7 +59,7 @@ export function VictimCardView({ id, card, fresh }: { id: string; card?: VictimC
       </div>
       <figcaption>
         <b>{cardTitle(id)}</b>
-        <small>{trap ? trap.note : pitch ? `มุก: ${lt(pitch.text).slice(0, 48)}` : ''}</small>
+        <small>{trap ? trap.note : pitch ? `มุก: ${clipWords(lt(pitch.text), 48)}` : ''}</small>
       </figcaption>
     </figure>
   );
