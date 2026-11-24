@@ -38,6 +38,10 @@ model User {
   money       Int      @default(0)
   /// ของที่ซื้อหรือได้จากออดิชั่นแล้ว เช่น "char:live_seller"
   owned       String[] @default([])
+  /// สมุดภาพการ์ดเหยื่อ { [cardId]: VictimCard } (ของสะสม ไม่มีผลกับเกม)
+  scrapbook   Json     @default("{}")
+  /// ประวัติข้ามรอบสำหรับยศในซอย (รอบที่เล่น รอดกี่รอบ หนีรอดกี่ครั้ง ฯลฯ)
+  career      Json     @default("{}")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   lastOnlineAt DateTime?

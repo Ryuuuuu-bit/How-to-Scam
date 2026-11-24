@@ -22,7 +22,7 @@ import './collection.css';
 export function CardCollector({ state }: { state: GameState }) {
   const { user } = useAuth();
   useEffect(() => {
-    if (collectCards(state, user?.uid).length > 0) audio.sfx('sfx_card_collect', 'paper');
+    if (collectCards(state, user).length > 0) audio.sfx('sfx_card_collect', 'paper');
   }, [state.lastResults, state.seed, user?.uid]);
   return null;
 }
@@ -68,15 +68,15 @@ export function VictimCardView({ id, card, fresh }: { id: string; card?: VictimC
 export function RunCollection({ state, owned }: { state: GameState; owned: readonly string[] }) {
   const { user } = useAuth();
   const [info] = useState(() => {
-    collectCards(state, user?.uid);
+    collectCards(state, user);
     // ยศก่อนรอบนี้: ยังไม่นับรอบนี้ และไม่นับการ์ดที่ได้ในรอบนี้
-    const prev = rankCtx(user?.uid, owned);
-    const thisRun = cardsFromRun(loadScrapbook(user?.uid), state.seed).length;
+    const prev = rankCtx(user, owned);
+    const thisRun = cardsFromRun(loadScrapbook(user), state.seed).length;
     const counted = prev.career.seeds.includes(state.seed);
     const before = counted ? soiRankIndex(prev) : soiRankIndex({ ...prev, cards: prev.cards - thisRun });
-    recordRun(state, user?.uid);
-    const ctx = rankCtx(user?.uid, owned);
-    const book = loadScrapbook(user?.uid);
+    recordRun(state, user);
+    const ctx = rankCtx(user, owned);
+    const book = loadScrapbook(user);
     return { book, fresh: cardsFromRun(book, state.seed), before, after: soiRankIndex(ctx), cards: ctx.cards };
   });
   const rankedUp = info.after > info.before;
@@ -114,7 +114,7 @@ export function RunCollection({ state, owned }: { state: GameState; owned: reado
 /** ป้ายยศในซอยบนเมนู */
 export function RankChip({ owned, onClick }: { owned: readonly string[]; onClick?: () => void }) {
   const { user } = useAuth();
-  const rank = soiRanks[soiRankIndex(rankCtx(user?.uid, owned))];
+  const rank = soiRanks[soiRankIndex(rankCtx(user, owned))];
   if (!rank) return null;
   return (
     <button type="button" className="rank-chip" onClick={onClick} aria-label={`ยศในซอย: ${rank.name}`}>

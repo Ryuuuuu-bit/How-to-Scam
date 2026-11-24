@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from 'react';
 import { api, ApiError, apiEnabled, getToken, setToken } from './api';
 import type { PublicUser } from './api';
+import { pendingUpload } from '../game/collection';
 
 // สถานะผู้เล่น: ทุกคนมี UID (Guest หรือ Google) ถ้า server ใช้ไม่ได้จะเล่นออฟไลน์
 export type AuthStatus = 'loading' | 'signedOut' | 'ready' | 'offline';
@@ -61,6 +62,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       alive = false;
     };
   }, []);
+
+  // ย้ายสมุดภาพการ์ดเหยื่อกับประวัติยศในซอยที่เคยเก็บแค่ในเครื่องขึ้น server (ทำซ้ำได้ ไม่นับซ้ำ)
+  const uid = user?.uid;
+  useEffect(() => {
+    if (!user || status !== 'ready') return;
+    const up = pendingUpload(user);
+    if (!up) return;
+    let alive = true;
+    api
+      .importCollection(up.scrapbook, up.career)
+      .then((r) => {
+        if (alive) setUser(r.user);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+    // ตรวจครั้งเดียวต่อบัญชีที่ล็อกอิน (ไม่ใส่ user ใน deps เพราะ setUser หลังส่งจะวนซ้ำ)
+  }, [uid, status]);
 
   const finish = useCallback((r: { token: string; user: PublicUser }) => {
     setToken(r.token);

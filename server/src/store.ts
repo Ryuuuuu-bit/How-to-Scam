@@ -1,4 +1,5 @@
 // ชั้นเก็บข้อมูล: แยกเป็น interface เพื่อให้ test ใช้ของในหน่วยความจำแทน Postgres ได้
+import type { Career, Scrapbook } from '@hts/shared';
 import type { SeasonInfo } from './season';
 
 export type Board = 'top' | 'longest' | 'fastest';
@@ -20,6 +21,10 @@ export interface UserRec {
   endings: string[];
   money: number;
   owned: string[];
+  /** สมุดภาพการ์ดเหยื่อ (JSON ดิบจากฐานข้อมูล ตรวจด้วย cleanScrapbook ก่อนใช้) */
+  scrapbook: unknown;
+  /** ประวัติข้ามรอบ (JSON ดิบ ตรวจด้วย cleanCareer ก่อนใช้) */
+  career: unknown;
   createdAt: Date;
 }
 
@@ -54,6 +59,8 @@ export interface ScoreInput {
   newOwned: string[];
   /** เหรียญใหม่ที่ปลดล็อกในรอบนี้ */
   newAchievements: string[];
+  /** สมุดภาพกับประวัติหลังรวมรอบนี้ (คำนวณใน transaction จากค่าล่าสุด) */
+  collect: (scrapbook: unknown, career: unknown) => { scrapbook: Scrapbook; career: Career };
 }
 
 export interface BoardRow {
@@ -96,6 +103,11 @@ export interface Store {
   saveScore(s: ScoreInput): Promise<UserRec>;
   /** หักเงินใต้ดินแล้วเพิ่มของ (ถ้าเงินไม่พอหรือมีแล้ว คืน null) */
   buyItem(userId: string, key: string, price: number): Promise<UserRec | null>;
+  /** รวมสมุดภาพกับประวัติจากเครื่องผู้เล่นเข้ากับของบน server (merge คำนวณจากค่าล่าสุด) */
+  mergeCollection(
+    userId: string,
+    merge: (scrapbook: unknown, career: unknown) => { scrapbook: Scrapbook; career: Career },
+  ): Promise<UserRec>;
   rejectRun(runId: string, reason: string, actionCount: number): Promise<void>;
   leaderboard(scope: Scope, board: Board, limit: number): Promise<BoardRow[]>;
   /** อันดับของคะแนนนี้ในกระดานคะแนนสูงสุด (นับผู้เล่นที่ทำได้ดีกว่า) */

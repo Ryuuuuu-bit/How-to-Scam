@@ -17,11 +17,19 @@ import {
   seedWithLoadout,
   type LoadoutPick,
   questSeedPrefix,
-  replay,
+  addRun,
+  cardIdsOf,
+  cleanCareer,
+  cleanScrapbook,
+  mergeCareer,
+  mergeScrapbook,
+  replayWithCards,
+  type Career,
+  type Scrapbook,
   titleFor,
   xpForRun,
 } from '@hts/shared';
-import type { Action, GameContent } from '@hts/shared';
+import type { Action, GameContent, GameState } from '@hts/shared';
 import { seasonFor } from './season';
 import type { Store, UserRec, Scope } from './store';
 
@@ -184,9 +192,10 @@ export async function submitRun(
   }
   const actions = parsed.data;
 
-  let state;
+  let state: GameState;
+  let cards: Scrapbook;
   try {
-    state = replay(run.seed, run.characterId, actions, c);
+    ({ state, cards } = replayWithCards(run.seed, run.characterId, actions, c));
   } catch (err) {
     const reason = err instanceof InvalidActionError ? err.message : 'replay_failed';
     await store.rejectRun(run.id, reason, actions.length);
@@ -229,6 +238,10 @@ export async function submitRun(
     moneyGained,
     newOwned: auditions.map(charKey),
     newAchievements,
+    collect: (book, career) => ({
+      scrapbook: mergeScrapbook(cleanScrapbook(book, cardIdsOf(c)), cards),
+      career: addRun(cleanCareer(career), state),
+    }),
   });
   const unlocked = c.characters
     .filter((ch) => isCharacterUnlocked(ch, updated) && !before.includes(ch.id))
@@ -266,4 +279,30 @@ export async function buyMarketItem(store: Store, c: GameContent, user: UserRec,
   const updated = await store.buyItem(user.id, key, price);
   if (!updated) throw new HttpError(409, 'purchase_failed');
   return { key, price, user: updated };
+}
+
+/**
+ * รับสมุดภาพกับประวัติจากเครื่องผู้เล่น (ข้อมูลเดิมก่อนย้ายมาเก็บที่ server หรือการ์ดจากรอบที่ยังไม่ได้ส่ง)
+ * รวมแบบไม่นับซ้ำและไม่ลดของเดิม ประวัติจำนวนรอบต้องไม่เกินรอบที่ server เคยรับจริงมากนัก
+ */
+export async function importCollection(
+  store: Store,
+  c: GameContent,
+  user: UserRec,
+  raw: { scrapbook?: unknown; career?: unknown },
+) {
+  const local = cleanScrapbook(raw.scrapbook, cardIdsOf(c));
+  const lc = cleanCareer(raw.career);
+  const cap = user.runsPlayed + 50;
+  const localCareer: Career = {
+    ...lc,
+    runs: Math.min(lc.runs, cap),
+    survived: Math.min(lc.survived, cap),
+    honest: Math.min(lc.honest, cap),
+    escapes: Math.min(lc.escapes, cap * 30),
+  };
+  return store.mergeCollection(user.id, (book, career) => ({
+    scrapbook: mergeScrapbook(cleanScrapbook(book, cardIdsOf(c)), local),
+    career: mergeCareer(cleanCareer(career), localCareer),
+  }));
 }

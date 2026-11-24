@@ -4,7 +4,8 @@ import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { campaignSeed, careerStatus, escapeOf, newGame, replay, step, unlockedMethods } from '@hts/shared';
+import { addCards, campaignSeed, careerStatus, escapeOf, newGame, replay, step, unlockedMethods } from '@hts/shared';
+import type { Scrapbook } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { createApp } from '../src/app';
@@ -249,6 +250,54 @@ describe('ส่งคะแนน (anti-cheat)', () => {
     // ส่งซ้ำไม่ได้
     const again = await api(`/api/runs/${runId}/submit`, { token: g.token, body: { actions } });
     expect(again.status).toBe(409);
+  });
+
+  it('เก็บสมุดภาพการ์ดเหยื่อและประวัติยศในซอยไว้ที่ server', async () => {
+    const g = await guest();
+    const { runId, seed } = (
+      await api('/api/runs', { token: g.token, body: { characterId: 'ex_insurance' } })
+    ).body as { runId: string; seed: string };
+    // บอทเลือกงานโทรหลอกเมื่อทำได้ จะได้มีการ์ดเหยื่อ
+    const calls = (st: GameState): Action => {
+      const money = st.dirtyCash + st.cleanCash;
+      const ms = unlockedMethods(st, content).filter((x) => x.cost <= money);
+      const m = ms.find((x) => x.mechanic === 'callCenter') ?? ms[0];
+      return st.heat > 80 || !m ? { t: 'choosePlan', methodId: null } : { t: 'choosePlan', methodId: m.id };
+    };
+    const actions = play(seed, 'ex_insurance', calls);
+    // การ์ดที่ client เก็บระหว่างเล่น ต้องตรงกับที่ server เก็บจาก replay
+    let s = newGame(seed, 'ex_insurance', content);
+    let book: Scrapbook = {};
+    for (const a of actions) {
+      s = step(s, a, content);
+      book = addCards(book, s.lastResults, seed).book;
+    }
+    const sub = await api(`/api/runs/${runId}/submit`, { token: g.token, body: { actions } });
+    expect(sub.status).toBe(200);
+    const u = sub.body.user as { scrapbook: Scrapbook; career: { runs: number; seeds: string[] } };
+    expect(Object.keys(book).length).toBeGreaterThan(0);
+    expect(u.scrapbook).toEqual(book);
+    expect(u.career.runs).toBe(1);
+    expect(u.career.seeds).toEqual([seed]);
+
+    // ย้ายข้อมูลเดิมในเครื่องขึ้น server: รวมโดยไม่นับซ้ำ ทิ้งการ์ดปลอม และจำกัดจำนวนรอบ
+    const local = {
+      scrapbook: { baiter: { portrait: 'baiter', won: false, firstSeed: 'old' }, fake: { portrait: 'x', won: true, firstSeed: 'x' } },
+      career: { seeds: ['old', seed], runs: 999, survived: 2, escapes: 3, bestScore: 5, honest: 0 },
+    };
+    const imp = await api('/api/me/collection', { token: g.token, body: local });
+    expect(imp.status).toBe(200);
+    const after = imp.body.user as { scrapbook: Scrapbook; career: { runs: number; survived: number; seeds: string[] } };
+    expect(after.scrapbook.baiter?.firstSeed).toBe('old');
+    expect(after.scrapbook.fake).toBeUndefined();
+    expect(Object.keys(after.scrapbook).length).toBe(Object.keys({ ...book, baiter: 1 }).length);
+    expect(after.career.runs).toBe(51);
+    expect(after.career.survived).toBeGreaterThanOrEqual(2);
+    expect(after.career.seeds).toEqual([seed, 'old']);
+    // ส่งซ้ำได้ ไม่นับเพิ่ม
+    const again = await api('/api/me/collection', { token: g.token, body: local });
+    expect(again.body.user).toEqual(imp.body.user);
+    expect((await api('/api/me/collection', { body: local })).status).toBe(401);
   });
 
   it('action log ที่ถูกแก้จนผิดกติกาถูกปฏิเสธ', async () => {

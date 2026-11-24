@@ -1,128 +1,103 @@
-import { bestHome, cars, pets, petKey, carKey, homes, type GameState, type LastResult } from '@hts/shared';
+import {
+  addCards,
+  addRun,
+  bestHome,
+  cardIdsOf,
+  cars,
+  cleanCareer,
+  cleanScrapbook,
+  emptyCareer,
+  mergeCareer,
+  mergeScrapbook,
+  pets,
+  petKey,
+  carKey,
+  homes,
+  type Career,
+  type GameState,
+  type Scrapbook,
+} from '@hts/shared';
 import { content } from '@hts/shared/data';
+import type { PublicUser } from '../net/api';
 
-// สมุดภาพการ์ดเหยื่อกับยศในซอย: ของสะสมข้ามรอบ เก็บในเครื่องแยกตามบัญชี
-// ไม่มีผลกับเกม ใช้โชว์อย่างเดียว
+// สมุดภาพการ์ดเหยื่อกับยศในซอย: ของสะสมข้ามรอบ ไม่มีผลกับเกม ใช้โชว์อย่างเดียว
+// ที่เก็บหลักอยู่บน server (ติดไปกับบัญชี) ส่วนในเครื่องเก็บสำเนาไว้ระหว่างเล่น
+// และไว้ใช้ตอนเล่นออฟไลน์ ค่าที่โชว์คือของ server รวมกับของในเครื่อง
 
-// ---------- สมุดภาพการ์ดเหยื่อ ----------
+export { cardsFromRun, trapCards, type Career, type Scrapbook, type TrapCard, type VictimCard } from '@hts/shared';
 
-/** การ์ดพิเศษจากสายที่หลอกกลับมา */
-export const trapCards = ['baiter', 'undercover'] as const;
-export type TrapCard = (typeof trapCards)[number];
-
-export interface VictimCard {
-  /** id รูปหน้าตา (content.victims) หรือ id การ์ดพิเศษ */
-  portrait: string;
-  /** มุกที่ใช้ครั้งแรก */
-  pitchId?: string;
-  /** เคยหลอกสำเร็จไหม */
-  won: boolean;
-  /** seed ของรอบที่ได้การ์ดใบนี้ครั้งแรก */
-  firstSeed: string;
-}
-
-export type Scrapbook = Record<string, VictimCard>;
+export const allCardIds: string[] = cardIdsOf(content);
 
 const bookKey = (uid?: string) => `hts.scrapbook.v1.${uid ?? 'offline'}`;
+const careerKey = (uid?: string) => `hts.career.v1.${uid ?? 'offline'}`;
 
-export const allCardIds: string[] = [
-  ...content.victimParts.names.map((_, i) => `n${i}`),
-  ...trapCards,
-];
-
-export function loadScrapbook(uid?: string): Scrapbook {
+function readJson(key: string): unknown {
   try {
-    const raw = JSON.parse(localStorage.getItem(bookKey(uid)) ?? '{}') as unknown;
-    return raw && typeof raw === 'object' ? (raw as Scrapbook) : {};
+    return JSON.parse(localStorage.getItem(key) ?? '{}') as unknown;
   } catch {
     return {};
   }
 }
 
-function cardFrom(r: LastResult, seed: string): [string, VictimCard] | null {
-  if (r.kind === 'baited') return ['baiter', { portrait: 'baiter', won: false, firstSeed: seed }];
-  if (r.kind === 'sting') return ['undercover', { portrait: 'undercover', won: false, firstSeed: seed }];
-  if (r.kind !== 'call' || !r.textKey) return null;
-  const [portrait, pitchId, nameIdx] = r.textKey.split(':');
-  if (!portrait || nameIdx === undefined) return null;
-  return [`n${nameIdx}`, { portrait, pitchId, won: !!r.success, firstSeed: seed }];
-}
-
-/** เก็บการ์ดจากผลของวันนี้ (เรียกซ้ำได้ ไม่นับซ้ำ) คืน id การ์ดที่เพิ่งได้ */
-export function collectCards(s: GameState, uid?: string): string[] {
-  const book = loadScrapbook(uid);
-  const fresh: string[] = [];
-  let changed = false;
-  for (const r of s.lastResults) {
-    const got = cardFrom(r, s.seed);
-    if (!got) continue;
-    const [id, card] = got;
-    const had = book[id];
-    if (!had) {
-      book[id] = card;
-      fresh.push(id);
-      changed = true;
-    } else if (card.won && !had.won) {
-      book[id] = { ...had, won: true };
-      changed = true;
-    }
-  }
-  if (changed) {
-    try {
-      localStorage.setItem(bookKey(uid), JSON.stringify(book));
-    } catch {
-      /* เก็บไม่ได้ก็เล่นต่อได้ */
-    }
-  }
-  return fresh;
-}
-
-/** การ์ดที่ได้ใหม่ในรอบนี้ */
-export const cardsFromRun = (book: Scrapbook, seed: string) =>
-  Object.keys(book).filter((id) => book[id]?.firstSeed === seed);
-
-// ---------- ประวัติการเล่นข้ามรอบ ----------
-
-export interface Career {
-  seeds: string[];
-  runs: number;
-  /** จบแบบรอดครบรอบหรือวางมือ */
-  survived: number;
-  escapes: number;
-  bestScore: number;
-  honest: number;
-}
-
-const careerKey = (uid?: string) => `hts.career.v1.${uid ?? 'offline'}`;
-const emptyCareer: Career = { seeds: [], runs: 0, survived: 0, escapes: 0, bestScore: 0, honest: 0 };
-
-export function loadCareer(uid?: string): Career {
+function writeJson(key: string, v: unknown) {
   try {
-    const raw = JSON.parse(localStorage.getItem(careerKey(uid)) ?? '{}') as Partial<Career>;
-    return { ...emptyCareer, ...raw, seeds: Array.isArray(raw.seeds) ? raw.seeds : [] };
+    localStorage.setItem(key, JSON.stringify(v));
   } catch {
-    return { ...emptyCareer };
+    /* เก็บไม่ได้ก็เล่นต่อได้ */
   }
 }
 
-/** บันทึกรอบที่จบแล้ว (ครั้งเดียวต่อ seed) */
-export function recordRun(s: GameState, uid?: string): Career {
-  const c = loadCareer(uid);
-  if (!s.end || c.seeds.includes(s.seed)) return c;
-  const next: Career = {
-    seeds: [...c.seeds, s.seed].slice(-300),
-    runs: c.runs + 1,
-    survived: c.survived + (s.end.reason === 'survived' || s.end.reason === 'retired' ? 1 : 0),
-    escapes: c.escapes + s.escapes,
-    bestScore: Math.max(c.bestScore, s.end.score),
-    honest: c.honest + (s.end.endingId === 'honest_shop' ? 1 : 0),
-  };
-  try {
-    localStorage.setItem(careerKey(uid), JSON.stringify(next));
-  } catch {
-    /* ไม่เป็นไร */
-  }
-  return next;
+/** สมุดในเครื่องอย่างเดียว */
+export const localScrapbook = (uid?: string): Scrapbook => cleanScrapbook(readJson(bookKey(uid)), allCardIds);
+/** ประวัติในเครื่องอย่างเดียว */
+export const localCareer = (uid?: string): Career => cleanCareer(readJson(careerKey(uid)));
+
+/** สมุดภาพที่ใช้โชว์: ของ server รวมกับของในเครื่อง */
+export function loadScrapbook(user?: PublicUser | null): Scrapbook {
+  const local = localScrapbook(user?.uid);
+  return user?.scrapbook ? mergeScrapbook(cleanScrapbook(user.scrapbook, allCardIds), local) : local;
+}
+
+export function loadCareer(user?: PublicUser | null): Career {
+  const local = localCareer(user?.uid);
+  return user?.career ? mergeCareer(cleanCareer(user.career), local) : local;
+}
+
+/** เก็บการ์ดจากผลของวันนี้ลงเครื่อง (เรียกซ้ำได้ ไม่นับซ้ำ) คืน id การ์ดที่เพิ่งได้ */
+export function collectCards(s: GameState, user?: PublicUser | null): string[] {
+  const { book, fresh, changed } = addCards(localScrapbook(user?.uid), s.lastResults, s.seed);
+  if (changed) writeJson(bookKey(user?.uid), book);
+  // นับว่าใหม่เฉพาะใบที่ยังไม่มีบน server ด้วย (เคยได้จากเครื่องอื่นแล้วไม่นับ)
+  const server = user?.scrapbook ? cleanScrapbook(user.scrapbook, allCardIds) : {};
+  return fresh.filter((id) => !server[id]);
+}
+
+/** บันทึกรอบที่จบแล้วลงเครื่อง (ครั้งเดียวต่อ seed) server นับเองตอนส่งผล */
+export function recordRun(s: GameState, user?: PublicUser | null): Career {
+  const c = localCareer(user?.uid);
+  const next = addRun(c, s);
+  if (next !== c) writeJson(careerKey(user?.uid), next);
+  return mergeCareer(user?.career ? cleanCareer(user.career) : emptyCareer(), next);
+}
+
+/**
+ * ของในเครื่องที่ server ยังไม่มี (ข้อมูลก่อนย้ายมาเก็บที่ server หรือรอบที่ไม่ได้ส่ง)
+ * คืน null ถ้าไม่มีอะไรต้องส่ง
+ */
+export function pendingUpload(user: PublicUser): { scrapbook: Scrapbook; career: Career } | null {
+  if (user.scrapbook === undefined) return null; // server รุ่นเก่า
+  const server = cleanScrapbook(user.scrapbook, allCardIds);
+  const sc = cleanCareer(user.career);
+  const book = localScrapbook(user.uid);
+  const career = localCareer(user.uid);
+  const newCard = Object.entries(book).some(([id, c]) => !server[id] || (c.won && !server[id]?.won));
+  const ahead =
+    career.runs > sc.runs ||
+    career.survived > sc.survived ||
+    career.escapes > sc.escapes ||
+    career.bestScore > sc.bestScore ||
+    career.honest > sc.honest;
+  return newCard || ahead ? { scrapbook: book, career } : null;
 }
 
 // ---------- ยศในซอย ----------
@@ -204,6 +179,6 @@ export function soiRankIndex(x: RankCtx): number {
   return i;
 }
 
-export function rankCtx(uid: string | undefined, owned: readonly string[]): RankCtx {
-  return { career: loadCareer(uid), cards: Object.keys(loadScrapbook(uid)).length, owned };
+export function rankCtx(user: PublicUser | null | undefined, owned: readonly string[]): RankCtx {
+  return { career: loadCareer(user), cards: Object.keys(loadScrapbook(user)).length, owned };
 }
