@@ -18,7 +18,13 @@ const effects = {
 type Cue = keyof typeof effects;
 type MusicScene = 'normal' | 'live' | 'focus' | 'chase';
 
-const recordedEffects = new Set(['sfx_click', 'sfx_cash', 'sfx_coins', 'sfx_card_flip', 'sfx_sale', 'sfx_spotted', 'sfx_chase']);
+// ไฟล์ที่มีอยู่จริงใน public/audio (ไม่มีก็ใช้เสียงสังเคราะห์แทน)
+const recordedEffects = new Set([
+  'sfx_click', 'sfx_cash', 'sfx_coins', 'sfx_card_flip', 'sfx_sale', 'sfx_spotted', 'sfx_chase',
+  'sfx_phone_ring', 'sfx_hangup', 'sfx_siren', 'sfx_jail', 'sfx_escape', 'sfx_level_up',
+  'sfx_launder_ok', 'sfx_launder_fail', 'sfx_event', 'sfx_achievement', 'sfx_news',
+  'sfx_home_upgrade', 'sfx_outfit_buy', 'sfx_outfit_wear',
+]);
 export interface AudioSettings {
   muted: boolean;
   music: number;
@@ -55,6 +61,10 @@ class GameAudio {
   private marketNode: AudioBufferSourceNode | null = null;
   private filter: BiquadFilterNode | null = null;
   private scene: MusicScene = 'normal';
+  /** เพลงพิเศษของหน้าจอ (เช่นเพลงบ้าน) แทนเพลงตลาดชั่วคราว */
+  private track: string | null = null;
+  private trackNode: AudioBufferSourceNode | null = null;
+  private trackGain: GainNode | null = null;
   /** ไฟล์เสียงจาก ElevenLabs ที่โหลดแล้ว (null = ไม่มีไฟล์) */
   private buffers = new Map<string, Promise<AudioBuffer | null>>();
   private voiceNode: AudioBufferSourceNode | null = null;
@@ -95,6 +105,11 @@ class GameAudio {
         void this.load('soi_cat_shuffle').then(buffer => { this.marketTrack = buffer; });
       }
       this.enabled = true;
+      if (this.track && !this.trackNode) {
+        const id = this.track;
+        this.track = null;
+        this.setTrack(id);
+      }
       if (document.hidden) return;
       if (this.context.state === 'suspended') await this.context.resume();
       if (!this.timer) {
@@ -109,6 +124,39 @@ class GameAudio {
   setDanger(value: boolean) {
     this.danger = value;
     this.mix();
+  }
+  /** เปลี่ยนไปเล่นเพลงของหน้าจอ (null = กลับเพลงปกติ) ค่อยๆ เฟดข้ามกัน */
+  setTrack(id: string | null) {
+    if (this.track === id) return;
+    this.track = id;
+    const ctx = this.context;
+    const old = this.trackNode;
+    const oldGain = this.trackGain;
+    this.trackNode = null;
+    this.trackGain = null;
+    if (ctx && old && oldGain) {
+      oldGain.gain.setTargetAtTime(0, ctx.currentTime, 0.4);
+      try { old.stop(ctx.currentTime + 2); } catch { /* stopped */ }
+    }
+    this.marketGainTo(id ? 0 : 1);
+    if (!ctx || !id || !this.musicGain) return;
+    void this.load(id).then((buf) => {
+      if (!buf || this.track !== id || !this.musicGain) return;
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      const g = ctx.createGain();
+      g.gain.value = 0;
+      g.gain.setTargetAtTime(1.4, ctx.currentTime, 0.6);
+      src.connect(g).connect(this.musicGain);
+      src.start();
+      this.trackNode = src;
+      this.trackGain = g;
+    });
+  }
+  private marketGain: GainNode | null = null;
+  private marketGainTo(v: number) {
+    if (this.context && this.marketGain) this.marketGain.gain.setTargetAtTime(v, this.context.currentTime, 0.4);
   }
   setScene(scene: MusicScene) {
     this.scene = scene;
@@ -173,7 +221,9 @@ class GameAudio {
         this.filter = this.context.createBiquadFilter();
         this.filter.type = 'lowpass';
         this.filter.Q.value = 0.65;
-        this.marketNode.connect(this.filter).connect(this.musicGain);
+        this.marketGain = this.context.createGain();
+        this.marketGain.gain.value = this.track ? 0 : 1;
+        this.marketNode.connect(this.filter).connect(this.marketGain).connect(this.musicGain);
         this.mix();
         this.marketNode.start();
       }

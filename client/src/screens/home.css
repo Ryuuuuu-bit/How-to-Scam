@@ -1,0 +1,187 @@
+/* บ้านกับตู้เสื้อผ้า */
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 3px solid var(--color-ink);
+  border-radius: 26px;
+  background: #2a2140;
+  box-shadow: var(--shadow-pop);
+}
+.home-hero > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: home-drift 18s ease-in-out infinite alternate;
+}
+.home-hero-empty {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 30% 30%, #ffcf7a55, #0000 60%), #2a2140;
+}
+@keyframes home-drift {
+  from { transform: scale(1.03) translateX(-1%); }
+  to { transform: scale(1.08) translateX(1%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-hero > img { animation: none; }
+}
+.home-hero-tag {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  padding: 6px 12px;
+  border: 2px solid var(--color-ink);
+  border-radius: 14px;
+  background: var(--color-sun);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pop-sm);
+}
+.home-hero-tag small { display: block; font-size: 11px; opacity: 0.7; }
+.home-hero-tag b { font: 600 17px/1.2 var(--font-display); }
+.home-hero-fit {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.home-hero-fit img {
+  filter: drop-shadow(0 4px 0 #080a0f88);
+}
+.home-hero-fit span {
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #080a0fcc;
+  color: #fff;
+  font-size: 11px;
+}
+
+.home-ladder {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 720px) {
+  .home-ladder { grid-template-columns: 1fr; }
+}
+.home-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid var(--color-ink);
+  border-radius: 22px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pop);
+}
+.home-card[data-current] {
+  border-width: 3px;
+  border-color: var(--color-grape);
+  background: #efeaff;
+}
+.home-card-art {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  background: #2a2140;
+}
+.home-card-art img { width: 100%; height: 100%; object-fit: cover; }
+.home-card:not([data-owned]) .home-card-art img { filter: saturate(0.55) brightness(0.8); }
+.home-step {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--color-ink);
+  color: var(--color-sun);
+  font: 500 12px var(--font-display);
+}
+.home-card-body { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px 12px; flex: 1; }
+.home-card h3 { font: 600 17px/1.2 var(--font-display); }
+.home-desc { font-size: 12px; color: var(--color-ink-soft); }
+.home-perks { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; font-size: 12px; flex: 1; }
+.home-perks li::before { content: '✦ '; color: var(--color-mint); }
+.home-badge { font: 500 14px var(--font-display); color: var(--color-grape); }
+.home-badge-old { color: var(--color-ink-soft); }
+
+.wardrobe-rack {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  padding: 18px 12px 14px;
+  border: 3px solid var(--color-ink);
+  border-radius: 26px;
+  background:
+    linear-gradient(#5b3a22 0 8px, #0000 8px) top / 100% 18px no-repeat,
+    repeating-linear-gradient(90deg, #f3e3c3 0 40px, #ead6ae 40px 42px);
+  box-shadow: var(--shadow-pop);
+}
+.outfit-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 10px 12px;
+  border: 2px solid var(--color-ink);
+  border-radius: 18px;
+  background: #fffdf6;
+  color: var(--color-ink);
+  text-align: center;
+  transition: transform 0.2s;
+}
+.outfit-card[data-on] {
+  border-width: 3px;
+  border-color: var(--color-mint);
+  background: #e6f6ef;
+  transform: translateY(-3px);
+}
+.outfit-hanger {
+  position: absolute;
+  top: -14px;
+  width: 34px;
+  height: 18px;
+  border: 3px solid #5b3a22;
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+}
+.outfit-art { border-radius: 14px; }
+.outfit-art-locked { filter: grayscale(0.85) opacity(0.6); }
+.outfit-card h3 { font: 600 15px/1.2 var(--font-display); }
+.outfit-effect { font: 500 12px/1.35 var(--font-display); color: var(--color-mint); }
+.outfit-desc { font-size: 11px; color: var(--color-ink-soft); flex: 1; }
+
+[data-flash] { animation: home-flash 1.2s ease-out 2; }
+@keyframes home-flash {
+  0% { box-shadow: 0 0 0 0 #e9fb77; }
+  60% { box-shadow: 0 0 0 10px #e9fb7700; }
+}
+
+.wardrobe-banner {
+  width: 100%;
+  aspect-ratio: 16 / 5;
+  object-fit: cover;
+  object-position: 50% 40%;
+  border: 3px solid var(--color-ink);
+  border-radius: 22px;
+  box-shadow: var(--shadow-pop);
+}
+
+/* ป้ายบ้านกับชุดระหว่างเล่น */
+.loadout-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 4px;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: #fffdf6;
+  color: var(--color-ink);
+  font-size: 12px;
+}

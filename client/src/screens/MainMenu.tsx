@@ -23,6 +23,7 @@ export function MainMenu({
   onDaily,
   onAchievements,
   onWardrobe,
+  onHome,
   onMarket,
   onEndings,
 }: {
@@ -34,6 +35,7 @@ export function MainMenu({
   onDaily?: (() => void) | undefined;
   onAchievements?: (() => void) | undefined;
   onWardrobe: () => void;
+  onHome: () => void;
   onMarket: () => void;
   onEndings?: (() => void) | undefined;
 }) {
@@ -155,6 +157,13 @@ export function MainMenu({
                 <span aria-hidden>↗</span>
               </Button>
             )}
+            <Button tone="sun" block onClick={onHome}>
+              <span className="flex items-center gap-2">
+                <Art id="icon:home" size={25} className="shrink-0" />
+                บ้านกับตู้เสื้อผ้า
+              </span>
+              <span aria-hidden>↗</span>
+            </Button>
             <Button tone="paper" block onClick={onWardrobe}>
               <span className="flex items-center gap-2">
                 <Art id="icon:wardrobe" size={25} className="shrink-0" />

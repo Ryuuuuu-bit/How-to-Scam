@@ -2,6 +2,7 @@ import type { Disguise, EscapeRoute, GameContent } from '../types/content';
 import type { EscapeState, GameState } from '../types/state';
 import { goToLaunder, spend } from './day';
 import { invariant } from './errors';
+import { homeOf } from './loadout';
 import { karmaDelta } from './perks';
 import { hashSeed, Rng } from './rng';
 
@@ -48,7 +49,8 @@ export function escapeChance(s: GameState, c: GameContent, hits = 0): number {
   const cfg = c.config.escape;
   const h = Math.max(0, Math.min(cfg.qteTargets, Math.floor(hits)));
   const raw =
-    (route?.baseChance ?? 0) + e.bonus + h * cfg.qtePerHit - s.escapes * cfg.repeatPenalty;
+    (route?.baseChance ?? 0) + e.bonus + h * cfg.qtePerHit - s.escapes * cfg.repeatPenalty +
+    homeOf(s).escapePct;
   return Math.max(5, Math.min(95, Math.round(raw)));
 }
 
@@ -116,7 +118,7 @@ export function escapeQte(s: GameState, c: GameContent, rng: Rng, hits: number):
   s.escape = null;
   if (!success) return true;
   s.escapes++;
-  s.heat = route.heatAfter;
+  s.heat = Math.max(0, route.heatAfter - homeOf(s).escapeHeat);
   s.pendingEvents = [];
   // กบดาน: ข้ามวัน (ไม่มีรายได้) แต่ไม่เกินวันสุดท้าย
   s.day = Math.min(s.maxDays, s.day + route.hideDays);

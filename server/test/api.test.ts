@@ -325,6 +325,22 @@ describe('ส่งคะแนน (anti-cheat)', () => {
     expect((await api('/api/runs', { token: g.token, body: { characterId: 'live_seller' } })).status).toBe(200);
   });
 
+  it('บ้านกับชุดติดไปกับ seed เฉพาะของที่มีจริง และบ้านเดี่ยวต้องมีคอนโดก่อน', async () => {
+    const g = await guest();
+    const plain = await api('/api/runs', { token: g.token, body: { characterId: 'gamer_kid', outfit: 'banker' } });
+    expect((plain.body as { seed: string }).seed).not.toContain('|L=');
+    const u = await store.findUser(g.user.uid);
+    if (!u) throw new Error('no user');
+    u.money = 20_000;
+    expect((await api('/api/market/buy', { token: g.token, body: { key: 'home:house' } })).status).toBe(409);
+    expect((await api('/api/market/buy', { token: g.token, body: { key: 'home:condo' } })).status).toBe(200);
+    expect((await api('/api/market/buy', { token: g.token, body: { key: 'home:house' } })).status).toBe(200);
+    expect((await api('/api/market/buy', { token: g.token, body: { key: 'outfit:banker' } })).status).toBe(200);
+    const run = await api('/api/runs', { token: g.token, body: { characterId: 'gamer_kid', outfit: 'banker' } });
+    expect((run.body as { seed: string }).seed).toMatch(/\|L=house\.banker$/);
+    expect((await api('/api/runs', { token: g.token, body: { characterId: 'gamer_kid', outfit: 'nope' } })).status).toBe(400);
+  });
+
   it('จบรอบได้เงินใต้ดิน และผ่านออดิชั่นได้ตัวละครฟรี', async () => {
     const g = await guest();
     const { runId, seed } = (

@@ -25,6 +25,9 @@ import { t } from './i18n';
 import { WardrobeScreen } from './screens/WardrobeScreen';
 import { MarketScreen } from './screens/MarketScreen';
 import { EndingsGallery } from './screens/EndingsGallery';
+import { HomeScreen } from './screens/HomeScreen';
+import { currentLoadout, loadOutfit } from './game/loadout';
+import { progressFor } from './game/meta';
 import './components/phone.css';
 
 type Screen =
@@ -37,7 +40,8 @@ type Screen =
   | 'achievements'
   | 'wardrobe'
   | 'market'
-  | 'endings';
+  | 'endings'
+  | 'home';
 
 export function App() {
   const preview = new URLSearchParams(window.location.search).get('preview');
@@ -89,14 +93,15 @@ function GameScreens() {
     let server: { runId: string; seed: string } | undefined;
     if (auth.status === 'ready') {
       try {
-        server = await api.startRun(characterId, days);
+        server = await api.startRun(characterId, days, loadOutfit(auth.user?.uid));
       } catch {
         setStarting(false);
         setStartError(true);
         return;
       }
     }
-    game.start(characterId, server, days);
+    // ออฟไลน์: บ้านกับชุดติดไปกับ seed ที่สุ่มเอง
+    game.start(characterId, server, days, currentLoadout(progressFor(auth.user).owned, auth.user?.uid));
     setStarting(false);
     setScreen('play');
   };
@@ -116,6 +121,7 @@ function GameScreens() {
 
   if (screen === 'wardrobe') return <WardrobeScreen onBack={() => setScreen('menu')} onMarket={() => setScreen('market')} />;
   if (screen === 'market') return <MarketScreen onBack={() => setScreen('menu')} />;
+  if (screen === 'home') return <HomeScreen onBack={() => setScreen('menu')} onPlay={() => setScreen('character')} />;
   if (screen === 'endings') return <EndingsGallery onBack={() => setScreen('menu')} />;
 
   if (screen === 'daily') {
@@ -182,6 +188,11 @@ function GameScreens() {
               setSaved(loadSavedRun());
               setScreen('market');
             }}
+            onHome={() => {
+              game.quit();
+              setSaved(loadSavedRun());
+              setScreen('home');
+            }}
           />
           {finalLines.length > 0 && <EndIntro key={game.tick} lines={finalLines} />}
         </>
@@ -201,6 +212,7 @@ function GameScreens() {
     <>
       <MainMenu
         onWardrobe={() => setScreen('wardrobe')}
+        onHome={() => setScreen('home')}
         onMarket={() => setScreen('market')}
         onEndings={() => setScreen('endings')}
         saved={saved}

@@ -2,6 +2,7 @@
 // ของที่ซื้อแล้วเก็บเป็น key เช่น "char:live_seller", "skin:ex_insurance_gold", "scene:condo"
 import type { Character, GameContent } from '../types/content';
 import type { GameState } from '../types/state';
+import { loadoutPrices } from './loadout';
 import { xpForRun } from './score';
 
 /** เงินใต้ดินที่ได้ต่อแต้มประสบการณ์ */
@@ -55,6 +56,7 @@ export function marketPrice(c: GameContent, key: string): number | null {
     const ch = c.characters.find((x) => charKey(x.id) === key);
     return ch?.price ?? null;
   }
+  if (Object.hasOwn(loadoutPrices, key)) return loadoutPrices[key] ?? null;
   return Object.hasOwn(cosmeticPrices, key) ? (cosmeticPrices[key] ?? null) : null;
 }
 

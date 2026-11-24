@@ -123,8 +123,8 @@ export const api = {
     }),
   rename: (displayName: string) =>
     call<{ user: PublicUser }>('/api/me', { method: 'PATCH', body: { displayName } }),
-  startRun: (characterId: string, days = 30) =>
-    call<{ runId: string; seed: string }>('/api/runs', { body: { characterId, days } }),
+  startRun: (characterId: string, days = 30, outfit?: string) =>
+    call<{ runId: string; seed: string }>('/api/runs', { body: { characterId, days, outfit } }),
   submitRun: (runId: string, actions: Action[]) =>
     call<SubmitResult>(`/api/runs/${runId}/submit`, { body: { actions } }),
   leaderboard: (board: 'top' | 'longest' | 'fastest' | 'daily', season?: string, days = 30) =>

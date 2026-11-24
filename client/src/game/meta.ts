@@ -5,6 +5,7 @@ import {
   isCharacterUnlocked,
   legacyCharacterKeys,
   marketPrice,
+  marketRequires,
   moneyForRun,
   xpForRun,
 } from '@hts/shared';
@@ -96,6 +97,8 @@ export function buyLocal(key: string): Meta | null {
   const m = loadMeta();
   const price = marketPrice(content, key);
   if (price === null || m.owned.includes(key) || m.money < price) return null;
+  const need = marketRequires(key);
+  if (need && !m.owned.includes(need)) return null;
   const next = { ...m, money: m.money - price, owned: [...m.owned, key] };
   saveMeta(next);
   return next;

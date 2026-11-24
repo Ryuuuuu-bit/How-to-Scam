@@ -11,7 +11,11 @@ import {
   charKey,
   isCharacterUnlocked,
   marketPrice,
+  marketRequires,
   moneyForRun,
+  loadoutFor,
+  seedWithLoadout,
+  type OutfitId,
   questSeedPrefix,
   replay,
   titleFor,
@@ -75,7 +79,14 @@ export function newSeed(days: Duration = 30): string {
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */
-export async function startRun(store: Store, c: GameContent, user: UserRec, characterId: string, days: Duration = 30) {
+export async function startRun(
+  store: Store,
+  c: GameContent,
+  user: UserRec,
+  characterId: string,
+  days: Duration = 30,
+  outfit?: OutfitId,
+) {
   const ch = c.characters.find((x) => x.id === characterId);
   if (!ch) throw new HttpError(400, 'unknown_character');
   if (!isCharacterUnlocked(ch, user)) throw new HttpError(403, 'character_locked');
@@ -85,7 +96,8 @@ export async function startRun(store: Store, c: GameContent, user: UserRec, char
   const run = await store.createRun({
     userId: user.id,
     characterId,
-    seed: newSeed(days),
+    // บ้านกับชุดติดไปกับ seed: ใช้ได้เฉพาะของที่ผู้เล่นมีจริง
+    seed: seedWithLoadout(newSeed(days), loadoutFor(user.owned, outfit)),
     mode,
     dailyDate: null,
   });
@@ -248,6 +260,8 @@ export async function buyMarketItem(store: Store, c: GameContent, user: UserRec,
   const price = marketPrice(c, key);
   if (price === null) throw new HttpError(400, 'unknown_item');
   if (user.owned.includes(key)) throw new HttpError(409, 'already_owned');
+  const need = marketRequires(key);
+  if (need && !user.owned.includes(need)) throw new HttpError(409, 'needs_previous');
   if (user.money < price) throw new HttpError(402, 'not_enough_money');
   const updated = await store.buyItem(user.id, key, price);
   if (!updated) throw new HttpError(409, 'purchase_failed');
