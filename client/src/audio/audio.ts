@@ -24,6 +24,7 @@ const recordedEffects = new Set([
   'sfx_phone_ring', 'sfx_hangup', 'sfx_siren', 'sfx_jail', 'sfx_escape', 'sfx_level_up',
   'sfx_launder_ok', 'sfx_launder_fail', 'sfx_event', 'sfx_achievement', 'sfx_news',
   'sfx_home_upgrade', 'sfx_outfit_buy', 'sfx_outfit_wear',
+  'sfx_pet_dog', 'sfx_pet_cat', 'sfx_pet_parrot', 'sfx_car_rev', 'sfx_card_collect', 'sfx_rank_up',
 ]);
 export interface AudioSettings {
   muted: boolean;

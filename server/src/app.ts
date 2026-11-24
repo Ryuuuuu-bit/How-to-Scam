@@ -159,14 +159,17 @@ export function createApp(d: AppDeps) {
     limit(10, 40),
     wrap(async (req) => {
       const user = requireUser(req);
-      const { characterId, days, outfit } = z
+      const { characterId, days, ...pick } = z
         .object({
           days: z.union([z.literal(30), z.literal(60), z.literal(90)]).default(30),
           characterId: z.string().min(1).max(64),
           outfit: z.enum(['casual', 'banker', 'white', 'influencer', 'trader', 'rider']).optional(),
+          pet: z.enum(['none', 'dog', 'cat', 'parrot']).optional(),
+          car: z.enum(['none', 'scooter', 'pickup', 'sports']).optional(),
+          reform: z.boolean().optional(),
         })
         .parse(req.body);
-      return startRun(d.store, d.content, user, characterId, days, outfit);
+      return startRun(d.store, d.content, user, characterId, days, pick);
     }),
   );
 

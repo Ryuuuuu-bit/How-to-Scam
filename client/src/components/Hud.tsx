@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { activeFestivals, caseStrength, dateOf, homeOf, loadoutOf, outfitOf, raidThreshold, soiBlocker } from '@hts/shared';
+import { activeFestivals, caseStrength, dateOf, carOf, homeOf, loadoutOf, outfitOf, petOf, raidThreshold, soiBlocker } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
 import { PhoneSheet } from './PhoneSheet';
 import { SoiMap } from './SoiMap';
@@ -198,15 +198,25 @@ function PhoneDock({ state, open }: { state: GameState; open: (app: App) => void
   );
 }
 
-/** บ้านกับชุดที่ติดมาจากนอกรอบ (โชว์เฉพาะเมื่อมีของ) */
+/** บ้าน ชุด สัตว์เลี้ยง รถ ที่ติดมาจากนอกรอบ (โชว์เฉพาะเมื่อมีของ) */
 function LoadoutChip({ state }: { state: GameState }) {
   const l = loadoutOf(state.seed);
-  if (l.home === 'room' && l.outfit === 'casual') return null;
+  if (l.home === 'room' && l.outfit === 'casual' && l.pet === 'none' && l.car === 'none' && !l.reform) return null;
   const fit = outfitOf(state);
+  const parts = [
+    homeOf(state).name,
+    `${fit.name}: ${fit.effect}`,
+    l.pet !== 'none' ? `${petOf(state).name}: ${petOf(state).effect}` : '',
+    l.car !== 'none' ? `${carOf(state).name}: ${carOf(state).effect}` : '',
+    l.reform ? 'ตั้งใจกลับใจ: รายได้ −10%' : '',
+  ].filter(Boolean);
   return (
-    <span className="loadout-chip ml-auto" title={`${homeOf(state).name} · ${fit.name}: ${fit.effect}`}>
+    <span className="loadout-chip ml-auto" title={parts.join(' · ')}>
       <Art id={`home:${l.home}`} size={20} />
       <Art id={`outfit:${l.outfit}`} size={20} />
+      {l.pet !== 'none' && <Art id={`pet:${l.pet}`} size={20} />}
+      {l.car !== 'none' && <Art id={`car:${l.car}`} size={20} />}
+      {l.reform && <Art id="icon:reform" size={20} />}
       <span className="hidden sm:inline">{fit.name}</span>
     </span>
   );

@@ -1,4 +1,5 @@
 import { campaignDays } from './campaign';
+import { reformFlag, reformOf, reformStartKarma } from './loadout';
 import { careerFee, careerSignatures, careerStatus, minimumJobCost } from './careerPaths';
 import type { EndReason, GameContent } from '../types/content';
 import type { Action, GameState } from '../types/state';
@@ -91,6 +92,10 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
   if (isLivingSoi(seed)) {
     s.soi = newSoi();
     s.case = newCase();
+  }
+  if (reformOf(s)) {
+    s.flags.push(reformFlag);
+    s.karma += reformStartKarma;
   }
   rollNews(s, c, rng);
   rollOffer(s, c, rng);

@@ -185,3 +185,63 @@
   color: var(--color-ink);
   font-size: 12px;
 }
+
+.home-hero-crew {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  display: flex;
+  gap: 6px;
+}
+.home-hero-crew img {
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  background: #fffdf6;
+  box-shadow: var(--shadow-pop-sm);
+}
+
+/* สัตว์เลี้ยงกับโรงรถ */
+.pick-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+.pick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  border: 2px solid var(--color-ink);
+  border-radius: 20px;
+  background: #fffdf6;
+  color: var(--color-ink);
+  text-align: center;
+  box-shadow: var(--shadow-pop-sm);
+}
+.pick-card[data-on] { border-width: 3px; border-color: var(--color-mint); background: #e6f6ef; }
+.pick-art { width: 120px; height: 120px; border-radius: 16px; object-fit: cover; }
+.pick-body { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; flex: 1; }
+.pick-body h3 { font: 600 15px/1.2 var(--font-display); }
+.pick-body .outfit-desc { flex: 1; }
+
+.reform-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 3px solid var(--color-ink);
+  border-radius: 24px;
+  background: #fff4d6;
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pop);
+}
+.reform-card[data-on] { border-color: var(--color-mint); background: #e6f6ef; }
+.reform-art { flex: none; width: 140px; height: 105px; border-radius: 16px; object-fit: cover; }
+.reform-body { display: flex; flex-direction: column; gap: 6px; }
+.reform-body h3 { font: 600 18px/1.2 var(--font-display); }
+.reform-body p { font-size: 13px; color: var(--color-ink-soft); }
+@media (max-width: 520px) {
+  .reform-card { flex-direction: column; align-items: stretch; }
+  .reform-art { width: 100%; height: auto; aspect-ratio: 16 / 9; }
+}

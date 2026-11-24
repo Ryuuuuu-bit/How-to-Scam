@@ -341,6 +341,22 @@ describe('ส่งคะแนน (anti-cheat)', () => {
     expect((await api('/api/runs', { token: g.token, body: { characterId: 'gamer_kid', outfit: 'nope' } })).status).toBe(400);
   });
 
+  it('สัตว์เลี้ยง รถ และทุนกลับใจ ติด seed เฉพาะของที่ซื้อแล้ว', async () => {
+    const g = await guest();
+    const pick = { characterId: 'gamer_kid', pet: 'dog', car: 'pickup', reform: true };
+    const plain = await api('/api/runs', { token: g.token, body: pick });
+    expect((plain.body as { seed: string }).seed).not.toContain('|L=');
+    const u = await store.findUser(g.user.uid);
+    if (!u) throw new Error('no user');
+    u.money = 20_000;
+    for (const key of ['pet:dog', 'car:pickup', 'reform:shop']) {
+      expect((await api('/api/market/buy', { token: g.token, body: { key } })).status).toBe(200);
+    }
+    const run = await api('/api/runs', { token: g.token, body: pick });
+    expect((run.body as { seed: string }).seed).toMatch(/\|L=room\.casual\.dog\.pickup\.reform$/);
+    expect((await api('/api/runs', { token: g.token, body: { ...pick, car: 'tank' } })).status).toBe(400);
+  });
+
   it('จบรอบได้เงินใต้ดิน และผ่านออดิชั่นได้ตัวละครฟรี', async () => {
     const g = await guest();
     const { runId, seed } = (

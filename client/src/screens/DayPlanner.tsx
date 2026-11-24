@@ -1,4 +1,4 @@
-import { homeOf } from '@hts/shared';
+import { homeOf, petOf } from '@hts/shared';
 import { useState } from 'react';
 import { careerStatus, henchmanCap, soiBlocker } from '@hts/shared';
 import { SoiDecision } from '../components/SoiMap';
@@ -200,7 +200,7 @@ export function DayPlanner({
           <span>{story.work}<small className="block font-normal">ทุน ฿{fmt(shop.method.cost)} · รายได้ ฿{fmt(estimate.income[0])}–{fmt(estimate.income[1])} · Heat +{estimate.heat.join('–')}</small></span>
         </Button>
         <Button tone="paper" block onClick={() => run(null, [], true)}>
-          <span>{story.rest}<small className="block font-normal">พักงานวันนี้ · Heat ลดได้สูงสุด {Math.min(state.heat, content.config.heatDecayQuietDay + homeOf(state).quietHeat)}</small></span>
+          <span>{story.rest}<small className="block font-normal">พักงานวันนี้ · Heat ลดได้สูงสุด {Math.min(state.heat, content.config.heatDecayQuietDay + homeOf(state).quietHeat)}{petOf(state).quietCash ? ` · ${petOf(state).name} คาบของมาขายได้ ฿${petOf(state).quietCash}` : ''}</small></span>
         </Button>
       </section>
     );

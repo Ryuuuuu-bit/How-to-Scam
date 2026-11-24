@@ -1,5 +1,5 @@
 // คุยกับ server (Phase 3) — ถ้าไม่ได้ตั้ง VITE_API_URL เกมจะเล่นแบบออฟไลน์
-import type { Action } from '@hts/shared';
+import type { Action, LoadoutPick } from '@hts/shared';
 
 const API = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? '';
 const TOKEN_KEY = 'hts.token';
@@ -123,8 +123,8 @@ export const api = {
     }),
   rename: (displayName: string) =>
     call<{ user: PublicUser }>('/api/me', { method: 'PATCH', body: { displayName } }),
-  startRun: (characterId: string, days = 30, outfit?: string) =>
-    call<{ runId: string; seed: string }>('/api/runs', { body: { characterId, days, outfit } }),
+  startRun: (characterId: string, days = 30, pick: LoadoutPick = {}) =>
+    call<{ runId: string; seed: string }>('/api/runs', { body: { characterId, days, ...pick } }),
   submitRun: (runId: string, actions: Action[]) =>
     call<SubmitResult>(`/api/runs/${runId}/submit`, { body: { actions } }),
   leaderboard: (board: 'top' | 'longest' | 'fastest' | 'daily', season?: string, days = 30) =>

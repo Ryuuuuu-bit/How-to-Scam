@@ -8,6 +8,7 @@ import { sceneUrl } from '../assets/art';
 import { useAuth } from '../net/auth';
 import { loadCosmetics, menuScenes } from '../game/cosmetics';
 import { progressFor } from '../game/meta';
+import { RankChip } from '../components/Collection';
 import { WalletBar } from '../components/Underground';
 import { HowToPlay } from './HowToPlay';
 import { Feedback } from './Feedback';
@@ -24,6 +25,7 @@ export function MainMenu({
   onAchievements,
   onWardrobe,
   onHome,
+  onCollection,
   onMarket,
   onEndings,
 }: {
@@ -36,6 +38,7 @@ export function MainMenu({
   onAchievements?: (() => void) | undefined;
   onWardrobe: () => void;
   onHome: () => void;
+  onCollection: () => void;
   onMarket: () => void;
   onEndings?: (() => void) | undefined;
 }) {
@@ -115,6 +118,7 @@ export function MainMenu({
               </span>
             </Button>
             </div>
+            <RankChip owned={progress.owned} onClick={onCollection} />
             <button type="button" className="menu-wallet" onClick={onMarket} aria-label="ไปตลาดใต้ดิน">
               <WalletBar progress={progress} compact />
               <span className="menu-wallet-go">
@@ -160,7 +164,14 @@ export function MainMenu({
             <Button tone="sun" block onClick={onHome}>
               <span className="flex items-center gap-2">
                 <Art id="icon:home" size={25} className="shrink-0" />
-                บ้านกับตู้เสื้อผ้า
+                บ้าน รถ สัตว์เลี้ยง ตู้เสื้อผ้า
+              </span>
+              <span aria-hidden>↗</span>
+            </Button>
+            <Button tone="paper" block onClick={onCollection}>
+              <span className="flex items-center gap-2">
+                <Art id="icon:scrapbook" size={25} className="shrink-0" />
+                ยศในซอยกับสมุดภาพ
               </span>
               <span aria-hidden>↗</span>
             </Button>
