@@ -13,9 +13,9 @@ export function CollectionScreen({ onBack }: { onBack: () => void }) {
   const market = useMarket();
   const owned = market.progress.owned;
   const [tab, setTab] = useState<'rank' | 'book'>('rank');
-  const ctx = rankCtx(user?.uid, owned);
+  const ctx = rankCtx(user, owned);
   const current = soiRankIndex(ctx);
-  const book = loadScrapbook(user?.uid);
+  const book = loadScrapbook(user);
 
   useEffect(() => {
     audio.setTrack('bgm_home');

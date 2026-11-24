@@ -8,7 +8,7 @@ import { bangkokDate, isDailyDate } from '@hts/shared';
 import type { GameContent } from '@hts/shared';
 import { attachUser, guestName, requireUser, signToken } from './auth';
 import type { GoogleVerifier } from './auth';
-import { buyMarketItem, dailyInfo, HttpError, MAX_ACTIONS, startDaily, startRun, submitRun } from './game';
+import { buyMarketItem, dailyInfo, HttpError, importCollection, MAX_ACTIONS, startDaily, startRun, submitRun } from './game';
 import { isSeasonId, seasonFor } from './season';
 import type { Board, Scope, Store, UserRec } from './store';
 
@@ -37,6 +37,8 @@ export function publicUser(u: UserRec) {
     endings: u.endings,
     money: u.money,
     owned: u.owned,
+    scrapbook: u.scrapbook,
+    career: u.career,
   };
 }
 
@@ -150,6 +152,17 @@ export function createApp(d: AppDeps) {
         .object({ displayName: z.string().trim().min(2).max(24) })
         .parse(req.body);
       return { user: publicUser(await d.store.renameUser(user.id, displayName)) };
+    }),
+  );
+
+  // ---------- สมุดภาพการ์ดเหยื่อกับยศในซอย ----------
+  app.post(
+    '/api/me/collection',
+    limit(10, 20),
+    wrap(async (req) => {
+      const user = requireUser(req);
+      const body = z.object({ scrapbook: z.unknown(), career: z.unknown() }).parse(req.body);
+      return { user: publicUser(await importCollection(d.store, d.content, user, body)) };
     }),
   );
 

@@ -19,6 +19,9 @@ export interface PublicUser {
   /** เงินใต้ดิน (server รุ่นเก่ายังไม่ส่งมา) */
   money?: number;
   owned?: string[];
+  /** สมุดภาพการ์ดเหยื่อกับประวัติข้ามรอบ (server รุ่นเก่ายังไม่ส่งมา) */
+  scrapbook?: unknown;
+  career?: unknown;
 }
 
 export interface DailyInfo {
@@ -133,6 +136,8 @@ export const api = {
     ),
   marketBuy: (key: string) =>
     call<{ key: string; price: number; user: PublicUser }>('/api/market/buy', { body: { key } }),
+  importCollection: (scrapbook: unknown, career: unknown) =>
+    call<{ user: PublicUser }>('/api/me/collection', { body: { scrapbook, career } }),
   seasons: () =>
     call<{ current: string; seasons: { id: string; players: number }[] }>('/api/seasons'),
 };

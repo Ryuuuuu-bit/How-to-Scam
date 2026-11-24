@@ -85,3 +85,20 @@ export {
   contrabandWeight,
 } from './engine/shop';
 export * from './engine/loadout';
+export {
+  addCards,
+  addRun,
+  cardIdsOf,
+  cardsFromRun,
+  cleanCareer,
+  cleanScrapbook,
+  emptyCareer,
+  mergeCareer,
+  mergeScrapbook,
+  replayWithCards,
+  trapCards,
+  type Career,
+  type Scrapbook,
+  type TrapCard,
+  type VictimCard,
+} from './engine/collection';

@@ -111,7 +111,10 @@ export function prismaStore(db: PrismaClient): Store {
             skipDuplicates: true,
           });
         }
+        // ล็อกแถวผู้เล่นก่อนอ่าน กันส่งสองรอบพร้อมกันแล้วการ์ดหาย
+        await tx.$queryRaw`SELECT 1 FROM "User" WHERE id = ${s.userId} FOR UPDATE`;
         const u = await tx.user.findUniqueOrThrow({ where: { id: s.userId } });
+        const col = s.collect(u.scrapbook, u.career);
         return tx.user.update({
           where: { id: s.userId },
           data: {
@@ -121,6 +124,8 @@ export function prismaStore(db: PrismaClient): Store {
             runsPlayed: { increment: 1 },
             ...(s.mode === 'daily' ? { dailyPlays: { increment: 1 } } : {}),
             endings: u.endings.includes(s.endingId) ? u.endings : [...u.endings, s.endingId],
+            scrapbook: col.scrapbook as object,
+            career: col.career as object,
           },
         });
       });
@@ -130,6 +135,17 @@ export function prismaStore(db: PrismaClient): Store {
       const n = await db.$executeRaw`UPDATE "User" SET "money" = "money" - ${price}, "owned" = array_append("owned", ${key}), "updatedAt" = now() WHERE id = ${userId} AND "money" >= ${price} AND NOT (${key} = ANY("owned"))`;
       if (n === 0) return null;
       return db.user.findUnique({ where: { id: userId } });
+    },
+    async mergeCollection(userId, merge) {
+      return db.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT 1 FROM "User" WHERE id = ${userId} FOR UPDATE`;
+        const u = await tx.user.findUniqueOrThrow({ where: { id: userId } });
+        const col = merge(u.scrapbook, u.career);
+        return tx.user.update({
+          where: { id: userId },
+          data: { scrapbook: col.scrapbook as object, career: col.career as object },
+        });
+      });
     },
     async rejectRun(runId, reason, actionCount) {
       await db.run.update({

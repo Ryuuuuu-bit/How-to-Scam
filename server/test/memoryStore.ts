@@ -29,6 +29,8 @@ export function memoryStore() {
     endings: [],
     money: 0,
     owned: [],
+    scrapbook: {},
+    career: {},
     createdAt: new Date(),
     ...p,
   });
@@ -116,6 +118,7 @@ export function memoryStore() {
       u.runsPlayed += 1;
       if (s.mode === 'daily') u.dailyPlays += 1;
       if (!u.endings.includes(s.endingId)) u.endings.push(s.endingId);
+      Object.assign(u, s.collect(u.scrapbook, u.career));
       return u;
     },
     async buyItem(userId, key, price) {
@@ -123,6 +126,11 @@ export function memoryStore() {
       if (u.money < price || u.owned.includes(key)) return null;
       u.money -= price;
       u.owned.push(key);
+      return u;
+    },
+    async mergeCollection(userId, merge) {
+      const u = must(userId);
+      Object.assign(u, merge(u.scrapbook, u.career));
       return u;
     },
     async rejectRun(runId, reason) {
