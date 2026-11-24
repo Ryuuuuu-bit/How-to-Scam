@@ -1,20 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   bestHome,
+  carKey,
+  cars,
   homeKey,
   homes,
   marketRequires,
   outfitKey,
   outfits,
+  ownsCar,
   ownsOutfit,
+  ownsPet,
+  petKey,
+  pets,
+  reformKey,
   type HomeDef,
-  type OutfitId,
+  type LoadoutPick,
 } from '@hts/shared';
 import { ART } from '../assets/art';
 import { audio } from '../audio/audio';
 import { Art, Button, ScreenTitle } from '../components/ui';
 import { BuyButton, WalletBar } from '../components/Underground';
-import { loadOutfit, saveOutfit } from '../game/loadout';
+import { loadPick, savePick } from '../game/loadout';
+import { RankChip } from '../components/Collection';
 import { useMarket } from '../game/market';
 import { useAuth } from '../net/auth';
 import './home.css';
@@ -28,14 +36,30 @@ function homePerks(h: HomeDef): string[] {
 }
 
 /** บ้านกับตู้เสื้อผ้า: ใช้เงินใต้ดินอัปเกรดบ้านและซื้อชุด ติดตัวเข้ารอบถัดไป */
-export function HomeScreen({ onBack, onPlay }: { onBack: () => void; onPlay?: () => void }) {
+export function HomeScreen({
+  onBack,
+  onPlay,
+  onCollection,
+}: {
+  onBack: () => void;
+  onPlay?: () => void;
+  onCollection?: () => void;
+}) {
   const { user } = useAuth();
   const market = useMarket();
   const p = market.progress;
   const home = bestHome(p.owned);
   const homeIdx = homes.findIndex((h) => h.id === home);
-  const [outfit, setOutfit] = useState<OutfitId>(() => loadOutfit(user?.uid));
-  const worn = ownsOutfit(p.owned, outfit) ? outfit : 'casual';
+  const [pick, setPick] = useState(() => loadPick(user?.uid));
+  const choose = (next: LoadoutPick, sfx: string) => {
+    setPick(savePick(next, user?.uid));
+    audio.sfx(sfx, 'paper');
+  };
+  const worn = ownsOutfit(p.owned, pick.outfit) ? pick.outfit : 'casual';
+  const pet = ownsPet(p.owned, pick.pet) ? pick.pet : 'none';
+  const car = ownsCar(p.owned, pick.car) ? pick.car : 'none';
+  const hasReform = p.owned.includes(reformKey);
+  const reform = hasReform && pick.reform;
   const [flash, setFlash] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,7 +72,14 @@ export function HomeScreen({ onBack, onPlay }: { onBack: () => void; onPlay?: ()
   useEffect(() => {
     if (p.owned.length > ownedCount) {
       const last = p.owned.at(-1) ?? '';
-      audio.sfx(last.startsWith('home:') ? 'sfx_home_upgrade' : 'sfx_outfit_buy', 'level');
+      const [kind, id] = last.split(':');
+      const buySfx: Record<string, string> = {
+        home: 'sfx_home_upgrade',
+        pet: `sfx_pet_${id}`,
+        car: 'sfx_car_rev',
+        reform: 'sfx_achievement',
+      };
+      audio.sfx(buySfx[kind ?? ''] ?? 'sfx_outfit_buy', 'level');
       setFlash(last);
     }
     setOwnedCount(p.owned.length);
@@ -57,12 +88,15 @@ export function HomeScreen({ onBack, onPlay }: { onBack: () => void; onPlay?: ()
   const heroSrc = ART[`home:${home}`]?.src;
   return (
     <main className="home-screen mx-auto flex min-h-dvh max-w-4xl flex-col gap-4 px-4 py-6">
-      <div className="eyebrow">SAFEHOUSE / บ้านกับตู้เสื้อผ้า</div>
+      <div className="eyebrow">SAFEHOUSE / บ้าน รถ สัตว์เลี้ยง ตู้เสื้อผ้า</div>
       <ScreenTitle
         title="บ้านของฉัน"
-        hint="เงินใต้ดินจากทุกรอบเอามาอัปเกรดบ้านและซื้อชุด ทุกอย่างติดตัวเข้ารอบถัดไป (ยกเว้น Daily Challenge)"
+        hint="เงินใต้ดินจากทุกรอบเอามาอัปเกรดบ้าน ซื้อชุด รถ และสัตว์เลี้ยง ทุกอย่างติดตัวเข้ารอบถัดไป (ยกเว้น Daily Challenge)"
       />
-      <WalletBar progress={p} compact />
+      <div className="flex flex-wrap items-center gap-2">
+        <RankChip owned={p.owned} onClick={onCollection} />
+        <WalletBar progress={p} compact />
+      </div>
 
       <section className="home-hero" data-home={home}>
         {heroSrc ? <img src={heroSrc} alt={homes[homeIdx]?.name ?? ''} /> : <div className="home-hero-empty" />}
@@ -74,6 +108,13 @@ export function HomeScreen({ onBack, onPlay }: { onBack: () => void; onPlay?: ()
           <Art id={`outfit:${worn}`} size={84} />
           <span>{outfits.find((o) => o.id === worn)?.name}</span>
         </div>
+        {(pet !== 'none' || car !== 'none' || reform) && (
+          <div className="home-hero-crew">
+            {pet !== 'none' && <Art id={`pet:${pet}`} size={44} />}
+            {car !== 'none' && <Art id={`car:${car}`} size={44} />}
+            {reform && <Art id="icon:reform" size={44} />}
+          </div>
+        )}
       </section>
 
       <h2 className="font-display text-xl">อัปเกรดบ้าน</h2>
@@ -154,11 +195,7 @@ export function HomeScreen({ onBack, onPlay }: { onBack: () => void; onPlay?: ()
                   className="px-3 py-2 text-sm"
                   aria-pressed={on}
                   disabled={on}
-                  onClick={() => {
-                    setOutfit(o.id);
-                    saveOutfit(o.id, user?.uid);
-                    audio.sfx('sfx_outfit_wear', 'paper');
-                  }}
+                  onClick={() => choose({ outfit: o.id }, 'sfx_outfit_wear')}
                 >
                   {on ? '✓ ใส่อยู่' : 'ใส่ชุดนี้'}
                 </Button>
@@ -170,14 +207,128 @@ export function HomeScreen({ onBack, onPlay }: { onBack: () => void; onPlay?: ()
         })}
       </div>
 
+      <h2 className="font-display text-xl">สัตว์เลี้ยง</h2>
+      <p className="-mt-2 text-sm text-ink-soft">พาไปด้วยได้ทีละตัว แต่ละตัวช่วยงานคนละแบบ</p>
+      <div className="pick-grid">
+        {pets
+          .filter((x) => x.id !== 'none')
+          .map((x) => (
+            <PickCard
+              key={x.id}
+              art={`pet:${x.id}`}
+              name={x.name}
+              effect={x.effect}
+              desc={x.desc}
+              owned={ownsPet(p.owned, x.id)}
+              on={pet === x.id}
+              flash={flash === petKey(x.id)}
+              buy={<BuyButton market={market} itemKey={petKey(x.id)} />}
+              onToggle={() => choose({ pet: pet === x.id ? 'none' : x.id }, `sfx_pet_${x.id}`)}
+              onLabel="✓ พาไปด้วย"
+              offLabel="พาไปด้วย"
+            />
+          ))}
+      </div>
+
+      <h2 className="font-display text-xl">โรงรถ</h2>
+      <p className="-mt-2 text-sm text-ink-soft">รถช่วยหนีตำรวจ แต่คันที่เด่นเกินไปก็ทำให้คนจำได้</p>
+      <div className="pick-grid">
+        {cars
+          .filter((x) => x.id !== 'none')
+          .map((x) => (
+            <PickCard
+              key={x.id}
+              art={`car:${x.id}`}
+              name={x.name}
+              effect={x.effect}
+              desc={x.desc}
+              owned={ownsCar(p.owned, x.id)}
+              on={car === x.id}
+              flash={flash === carKey(x.id)}
+              buy={<BuyButton market={market} itemKey={carKey(x.id)} />}
+              onToggle={() => choose({ car: car === x.id ? 'none' : x.id }, 'sfx_car_rev')}
+              onLabel="✓ ขับคันนี้"
+              offLabel="ขับคันนี้"
+            />
+          ))}
+      </div>
+
+      <h2 className="font-display text-xl">ทางกลับใจ</h2>
+      <section className="reform-card" data-on={reform || undefined} data-flash={flash === reformKey || undefined}>
+        <Art id="misc:honest_shop" size={140} className="reform-art" />
+        <div className="reform-body">
+          <h3>ทุนเปิดร้านสุจริต</h3>
+          <p>
+            เก็บเงินก้อนนี้ไว้เปิดร้านของตัวเองหลังวางมือ รอบที่ตั้งใจกลับใจ เริ่มด้วยกรรมดี +5 แต่รายได้ทุกงาน −10%
+            ถ้าอยู่รอดจนจบรอบโดยกรรมไม่ติดลบ จะได้ฉากจบใหม่ "ร้านสุจริต"
+          </p>
+          {hasReform ? (
+            <Button
+              tone={reform ? 'mint' : 'paper'}
+              className="px-3 py-2 text-sm"
+              aria-pressed={reform}
+              onClick={() => choose({ reform: !reform }, reform ? 'sfx_outfit_wear' : 'sfx_achievement')}
+            >
+              {reform ? '✓ รอบหน้าตั้งใจกลับใจ' : 'รอบหน้าตั้งใจกลับใจ'}
+            </Button>
+          ) : (
+            <BuyButton market={market} itemKey={reformKey} label="เก็บทุน" />
+          )}
+        </div>
+      </section>
+
       {onPlay && (
         <Button tone="sun" onClick={onPlay}>
-          แต่งตัวเสร็จแล้ว ออกไปทำงานรอบใหม่
+          พร้อมแล้ว ออกไปทำงานรอบใหม่
         </Button>
       )}
       <Button tone="paper" onClick={onBack}>
         กลับ
       </Button>
     </main>
+  );
+}
+
+function PickCard({
+  art,
+  name,
+  effect,
+  desc,
+  owned,
+  on,
+  flash,
+  buy,
+  onToggle,
+  onLabel,
+  offLabel,
+}: {
+  art: string;
+  name: string;
+  effect: string;
+  desc: string;
+  owned: boolean;
+  on: boolean;
+  flash: boolean;
+  buy: ReactNode;
+  onToggle: () => void;
+  onLabel: string;
+  offLabel: string;
+}) {
+  return (
+    <article className="pick-card" data-on={on || undefined} data-owned={owned || undefined} data-flash={flash || undefined}>
+      <Art id={art} size={120} className={owned ? 'pick-art' : 'pick-art outfit-art-locked'} />
+      <div className="pick-body">
+        <h3>{name}</h3>
+        <p className="outfit-effect">{effect}</p>
+        <p className="outfit-desc">{desc}</p>
+        {owned ? (
+          <Button tone={on ? 'mint' : 'paper'} className="px-3 py-2 text-sm" aria-pressed={on} onClick={onToggle}>
+            {on ? onLabel : offLabel}
+          </Button>
+        ) : (
+          buy
+        )}
+      </div>
+    </article>
   );
 }

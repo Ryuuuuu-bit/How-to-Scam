@@ -134,6 +134,42 @@ export const SFX: SfxSpec[] = [
     prompt: 'Clothes hanger sliding on rail and fabric swish, quick cartoon outfit change',
     seconds: 1,
   },
+  {
+    id: 'sfx_pet_dog',
+    kind: 'sfx',
+    prompt: 'Two happy barks from a medium street dog, playful cartoon style',
+    seconds: 1.5,
+  },
+  {
+    id: 'sfx_pet_cat',
+    kind: 'sfx',
+    prompt: 'Short cute cat meow followed by a small purr, cartoon style',
+    seconds: 1.5,
+  },
+  {
+    id: 'sfx_pet_parrot',
+    kind: 'sfx',
+    prompt: 'Parrot squawk then a chirpy mimic whistle, comedic cartoon',
+    seconds: 1.5,
+  },
+  {
+    id: 'sfx_car_rev',
+    kind: 'sfx',
+    prompt: 'Motorbike engine revs twice then speeds away, short arcade getaway',
+    seconds: 2,
+  },
+  {
+    id: 'sfx_card_collect',
+    kind: 'sfx',
+    prompt: 'Polaroid photo snap and paper card sliding into an album, light sparkle',
+    seconds: 1,
+  },
+  {
+    id: 'sfx_rank_up',
+    kind: 'sfx',
+    prompt: 'Short brass fanfare with drum hit, cartoon rank promotion jingle',
+    seconds: 2.5,
+  },
 ];
 
 // เสียงพากย์: ผู้เล่นขอไม่ใช้ (2026-11-22) เก็บโครงไว้เผื่ออนาคต

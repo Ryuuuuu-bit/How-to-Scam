@@ -15,7 +15,7 @@ import {
   moneyForRun,
   loadoutFor,
   seedWithLoadout,
-  type OutfitId,
+  type LoadoutPick,
   questSeedPrefix,
   replay,
   titleFor,
@@ -85,7 +85,7 @@ export async function startRun(
   user: UserRec,
   characterId: string,
   days: Duration = 30,
-  outfit?: OutfitId,
+  pick: LoadoutPick = {},
 ) {
   const ch = c.characters.find((x) => x.id === characterId);
   if (!ch) throw new HttpError(400, 'unknown_character');
@@ -96,8 +96,8 @@ export async function startRun(
   const run = await store.createRun({
     userId: user.id,
     characterId,
-    // บ้านกับชุดติดไปกับ seed: ใช้ได้เฉพาะของที่ผู้เล่นมีจริง
-    seed: seedWithLoadout(newSeed(days), loadoutFor(user.owned, outfit)),
+    // บ้าน ชุด สัตว์เลี้ยง รถ และทุนกลับใจติดไปกับ seed: ใช้ได้เฉพาะของที่ผู้เล่นมีจริง
+    seed: seedWithLoadout(newSeed(days), loadoutFor(user.owned, pick)),
     mode,
     dailyDate: null,
   });

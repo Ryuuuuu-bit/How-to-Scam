@@ -5,6 +5,7 @@ import { useSubmitRun } from '../game/submit';
 import { shareCard } from '../game/shareCard';
 import { usePlayerPortrait } from '../game/usePlayerPortrait';
 import { awardRun, noAward, progressFor } from '../game/meta';
+import { RunCollection } from '../components/Collection';
 import { auditionProgress, charKey } from '@hts/shared';
 import { useAuth } from '../net/auth';
 import { bountyText, moneyText } from '../game/bounty';
@@ -111,6 +112,8 @@ export function EndScreen({
       <ClosingEdition state={state} />
       <DailyNewspaper state={state} />
 
+      <RunCollection state={state} owned={progressFor(user).owned} />
+
       {newAch.length > 0 && (
         <div className="anim-rise-in rounded-2xl border-[3px] border-ink bg-sun p-3 text-center text-ink shadow-pop">
           <div className="font-display text-lg">🎖️ {t('achievements.newTitle')}</div>
@@ -206,7 +209,7 @@ export function EndScreen({
           {onHome && (
             <Button tone="paper" block onClick={onHome}>
               <span className="flex items-center justify-center gap-2">
-                <Art id="icon:home" size={26} /> กลับบ้าน อัปเกรดบ้านและซื้อชุด
+                <Art id="icon:home" size={26} /> กลับบ้าน อัปเกรดบ้าน ซื้อชุด รถ และสัตว์เลี้ยง
               </span>
             </Button>
           )}

@@ -26,7 +26,9 @@ import { WardrobeScreen } from './screens/WardrobeScreen';
 import { MarketScreen } from './screens/MarketScreen';
 import { EndingsGallery } from './screens/EndingsGallery';
 import { HomeScreen } from './screens/HomeScreen';
-import { currentLoadout, loadOutfit } from './game/loadout';
+import { currentLoadout, loadPick } from './game/loadout';
+import { CardCollector } from './components/Collection';
+import { CollectionScreen } from './screens/CollectionScreen';
 import { progressFor } from './game/meta';
 import './components/phone.css';
 
@@ -41,7 +43,8 @@ type Screen =
   | 'wardrobe'
   | 'market'
   | 'endings'
-  | 'home';
+  | 'home'
+  | 'collection';
 
 export function App() {
   const preview = new URLSearchParams(window.location.search).get('preview');
@@ -93,7 +96,7 @@ function GameScreens() {
     let server: { runId: string; seed: string } | undefined;
     if (auth.status === 'ready') {
       try {
-        server = await api.startRun(characterId, days, loadOutfit(auth.user?.uid));
+        server = await api.startRun(characterId, days, loadPick(auth.user?.uid));
       } catch {
         setStarting(false);
         setStartError(true);
@@ -121,7 +124,8 @@ function GameScreens() {
 
   if (screen === 'wardrobe') return <WardrobeScreen onBack={() => setScreen('menu')} onMarket={() => setScreen('market')} />;
   if (screen === 'market') return <MarketScreen onBack={() => setScreen('menu')} />;
-  if (screen === 'home') return <HomeScreen onBack={() => setScreen('menu')} onPlay={() => setScreen('character')} />;
+  if (screen === 'home') return <HomeScreen onBack={() => setScreen('menu')} onPlay={() => setScreen('character')} onCollection={() => setScreen('collection')} />;
+  if (screen === 'collection') return <CollectionScreen onBack={() => setScreen('menu')} />;
   if (screen === 'endings') return <EndingsGallery onBack={() => setScreen('menu')} />;
 
   if (screen === 'daily') {
@@ -195,16 +199,20 @@ function GameScreens() {
             }}
           />
           {finalLines.length > 0 && <EndIntro key={game.tick} lines={finalLines} />}
+          <CardCollector state={state} />
         </>
       );
     }
     return (
-      <PlayScreen
-        state={state}
-        tick={game.tick}
-        dispatch={game.dispatch}
-        actions={game.run.actions}
-      />
+      <>
+        <PlayScreen
+          state={state}
+          tick={game.tick}
+          dispatch={game.dispatch}
+          actions={game.run.actions}
+        />
+        <CardCollector state={state} />
+      </>
     );
   }
 
@@ -213,6 +221,7 @@ function GameScreens() {
       <MainMenu
         onWardrobe={() => setScreen('wardrobe')}
         onHome={() => setScreen('home')}
+        onCollection={() => setScreen('collection')}
         onMarket={() => setScreen('market')}
         onEndings={() => setScreen('endings')}
         saved={saved}

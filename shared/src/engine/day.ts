@@ -14,7 +14,7 @@ import type { Rng } from './rng';
 import { addEvidence, afterShift, endOfDaySoi, isAlly, placeBonus, quietDayBonus } from './soi';
 import { applyNow, basePrice, contrabandWeight, dealDiscount, famePerShift, henchmanCap, hideoutPct, holdPrice, owns, placeUnlocked } from './shop';
 
-import { homeOf, outfitOf } from './loadout';
+import { carOf, homeOf, outfitOf, petOf, reformIncomePct, reformOf } from './loadout';
 
 export const newsScout = { firstDay: 2, price: 350 } as const;
 
@@ -156,6 +156,7 @@ export function incomeBonusPct(s: GameState, c: GameContent, methodId: string): 
   pct += hideoutPct(s, 'incomePct');
   const fit = outfitOf(s).incomePct;
   if (fit?.methodIds.includes(methodId)) pct += fit.pct;
+  if (reformOf(s)) pct += reformIncomePct;
   return pct;
 }
 
@@ -174,6 +175,7 @@ export function heatBonusPct(s: GameState, c: GameContent, methodId: string): nu
   pct += itemPct(s, c, s.upgrades, 'heatPct', methodId);
   pct += hideoutPct(s, 'heatPct');
   pct += outfitOf(s).heatPct ?? 0;
+  pct += carOf(s).heatPct ?? 0;
   return Math.max(-90, pct);
 }
 
@@ -208,6 +210,7 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
   if (methodId === null) {
     // วันพัก: Heat ลดเอง
     s.heat -= c.config.heatDecayQuietDay + quietDayBonus(s) + homeOf(s).quietHeat;
+    s.dirtyCash += petOf(s).quietCash ?? 0;
     clampHeat(s);
     s.workStreak = 0;
     tickIdle(s, c, null);
@@ -330,7 +333,10 @@ export function callPitch(s: GameState, c: GameContent, rng: Rng, pitchId: strin
     return;
   }
   const matched = pitch.weakness === victim.weakness;
-  const success = rng.chance(Math.min(95, (matched ? matchSuccessPct : missSuccessPct) + (outfitOf(s).callPct ?? 0)));
+  const parrot = matched ? 0 : (petOf(s).missCallPct ?? 0);
+  const success = rng.chance(
+    Math.min(95, (matched ? matchSuccessPct : missSuccessPct) + (outfitOf(s).callPct ?? 0) + parrot),
+  );
   const base = success ? Math.round(rng.range(m.income) * victim.wealth) : 0;
   const heat = rng.range(m.heat) + (success ? 0 : failHeat);
   s.lastResults.push({

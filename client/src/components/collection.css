@@ -1,0 +1,166 @@
+/* สมุดภาพการ์ดเหยื่อ */
+.vcard {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  overflow: hidden;
+  border: 2px solid var(--color-ink);
+  border-radius: 14px;
+  background: #fffdf6;
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pop-sm);
+  transform: rotate(-1deg);
+}
+.vcard:nth-child(even) { transform: rotate(1.2deg); }
+.vcard[data-trap] { background: #ffe9ec; }
+.vcard[data-fresh] { animation: vcard-in 0.5s ease-out both; }
+@keyframes vcard-in {
+  from { transform: translateY(12px) rotate(-6deg) scale(0.9); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vcard[data-fresh] { animation: none; }
+}
+.vcard-photo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 8px 8px 0;
+  padding: 4px;
+  border-radius: 8px;
+  background: #e8dfcc;
+}
+.vcard-photo img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
+.vcard-stamp {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  padding: 1px 6px;
+  border: 2px solid var(--color-danger);
+  border-radius: 6px;
+  background: #fffdf6e6;
+  color: var(--color-danger);
+  font: 600 11px var(--font-display);
+  transform: rotate(-8deg);
+}
+.vcard-stamp[data-won] { border-color: var(--color-grape); color: var(--color-grape); }
+.vcard figcaption { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px 8px; text-align: center; }
+.vcard figcaption b { font: 600 13px/1.2 var(--font-display); }
+.vcard figcaption small { font-size: 10.5px; line-height: 1.3; color: var(--color-ink-soft); }
+.vcard-empty {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  border-style: dashed;
+  background: #fffdf680;
+  box-shadow: none;
+}
+.vcard-empty span { font: 600 32px var(--font-display); color: #0003; }
+
+.vcard-row,
+.vcard-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+}
+.scrapbook {
+  padding: 14px;
+  border: 3px solid var(--color-ink);
+  border-radius: 24px;
+  background-color: #f3e3c3;
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--shadow-pop);
+}
+.scrapbook-note {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  background: var(--color-sun);
+  color: var(--color-ink);
+  font-size: 13px;
+}
+
+.collection-tabs { display: flex; gap: 8px; }
+.collection-tabs button {
+  flex: 1;
+  padding: 8px 10px;
+  border: 2px solid var(--color-ink);
+  border-radius: 14px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font: 500 15px var(--font-display);
+}
+.collection-tabs button[aria-selected='true'] { background: var(--color-grape); color: #fff; }
+
+/* บันไดยศในซอย */
+.rank-ladder { display: flex; flex-direction: column-reverse; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.rank-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 2px solid var(--color-ink);
+  border-radius: 20px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pop-sm);
+}
+.rank-step[data-state='now'] { border-width: 3px; border-color: var(--color-grape); background: #efeaff; }
+.rank-step[data-state='next'] { background: #fffdf6; }
+.rank-step img { border-radius: 14px; flex: none; }
+.rank-locked { filter: grayscale(0.9) opacity(0.55); }
+.rank-body { flex: 1; min-width: 0; }
+.rank-body h3 { font: 600 17px/1.25 var(--font-display); }
+.rank-body h3 em {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--color-grape);
+  color: #fff;
+  font: 500 12px var(--font-display);
+  font-style: normal;
+}
+.rank-no { color: var(--color-ink-soft); font-size: 13px; }
+.rank-body p { font-size: 12.5px; color: var(--color-ink-soft); }
+.rank-quests { margin: 6px 0 0; padding: 0; list-style: none; font-size: 13px; }
+.rank-quests li[data-done] { color: var(--color-mint); }
+
+.rank-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px 3px 4px;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: var(--color-sun);
+  color: var(--color-ink);
+  font: 500 14px var(--font-display);
+  box-shadow: var(--shadow-pop-sm);
+}
+.rank-chip img { border-radius: 50%; }
+
+.run-collection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 3px solid var(--color-ink);
+  border-radius: 22px;
+  background: #f3e3c3;
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pop);
+}
+.rank-up {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--color-grape);
+  color: #fff;
+}
+.rank-up img { border-radius: 14px; }
+.rank-up small { display: block; opacity: 0.8; }
+.rank-up b { font: 600 22px/1.2 var(--font-display); }
