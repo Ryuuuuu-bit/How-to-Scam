@@ -17,7 +17,7 @@ export {
   heatBonusPct,
 } from './engine/day';
 export { dateOf, activeFestivals, currentNews } from './engine/calendar';
-export { launderSuccessPct } from './engine/launder';
+export { launderSuccessPct, launderPityPct } from './engine/launder';
 export { priceOf, perksOfKind } from './engine/perks';
 export { isEventEligible, choiceAvailable } from './engine/events';
 export { validateContent } from './validate';
