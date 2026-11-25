@@ -91,7 +91,8 @@ describe('1.0 living soi', () => {
   });
 
   it('raids when evidence reaches the threshold, and a decoy wastes the raid', () => {
-    const s = newGame(v1(30, 'raid'), 'ex_insurance', content);
+    // กติกาบุกค้นของรุ่น 1.0 เดิม (น้ำหนัก 7) — โหมดเล่นสบายทดสอบใน casual.test.ts
+    const s = newGame(campaignSeed(30, 'raid', false), 'ex_insurance', content);
     need(s.case).evidence = [
       { id: 1, kind: 'sting', weight: 3, day: 1 },
       { id: 2, kind: 'crash', weight: 2, day: 1 },

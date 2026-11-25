@@ -1,5 +1,6 @@
 import type { GameContent } from '../types/content';
 import type { GameState } from '../types/state';
+import { rule } from './casual';
 import { currentNews } from './calendar';
 import { clampHeat } from './effects';
 import { invariant } from './errors';
@@ -65,7 +66,7 @@ export function launder(s: GameState, c: GameContent, rng: Rng, cardId: string |
     s.launderFailStreak = (s.launderFailStreak ?? 0) + 1;
     // ส่วนที่ไม่หายกลับมาเป็นเงินสกปรก
     s.dirtyCash += Math.round(amount * (1 - card.failLossPct / 100));
-    const mul = perksOfKind(s, c, 'launderFailHeat').reduce((m, p) => m * p.mul, 2);
+    const mul = perksOfKind(s, c, 'launderFailHeat').reduce((m, p) => m * p.mul, rule(s, 'launderFailHeatMul'));
     s.heat += card.heat * mul;
   }
   s.karma += karmaDelta(s, c, card.karma ?? 0);

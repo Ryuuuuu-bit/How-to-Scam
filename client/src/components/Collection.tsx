@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { audio } from '../audio/audio';
 import {
   allCardIds,

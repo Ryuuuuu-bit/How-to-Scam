@@ -1,4 +1,4 @@
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { loadMeta } from '../game/meta';
 import { useAuth } from '../net/auth';
 import { lt, t } from '../i18n';

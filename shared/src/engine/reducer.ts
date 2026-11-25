@@ -1,4 +1,5 @@
 import { campaignDays } from './campaign';
+import { contentForSeed } from './casual';
 import { reformFlag, reformOf, reformStartKarma } from './loadout';
 import { careerFee, careerSignatures, careerStatus, minimumJobCost } from './careerPaths';
 import type { EndReason, GameContent } from '../types/content';
@@ -41,7 +42,8 @@ import { openShop, owns } from './shop';
 import { caseAction, caseEscapePenalty, finishSoi, isLivingSoi, keepAppointment, newCase, newSoi, shapePlace, soiBlocker } from './soi';
 
 /** เริ่มรอบใหม่ — seed มาจาก server (หรือสุ่มเองตอนเล่น offline) */
-export function newGame(seed: string, characterId: string, c: GameContent): GameState {
+export function newGame(seed: string, characterId: string, base: GameContent): GameState {
+  const c = contentForSeed(base, seed);
   const ch = getCharacter(c, characterId);
   const rng = new Rng(hashSeed(seed));
   const perk = <K extends 'startFame' | 'startCash'>(k: K) =>
@@ -123,7 +125,8 @@ function expectPhase(s: GameState, ...phases: GameState['phase'][]): void {
  * pure function: คืน state ใหม่ ไม่แก้ของเดิม
  * action ผิดกติกา → โยน InvalidActionError
  */
-export function step(prev: GameState, action: Action, c: GameContent): GameState {
+export function step(prev: GameState, action: Action, base: GameContent): GameState {
+  const c = contentForSeed(base, prev.seed);
   invariant(prev.phase !== 'ended', 'game already ended');
   const s = structuredClone(prev);
   s.lastResults = [];

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { useAuth } from '../net/auth';
 import { progressFor } from '../game/meta';
 import { lt } from '../i18n';

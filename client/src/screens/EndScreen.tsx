@@ -10,7 +10,7 @@ import { auditionProgress, charKey } from '@hts/shared';
 import { useAuth } from '../net/auth';
 import { bountyText, moneyText } from '../game/bounty';
 import '../components/underground.css';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, Panel } from '../components/ui';
 import { EndingCard } from '../components/EndingCard';

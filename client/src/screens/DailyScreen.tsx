@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { api } from '../net/api';
 import type { DailyInfo } from '../net/api';
 import { fmt, lt, t } from '../i18n';

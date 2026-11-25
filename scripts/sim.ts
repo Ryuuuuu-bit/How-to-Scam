@@ -15,6 +15,8 @@ import {
   priceOf,
   step,
   unlockedMethods,
+  soiBlocker,
+  minimumJobCost,
 } from '../shared/src';
 import type { Action, GameState } from '../shared/src';
 
@@ -32,6 +34,14 @@ function bot(s: GameState, style: Style, r: () => number): Action {
       const stage = originStage(s);
       if (stage === 'opening') return { t: 'replyOrigin', reply: style === 'careful' ? 'later' : 'help' };
       if (stage === 'followup') return { t: 'readOrigin' };
+      // ซอยมีชีวิต: ตัดสินใจเรื่องสถานที่/นัดก่อนเริ่มงาน
+      const block = soiBlocker(s);
+      if (block === 'shape' && s.soi?.pendingShape) {
+        const form = style === 'careful' ? 'local' : style === 'greedy' ? 'patron' : (['patron', 'local', 'show'] as const)[Math.floor(r() * 3)];
+        return { t: 'shapePlace', place: s.soi.pendingShape, form: form === 'local' && money < 2_000 ? 'patron' : form };
+      }
+      if (block === 'appointment' && s.soi?.appointment) return { t: 'appointment', npc: s.soi.appointment.npcs[0] };
+      if (s.favorDay !== undefined && s.day >= s.favorDay) return { t: 'relief', job: 'favor' };
       const restAt = style === 'careful' ? 60 : style === 'greedy' ? 88 : 75;
       if (s.heat > restAt) return { t: 'choosePlan', methodId: null };
       if (style === 'careful' && s.day >= s.maxDays - 2 && s.cleanCash > 0) return { t: 'retire' };
@@ -39,7 +49,11 @@ function bot(s: GameState, style: Style, r: () => number): Action {
       if (opts.some((m) => m.id === 'ponzi') && ponziCrashPct(s, content) > 30) {
         opts = opts.filter((m) => m.id !== 'ponzi');
       }
-      if (opts.length === 0) return { t: 'choosePlan', methodId: null };
+      if (opts.length === 0) {
+        const cost = minimumJobCost(s, content);
+        if (cost !== null && money < cost) return { t: 'relief', job: 'mascot' };
+        return { t: 'choosePlan', methodId: null };
+      }
       const pick =
         style === 'random'
           ? opts[Math.floor(r() * opts.length)]
@@ -99,6 +113,7 @@ function bot(s: GameState, style: Style, r: () => number): Action {
       const up = content.shopItems.find(
         (i) =>
           i.kind === 'permanent' &&
+          !i.line &&
           (s.upgrades[i.id] ?? 0) < i.maxStack &&
           priceOf(s, content, i.id, i.price) < money * 0.3 &&
           (!i.minLevel || i.minLevel <= s.gangLevel),
@@ -130,6 +145,7 @@ const rows: Record<
   { n: number; score: number[]; caught: number; lvl: number[]; days: number[] }
 > = {};
 const endings: Record<string, number> = {};
+const stress: Record<string, { n: number; caught: number; score: number[]; escapes: number; launderFail: number; launder: number; sting: number; crash: number; raid: number; relief: number; lvl: number }> = {};
 const eventsSeen: Record<string, number> = {};
 const methodUse: Record<string, number> = {};
 
@@ -140,7 +156,21 @@ for (let i = 0; i < runs; i++) {
   if (!ch) break;
   const r = lcg(i * 7919 + 1);
   let s = newGame(campaignSeed(days, 'sim-' + i), ch.id, content);
-  for (let k = 0; k < 5000 && s.phase !== 'ended'; k++) s = step(s, bot(s, style, r), content);
+  const g = (stress[`${style}/${days}`] ??= { n: 0, caught: 0, score: [], escapes: 0, launderFail: 0, launder: 0, sting: 0, crash: 0, raid: 0, relief: 0, lvl: 0 });
+  for (let k = 0; k < 5000 && s.phase !== 'ended'; k++) {
+    const wasEscape = s.phase === 'escape';
+    s = step(s, bot(s, style, r), content);
+    if (s.phase === 'escape' && !wasEscape) g.escapes++;
+    for (const x of s.lastResults) {
+      if (x.kind === 'launder') { g.launder++; if (!x.success) g.launderFail++; }
+      if (x.kind === 'sting') g.sting++;
+      if (x.kind === 'ponziCrash') g.crash++;
+      if (x.kind === 'raid' && !x.success) g.raid++;
+    }
+  }
+  g.n++; g.score.push(s.end?.score ?? 0); g.lvl += s.gangLevel;
+  if (s.end?.reason === 'caught') g.caught++;
+  g.relief += s.history.filter(h => h.relief).length;
   if (!s.end) throw Error(`Run ${i} did not finish (day ${s.day}, ${s.phase})`);
   const key = `${ch.id}/${style}/${days}`;
   const row = (rows[key] ??= { n: 0, score: [], caught: 0, lvl: [], days: [] });
@@ -182,3 +212,11 @@ console.log(
   `\nevents seen: ${Object.keys(eventsSeen).length}/${content.events.length}; never:`,
   never,
 );
+
+console.log('\nstyle/days   n caught% medScore  lvl escapes/run launderFail% stings/run crashes/run raids/run relief/run');
+for (const [k, v] of Object.entries(stress).sort()) {
+  const per = (x: number) => (x / v.n).toFixed(2).padStart(6);
+  console.log(k.padEnd(12), String(v.n).padStart(2), String(Math.round((100 * v.caught) / v.n)).padStart(6),
+    String(med(v.score)).padStart(9), (v.lvl / v.n).toFixed(1), per(v.escapes),
+    String(Math.round((100 * v.launderFail) / Math.max(1, v.launder))).padStart(8), per(v.sting), per(v.crash), per(v.raid), per(v.relief));
+}

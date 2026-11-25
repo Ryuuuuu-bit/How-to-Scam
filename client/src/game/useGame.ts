@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { InvalidActionError, newGame, campaignSeed, seedWithLoadout, type Duration, type Loadout, replay, step } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content, selectRunContent } from './content';
 
 // เซฟเก็บแค่ seed + ตัวละคร + action log แล้ว replay ตอนโหลด
 // รูปแบบเดียวกับที่จะส่งให้ server ตรวจใน Phase 3
@@ -80,6 +80,8 @@ function randomSeed(): string {
 
 export function useGame() {
   const [run, setRun] = useState<Run | null>(null);
+  // หน้าจอทุกหน้าอ่าน content ชุดที่ตรงกับกติกาของรอบนี้
+  selectRunContent(run?.seed);
   /** นับจำนวน action เพื่อให้ UI รู้ว่ามีผลใหม่ให้แสดง */
   const [tick, setTick] = useState(0);
 

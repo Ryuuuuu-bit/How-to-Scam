@@ -1,6 +1,6 @@
 import { careerTracks, isAlly, isFoe, npcIds, npcs, places } from '@hts/shared';
 import type { GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from './content';
 import { fmt, lt } from '../i18n';
 import { jobSceneUrl, sceneUrl, soiArtUrl } from '../assets/art';
 

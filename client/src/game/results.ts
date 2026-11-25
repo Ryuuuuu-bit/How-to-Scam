@@ -1,6 +1,6 @@
 import type { GameState, LastResult, NpcId, PlaceForm, PlaceId } from '@hts/shared';
-import { evidenceInfo, npcs, places } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { casualRules, evidenceInfo, isCasual, npcs, places } from '@hts/shared';
+import { content } from './content';
 import { fmt, lt, t } from '../i18n';
 
 export interface ResultLine {
@@ -80,7 +80,7 @@ export function describeResult(r: LastResult, s: GameState): ResultLine | null {
     case 'exposed':
       return { tone: 'bad', title: t('result.exposed'), art: 'icon:exposed' };
     case 'ponziCrash':
-      return { tone: 'bad', title: t('result.ponziCrash'), art: 'icon:ponzi_crash' };
+      return { tone: 'bad', title: t('result.ponziCrash', { n: Math.round((1 - casualRules.ponziCrashKeep[isCasual(s) ? 1 : 0]) * 100) }), art: 'icon:ponzi_crash' };
     case 'news': {
       const n = content.news.find((x) => x.id === r.textKey);
       if (!n) return null;

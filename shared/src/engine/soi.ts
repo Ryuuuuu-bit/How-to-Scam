@@ -2,6 +2,7 @@
 // ทุกกติกาในไฟล์นี้เปิดเฉพาะ seed รุ่น 1.0 (มี ':v1:' หลังจำนวนวัน) รอบเก่าที่เซฟไว้จึง replay ได้ผลเดิม
 import type { EvidenceKind, GameState, SoiCase, SoiForm, SoiNpcId, SoiPlaceId, SoiState } from '../types/state';
 import { campaignDays } from './campaign';
+import { rule } from './casual';
 import { clampHeat, HEAT_MAX } from './effects';
 import { invariant } from './errors';
 import type { Rng } from './rng';
@@ -180,7 +181,7 @@ export function caseStrength(s: GameState): number {
 }
 
 export function raidThreshold(s: GameState): number {
-  return raidAt + (isAlly(s, 'hia') ? 2 : 0) + raidGearBonus(s);
+  return rule(s, 'raidAt') + (isAlly(s, 'hia') ? 2 : 0) + raidGearBonus(s);
 }
 
 export function repOf(s: GameState, npc: NpcId): number {
@@ -292,7 +293,7 @@ function maybeRaid(s: GameState): void {
   c.raids++;
   const warned = isAlly(s, 'jae');
   const heat = Math.round((10 + strength * 2) * (warned ? 0.5 : 1));
-  const seized = Math.round(s.dirtyCash * (warned ? 0.1 : 0.2) * (owns(s, 'app_scanner') ? 0.5 : 1));
+  const seized = Math.round(s.dirtyCash * rule(s, warned ? 'raidSeizeWarned' : 'raidSeize') * (owns(s, 'app_scanner') ? 0.5 : 1));
   const before = s.heat;
   s.heat = Math.min(HEAT_MAX - 1, s.heat + heat);
   s.dirtyCash -= seized;
@@ -320,7 +321,7 @@ export function raidTonight(s: GameState): boolean {
 
 /** โอกาสหนีลดลงตามน้ำหนักคดีบนบอร์ด */
 export function caseEscapePenalty(s: GameState): number {
-  return s.case ? caseStrength(s) * 2 : 0;
+  return s.case ? caseStrength(s) * rule(s, 'caseEscapePerWeight') : 0;
 }
 
 // ---------- action ของผู้เล่น ----------
@@ -433,5 +434,5 @@ export function soiBlocker(s: GameState): 'shape' | 'appointment' | null {
 /** ปิดท้ายรอบ: ธงสำหรับฉากจบใหม่ */
 export function finishSoi(s: GameState): void {
   if (!s.case) return;
-  if (s.case.peak >= raidAt && caseStrength(s) === 0 && !s.flags.includes('case_cold')) s.flags.push('case_cold');
+  if (s.case.peak >= rule(s, 'raidAt') && caseStrength(s) === 0 && !s.flags.includes('case_cold')) s.flags.push('case_cold');
 }

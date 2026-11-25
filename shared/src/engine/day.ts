@@ -1,4 +1,5 @@
 import type { GameContent, GangLevel, ScamMethod } from '../types/content';
+import { rule } from './casual';
 import { openingFor } from './opening';
 import { callerNameIndices, callerPortraits } from './callerIdentity';
 import type { CallVictim, GameState } from '../types/state';
@@ -273,7 +274,7 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
         base = 0;
         heat += p.crashHeat;
         ms.streak = 0;
-        s.dirtyCash = Math.round(s.dirtyCash * 0.7);
+        s.dirtyCash = Math.round(s.dirtyCash * rule(s, 'ponziCrashKeep'));
         s.lastResults.push({ kind: 'ponziCrash' });
         addEvidence(s, 'crash', 2, m.id);
       } else {

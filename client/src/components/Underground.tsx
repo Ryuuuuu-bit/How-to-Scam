@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { auditionProgress, bountyRank, charKey } from '@hts/shared';
 import type { Character, GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { bountyText, moneyText } from '../game/bounty';
 import type { BuyResult, useMarket } from '../game/market';
 import type { Progress } from '../game/meta';

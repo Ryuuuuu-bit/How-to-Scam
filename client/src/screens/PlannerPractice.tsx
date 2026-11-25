@@ -1,7 +1,7 @@
 import { useReducer } from 'react';
 import { newGame, step } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { PlayScreen } from './PlayScreen';
 import { EndScreen } from './EndScreen';
 import { fmt } from '../i18n';

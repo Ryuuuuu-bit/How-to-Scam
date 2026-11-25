@@ -11,7 +11,7 @@ import {
   shapeAfterShifts,
 } from '@hts/shared';
 import type { Action, GameState, NpcId, PlaceForm, PlaceId } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { fmt, lt } from '../i18n';
 import { soiArtUrl } from '../assets/art';
 

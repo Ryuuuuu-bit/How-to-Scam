@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { careerTracks } from '@hts/shared';
 import type { GameState } from '@hts/shared';
-import { content, day30Ending } from '@hts/shared/data';
+import { day30Ending } from '@hts/shared/data';
+import { content } from '../game/content';
 import { sceneUrl } from '../assets/art';
 import { audio } from '../audio/audio';
 import { lt } from '../i18n';

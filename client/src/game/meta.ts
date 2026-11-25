@@ -10,7 +10,7 @@ import {
   xpForRun,
 } from '@hts/shared';
 import type { Character, GameState, UnlockProgress } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from './content';
 
 // ความคืบหน้าข้ามรอบ (meta progression) เก็บในเครื่อง
 // ล็อกอินอยู่ใช้ของ server แทน

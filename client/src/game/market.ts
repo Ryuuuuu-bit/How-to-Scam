@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { marketPrice } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from './content';
 import { api, ApiError } from '../net/api';
 import { useAuth } from '../net/auth';
 import { buyLocal, progressFor, type Progress } from './meta';

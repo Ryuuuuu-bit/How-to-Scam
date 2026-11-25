@@ -6,7 +6,7 @@ import { SoiMap } from './SoiMap';
 import { CaseBoard } from './CaseBoard';
 import './phone.css';
 import './shop.css';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { fmt, lt, monthName, t } from '../i18n';
 import { Art } from './ui';
 import { OnlineCount } from './OnlineCount';

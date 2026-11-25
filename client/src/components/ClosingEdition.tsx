@@ -1,6 +1,6 @@
 import type { GameState } from '@hts/shared';
 import { neighborhoodHeadline } from '../game/origins';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { Art, Panel } from './ui';
 import { sceneUrl } from '../assets/art';
 

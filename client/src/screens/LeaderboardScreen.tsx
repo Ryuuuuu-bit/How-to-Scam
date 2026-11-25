@@ -1,6 +1,6 @@
 import { durations, type Duration } from '@hts/shared';
 import { useEffect, useState } from 'react';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { api } from '../net/api';
 import type { BoardRow } from '../net/api';
 import { useAuth } from '../net/auth';

@@ -17,7 +17,7 @@ import {
   type GameState,
   type Scrapbook,
 } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from './content';
 import type { PublicUser } from '../net/api';
 
 // สมุดภาพการ์ดเหยื่อกับยศในซอย: ของสะสมข้ามรอบ ไม่มีผลกับเกม ใช้โชว์อย่างเดียว

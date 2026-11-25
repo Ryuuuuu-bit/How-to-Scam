@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { dreamSequence, type Action, type GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { Art, Button } from '../components/ui';
 import './custody.css';
 import { audio } from '../audio/audio';
 
 const stamps = [{ icon: '🐟', name: 'ปลาทู' }, { icon: '🐾', name: 'อุ้งเท้า' }, { icon: '🌙', name: 'พระจันทร์' }] as const;
-const contentKeep = content.config.caughtCleanKeepPct;
 const memorySeconds = 3;
 
 export function CustodyScene({ state, dispatch, portrait = 'char:' + state.characterId }: {
@@ -61,7 +60,7 @@ export function CustodyScene({ state, dispatch, portrait = 'char:' + state.chara
     </div>
     <div className="custody-copy">
       {cell && <><p>{available ? 'ส้มซ่าคาบการ์ดสามใบมาวางหน้าห้องขัง “จำให้ได้นะ เดี๋ยวส้มคว่ำไพ่ ถ้าจิ้มถูกทั้งสามใบ ส้มพากลับตลาดเอง”' : 'แมวส้มจองหมอนใบเดียวในห้องไปแล้ว คืนนี้คุณเลยได้ทั้งเตียง… ยกเว้นตรงหัว'}</p>
-        {available && <><Button tone="grape" block onClick={() => setPage('remember')}>เริ่มจำภาพ · {memorySeconds} วินาที</Button><small>ตอบถูกได้เล่นต่อวันที่ {Math.min(state.day + 1, state.maxDays)} เงินสกปรกถูกยึด เงินสะอาดเหลือ ฿{Math.round(state.cleanCash * contentKeep / 100).toLocaleString('th-TH')} และ Heat เหลือ 45 ถ้าตอบผิด รอบนี้จบในคุก</small></>}
+        {available && <><Button tone="grape" block onClick={() => setPage('remember')}>เริ่มจำภาพ · {memorySeconds} วินาที</Button><small>ตอบถูกได้เล่นต่อวันที่ {Math.min(state.day + 1, state.maxDays)} เงินสกปรกถูกยึด เงินสะอาดเหลือ ฿{Math.round(state.cleanCash * content.config.caughtCleanKeepPct / 100).toLocaleString('th-TH')} และ Heat เหลือ 45 ถ้าตอบผิด รอบนี้จบในคุก</small></>}
         {photo ? <p role="status">“รูปนี้ใช้ยื่นสมัครงานได้ไหมครับ” ทั้งห้องเงียบ… ได้ยินแต่เสียงแมวกรน</p> :
           <Button tone="sun" block onClick={() => setPhoto(true)}>ถ่ายรูปติดแฟ้มคดี</Button>}
         <Button tone="paper" block onClick={() => dispatch({ t: 'custodyVerdict', answer: null })}>จบรอบในคุก</Button></>}
