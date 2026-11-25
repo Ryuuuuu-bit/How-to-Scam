@@ -1,6 +1,6 @@
 import { careerAffinities, charKey, durations, type Duration } from '@hts/shared';
 import { useState } from 'react';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { isUnlocked } from '../game/meta';
 import { useMarket } from '../game/market';
 import { bountyText } from '../game/bounty';

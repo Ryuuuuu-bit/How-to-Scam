@@ -1,5 +1,5 @@
 import { careerDecisions, careerFee, careerSignatures, careerStatus, minimumJobCost, type Action, type GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { Button } from './ui';
 import { fmt } from '../i18n';
 

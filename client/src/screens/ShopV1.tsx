@@ -13,7 +13,8 @@ import {
   raidTonight,
 } from '@hts/shared';
 import type { Action, GameState, ShopItem } from '@hts/shared';
-import { content, hideoutTiers } from '@hts/shared/data';
+import { hideoutTiers } from '@hts/shared/data';
+import { content } from '../game/content';
 import { fmt, lt } from '../i18n';
 import { Art, Button } from '../components/ui';
 import { hideoutArtUrl } from '../assets/art';

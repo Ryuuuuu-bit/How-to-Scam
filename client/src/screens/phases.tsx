@@ -19,7 +19,8 @@ import {
   ponziCrashPct,
   priceOf,
 } from '@hts/shared';
-import { content, soiSketches } from '@hts/shared/data';
+import { soiSketches } from '@hts/shared/data';
+import { content } from '../game/content';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, Panel, ScreenTitle } from '../components/ui';
 import { ConfirmPopup } from '../components/PopupControls';

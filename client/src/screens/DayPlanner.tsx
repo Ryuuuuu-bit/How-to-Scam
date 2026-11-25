@@ -8,7 +8,7 @@ import { currentOffer, methodBlock, newsScout, openingFor, originStage, priceOf,
 import { openingStories } from '../game/openingStories';
 import { OriginChat } from './OriginChat';
 import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { fmt, lt, t } from '../i18n';
 import { Art, Button, ScreenTitle } from '../components/ui';
 import { jobSceneUrl } from '../assets/art';

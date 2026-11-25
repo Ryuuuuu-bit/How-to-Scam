@@ -27,7 +27,9 @@ import { autoPlay } from './helpers';
 const L = (p: Partial<Loadout> = {}): Loadout => ({ home: 'room', outfit: 'casual', pet: 'none', car: 'none', reform: false, ...p });
 const base = campaignSeed(30, 'loadout-test');
 /** รอบเปล่า ไม่มีข่าวหรือข้อเสนอสุ่ม เทียบเฉพาะผลของบ้านกับชุด */
-const bare = (seed: string) => ({ ...newGame(seed, 'ex_insurance', content), news: null, offer: null, modifiers: [] });
+const ref = newGame(base, 'ex_insurance', content);
+// วันที่เริ่มเท่ากันทุกรอบ ไม่ให้เทศกาลที่บังเอิญตรงกันมาปนตัวเลข
+const bare = (seed: string) => ({ ...newGame(seed, 'ex_insurance', content), news: null, offer: null, modifiers: [], startMonth: ref.startMonth, startDate: ref.startDate });
 
 describe('บ้านกับตู้เสื้อผ้า', () => {
   it('seed ปกติได้ห้องเช่ากับเสื้อยืด และ seed ไม่เปลี่ยน', () => {

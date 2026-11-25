@@ -1,6 +1,6 @@
 import { heatBonusPct, incomeBonusPct, step } from '@hts/shared';
 import type { GameState, ScamMethod, ShopItem } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from './content';
 
 export function planEstimate(state: GameState, method: ScamMethod, cart: Record<string, number>) {
   const projected = { ...state, dailyItems: { ...state.dailyItems } };

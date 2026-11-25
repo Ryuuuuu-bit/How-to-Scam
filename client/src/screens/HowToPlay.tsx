@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { sceneUrl } from '../assets/art';
 import { Art, Button } from '../components/ui';
 import './how-to-play.css';

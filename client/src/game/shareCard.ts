@@ -2,7 +2,7 @@
 import { breakChunks } from '../i18n/thaiBreak';
 import { titleFor } from '@hts/shared';
 import type { GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from './content';
 import { ART, sceneUrl } from '../assets/art';
 import { fmt, lt, t } from '../i18n';
 import { neighborhoodHeadline } from './origins';

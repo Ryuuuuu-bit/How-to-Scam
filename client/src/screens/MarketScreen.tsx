@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { charKey, cosmeticPrices } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { sceneUrl } from '../assets/art';
 import { Art, Button, ScreenTitle } from '../components/ui';
 import {

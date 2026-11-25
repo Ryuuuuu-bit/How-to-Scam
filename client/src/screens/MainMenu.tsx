@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { durations } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import type { Run } from '../game/useGame';
 import { t } from '../i18n';
 import { Art, Button } from '../components/ui';

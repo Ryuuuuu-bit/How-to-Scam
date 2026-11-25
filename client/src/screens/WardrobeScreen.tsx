@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { sceneUrl } from '../assets/art';
 import { Art, Button, Panel, ScreenTitle } from '../components/ui';
 import {

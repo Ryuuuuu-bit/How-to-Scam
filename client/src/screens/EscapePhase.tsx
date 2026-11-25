@@ -2,7 +2,7 @@ import { carOf, homeOf } from '@hts/shared';
 import { useEffect, useRef, useState } from 'react';
 import type { Action, GameState } from '@hts/shared';
 import { bribeCost, escapeChance, escapeOf } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { lt, t } from '../i18n';
 import { Art, Button, Chip, Panel } from '../components/ui';
 import { CustodyScene } from './CustodyScene';
@@ -56,7 +56,7 @@ export function EscapePhase({ state, dispatch, portrait }: Props) {
         type="button"
         className="mx-auto mt-1 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-sm font-semibold text-ink shadow-pop-sm"
         onClick={() => {
-          if (window.confirm(t('escape.surrenderConfirm'))) dispatch({ t: 'escapeSurrender', custody: true });
+          if (window.confirm(t('escape.surrenderConfirm', { n: content.config.escape.surrenderKeepPct }))) dispatch({ t: 'escapeSurrender', custody: true });
         }}
       >
         🙇 {t('escape.surrender')}

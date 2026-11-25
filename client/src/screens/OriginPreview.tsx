@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { careerSeedPrefix, newGame, step, type Action, type GameState } from '@hts/shared';
-import { content, soiSketches } from '@hts/shared/data';
+import { soiSketches } from '@hts/shared/data';
+import { content } from '../game/content';
 import { sceneUrl } from '../assets/art';
 import { audio } from '../audio/audio';
 import { ClosingEdition } from '../components/ClosingEdition';

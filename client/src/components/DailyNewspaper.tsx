@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { GameState } from '@hts/shared';
-import { content } from '@hts/shared/data';
+import { content } from '../game/content';
 import { dailyArticles, markPaperRead, paperWasRead } from '../game/newspaper';
 import { Art } from './ui';
 import { PopupButton, PopupClose } from './PopupControls';
