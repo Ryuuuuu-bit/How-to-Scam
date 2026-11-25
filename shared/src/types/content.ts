@@ -394,6 +394,24 @@ export interface GameConfig {
   caughtCleanKeepPct: number;
   newsEveryDays: number;
   score: { daysWeight: number; maxVarietyBonus: number; varietyTarget: number; noEscapeBonus: number };
+  /** กติกา "เสี่ยงแล้วคุ้ม" ใช้เฉพาะ seed รุ่น 1.1 (ดู engine/risk.ts) */
+  risk: RiskConfig;
+}
+
+export interface RiskConfig {
+  /** งานด่วน: คูณรายได้และ Heat พื้นฐานของงานวันนั้น */
+  rushIncomeMul: number;
+  rushHeatMul: number;
+  /** ทำงานตอน Heat สูง ได้รายได้เพิ่ม [Heat ขั้นต่ำ, % โบนัส] เรียงจากน้อยไปมาก */
+  edgeIncome: readonly (readonly [number, number])[];
+  /** วันพักติดกัน Heat ลดมากขึ้น: base + perDay × (วันพักติดกัน − 1) ไม่เกิน max */
+  restDecay: { base: number; perDay: number; max: number };
+  /** จบวันด้วย Heat ≥ edgeHeat นับเป็น "วันเสียว" ได้โบนัสคะแนนสไตล์ต่อวัน */
+  edgeHeat: number;
+  edgeScorePerDay: number;
+  edgeScoreMax: number;
+  /** ปลดวิธีโกงเร็วขึ้นในกติการุ่นนี้ (methodId → ระดับแก๊ง) */
+  methodLevels: Readonly<Record<string, GangLevel>>;
 }
 
 /** ฉายาอัตโนมัติ */

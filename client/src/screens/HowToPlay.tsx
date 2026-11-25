@@ -143,7 +143,12 @@ const chapters = [
       {
         icon: 'icon:rest',
         title: 'พักเพื่อให้ Heat ลด',
-        text: `ระหว่างวางแผน กด “พักวันนี้” เพื่อลด Heat ลง ${content.config.heatDecayQuietDay} หน่วย ของบางชิ้นในร้านช่วยให้ลดได้มากขึ้น`,
+        text: `ระหว่างวางแผน กด “พักวันนี้” เพื่อลด Heat ลง ${content.config.risk.restDecay.base} หน่วย พักติดกันหลายวันจะลดเร็วขึ้นจนถึง ${content.config.risk.restDecay.max} หน่วยต่อวัน ของบางชิ้นในร้านช่วยให้ลดได้มากขึ้น`,
+      },
+      {
+        icon: 'icon:heat',
+        title: 'เสี่ยงแล้วคุ้ม',
+        text: `รับงานด่วนได้เงิน ×${content.config.risk.rushIncomeMul} แต่ Heat ขึ้นเร็วขึ้น ทำงานตอน Heat สูงได้รายได้เพิ่ม และทุกวันที่จบด้วย Heat ${content.config.risk.edgeHeat}+ แล้วรอด ได้โบนัสคะแนน`,
       },
       {
         icon: 'icon:bribe',

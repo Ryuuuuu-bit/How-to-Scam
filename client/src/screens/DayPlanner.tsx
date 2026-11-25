@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { careerStatus, henchmanCap, soiBlocker } from '@hts/shared';
 import { SoiDecision } from '../components/SoiMap';
 import { CareerDesk, CareerDirectory, ReliefDesk } from '../components/CareerDesk';
-import type { Action, GameState } from '@hts/shared';
-import { currentOffer, methodBlock, newsScout, openingFor, originStage, priceOf, questSeedPrefix } from '@hts/shared';
+import type { Action, GameState, ScamMethod } from '@hts/shared';
+import { currentOffer, edgeIncomePct, methodBlock, methodLevel, newsScout, nextRestDecay, openingFor, originStage, priceOf, questSeedPrefix, restStreak, riskRules } from '@hts/shared';
 import { openingStories } from '../game/openingStories';
 import { OriginChat } from './OriginChat';
 import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
@@ -18,6 +18,7 @@ import { MethodChips, NewsCard, RetireButton } from './phases';
 export interface LastPlan {
   methodId: string | null;
   items: string[];
+  rush?: boolean;
 }
 
 export function lastPlanFrom(actions: Action[]): LastPlan | null {
@@ -34,7 +35,7 @@ export function lastPlanFrom(actions: Action[]): LastPlan | null {
       if (content.shopItems.find((x) => x.id === a.itemId)?.kind === 'daily') items.push(a.itemId);
     }
   }
-  return { methodId: plan.methodId, items };
+  return { methodId: plan.methodId, items, ...(plan.rush && { rush: true }) };
 }
 
 const money = (s: GameState) => s.dirtyCash + s.cleanCash;
@@ -113,6 +114,10 @@ export function DayPlanner({
     lastPlan?.methodId && !methodBlockFor(state, lastPlan.methodId) ? lastPlan.methodId : null,
   );
   const [cart, setCart] = useState<Record<string, number>>({});
+  const [rush, setRush] = useState(false);
+  const risky = riskRules(state.seed);
+  const restDrop = nextRestDecay(state, content) + homeOf(state).quietHeat;
+  const edgePct = edgeIncomePct(state, content);
   const [order, setOrder] = useState('featured');
   const [itemGroup, setItemGroup] = useState<'daily' | 'henchman'>('daily');
   const skipKey = 'hts.opening.skipped';
@@ -149,10 +154,10 @@ export function DayPlanner({
   }, 0);
   const total = (method?.cost ?? 0) + cartCost;
   const canAfford = total <= money(state);
-  const preview = method && planEstimate(state, method, cart);
+  const preview = method && planEstimate(state, method, cart, risky && rush);
 
-  const run = (mId: string | null, buy: string[], opening = false) => {
-    dispatch({ t: 'choosePlan', methodId: mId, ...(opening && { opening: true as const }) });
+  const run = (mId: string | null, buy: string[], opening = false, rushJob = false) => {
+    dispatch({ t: 'choosePlan', methodId: mId, ...(opening && { opening: true as const }), ...(risky && rushJob && mId !== null && { rush: true as const }) });
     if (mId !== null) for (const id of buy) dispatch({ t: 'invest', itemId: id });
     dispatch({ t: 'confirmInvest' });
   };
@@ -200,7 +205,7 @@ export function DayPlanner({
           <span>{story.work}<small className="block font-normal">ทุน ฿{fmt(shop.method.cost)} · รายได้ ฿{fmt(estimate.income[0])}–{fmt(estimate.income[1])} · Heat +{estimate.heat.join('–')}</small></span>
         </Button>
         <Button tone="paper" block onClick={() => run(null, [], true)}>
-          <span>{story.rest}<small className="block font-normal">พักงานวันนี้ · Heat ลดได้สูงสุด {Math.min(state.heat, content.config.heatDecayQuietDay + homeOf(state).quietHeat)}{petOf(state).quietCash ? ` · ${petOf(state).name} คาบของมาขายได้ ฿${petOf(state).quietCash}` : ''}</small></span>
+          <span>{story.rest}<small className="block font-normal">พักงานวันนี้ · Heat ลดได้สูงสุด {Math.min(state.heat, restDrop)}{petOf(state).quietCash ? ` · ${petOf(state).name} คาบของมาขายได้ ฿${petOf(state).quietCash}` : ''}</small></span>
         </Button>
       </section>
     );
@@ -223,6 +228,7 @@ export function DayPlanner({
         <p className="font-display">{openingStories[yesterday.opening][yesterday.methodId ? 'workNews' : 'quietNews']}</p>
       </aside>}
       <NewsCard state={state} compact />
+      {risky && <RiskBrief state={state} edgePct={edgePct} restDrop={restDrop} />}
       <div className="job-toolbar">
         <strong>งานที่เปิดวันนี้ <span>{available.length}</span></strong>
         <select aria-label="เรียงแผนงาน" value={order} onChange={e => setOrder(e.target.value)}>
@@ -274,6 +280,8 @@ export function DayPlanner({
             run(
               lastPlan.methodId,
               lastPlan.items.filter((id) => !banned(id)),
+              false,
+              lastPlan.rush === true,
             )
           }
         >
@@ -283,6 +291,7 @@ export function DayPlanner({
             {lastPlan.methodId
               ? lt(content.methods.find((m) => m.id === lastPlan.methodId)?.name ?? { th: '' })
               : t('planner.rest')}
+            {risky && lastPlan.rush && lastPlan.methodId ? ' · งานด่วน' : ''}
             {lastPlan.items.length > omitted.length
               ? ` + ${t('planner.items', { n: lastPlan.items.length - omitted.length })}`
               : ''}
@@ -310,6 +319,7 @@ export function DayPlanner({
             <div className="flex flex-wrap gap-1"><MethodChips state={state} m={method} /></div>
           </div>
           <CareerDesk state={state} method={method.id} dispatch={dispatch} />
+          {risky && <RushToggle state={state} method={method} cart={cart} rush={rush} setRush={setRush} />}
           <div className="kit-heading"><h3>ของช่วยงานวันนี้</h3><span>ไม่ซื้อก็เริ่มได้</span></div>
           <div className="kit-switch" role="group" aria-label="ประเภทของช่วยงาน">
             <button type="button" aria-pressed={itemGroup === 'daily'} onClick={() => setItemGroup('daily')}>ของรายวัน</button>
@@ -375,7 +385,7 @@ export function DayPlanner({
               {state.scoutedDay === state.day ? (
                 <p role="status">
                   {canAfford
-                    ? scoutHint(state, method.id, cartList)
+                    ? scoutHint(state, method.id, cartList, risky && rush)
                     : 'ลดของในแผนให้พอกับงบเพื่ออ่านเบาะแส'}
                 </p>
               ) : (
@@ -407,7 +417,7 @@ export function DayPlanner({
             {locked.map(({ method: m }) => (
               <li key={m.id} className="flex items-center gap-2">
                 <Art id="icon:lock" size={20} />
-                {lt(m.name)} · {t('plan.locked', { level: m.level })}
+                {lt(m.name)} · {t('plan.locked', { level: methodLevel(state, content, m) })}
               </li>
             ))}
           </ul>
@@ -436,16 +446,73 @@ export function DayPlanner({
             tone="pink"
             block
             disabled={!method || !canAfford}
-            onClick={() => run(methodId, cartList)}
+            onClick={() => run(methodId, cartList, false, rush)}
           >
-            {method ? `${t('invest.go')} · ต้นทุน ฿${fmt(total)}` : t('planner.pick')}
+            {method ? `${risky && rush ? '⚡ ' : ''}${t('invest.go')} · ต้นทุน ฿${fmt(total)}` : t('planner.pick')}
           </Button>
           <Button tone="mint" onClick={() => run(null, [])}>
-            {t('plan.rest', { n: content.config.heatDecayQuietDay + homeOf(state).quietHeat })}
+            {t('plan.rest', { n: restDrop })}
           </Button>
         </div>
       </div>
     </>
+  );
+}
+
+/** สถานะสายเสี่ยงของวันนี้: โบนัสหน้าสิ่ว วันเสียวที่สะสม และ Heat ที่ลดได้ถ้าพัก */
+function RiskBrief({ state, edgePct, restDrop }: { state: GameState; edgePct: number; restDrop: number }) {
+  const risk = content.config.risk;
+  const edgeDays = state.stats.edgeDays ?? 0;
+  const bonus = Math.round(Math.min(risk.edgeScoreMax, edgeDays * risk.edgeScorePerDay) * 100);
+  const streak = restStreak(state);
+  const low = risk.edgeIncome[0];
+  const high = risk.edgeIncome.at(-1);
+  return (
+    <aside className="risk-brief mb-3 rounded-xl border-2 border-ink bg-paper p-3 text-sm text-ink" aria-label="สถานะสายเสี่ยง">
+      {edgePct > 0 ? (
+        <p><b>🔥 หน้าสิ่ว · รายได้ +{edgePct}%</b> Heat ตอนนี้ {state.heat} ยิ่งร้อนยิ่งได้เยอะ แต่ถ้าถึง 100 ตำรวจจะตามทันที</p>
+      ) : (
+        <p><b>หน้าสิ่ว</b> ทำงานตอน Heat {low?.[0]}+ ได้รายได้เพิ่ม {low?.[1]}% และ {high?.[0]}+ ได้ {high?.[1]}%</p>
+      )}
+      <p className="mt-1">
+        <b>วันเสียว {edgeDays} วัน</b> · โบนัสคะแนน +{bonus}% (เต็ม {Math.round(risk.edgeScoreMax * 100)}%) จบวันด้วย Heat {risk.edgeHeat}+ แล้วรอด นับเพิ่ม 1 วัน
+      </p>
+      <p className="mt-1">
+        <b>หลบเงียบ</b> พักวันนี้ Heat −{Math.min(state.heat, restDrop)}
+        {streak > 0 ? ` · พักติดกันวันที่ ${streak + 1} ลดเร็วขึ้น` : ' · พักติดกันหลายวัน Heat ยิ่งลดเร็ว'}
+      </p>
+    </aside>
+  );
+}
+
+/** งานด่วน: ได้มากขึ้นแลกกับ Heat ที่พุ่งขึ้น แสดงตัวเลขให้ตัดสินใจก่อนกดเริ่ม */
+function RushToggle({
+  state,
+  method,
+  cart,
+  rush,
+  setRush,
+}: {
+  state: GameState;
+  method: ScamMethod;
+  cart: Record<string, number>;
+  rush: boolean;
+  setRush: (v: boolean) => void;
+}) {
+  const risk = content.config.risk;
+  const fast = planEstimate(state, method, cart, true);
+  const worst = state.heat + fast.heat[1];
+  return (
+    <label className={`rush-toggle mt-3 flex items-start gap-3 rounded-xl border-2 border-ink p-3 text-sm text-ink ${rush ? 'bg-sun' : 'bg-paper'}`}>
+      <input type="checkbox" className="mt-1 h-5 w-5 shrink-0" checked={rush} onChange={(e) => setRush(e.target.checked)} />
+      <span>
+        <b>⚡ รับเป็นงานด่วน</b> รายได้ ×{risk.rushIncomeMul} · Heat ×{risk.rushHeatMul}
+        <small className="block">
+          ถ้ารับ: ฿{fmt(fast.income[0])}–{fmt(fast.income[1])} · Heat +{fast.heat.join('–')}
+          {worst >= 100 ? ' · เสี่ยงถึง 100 ตำรวจอาจตามวันนี้' : ` · แย่สุด Heat ${worst}`}
+        </small>
+      </span>
+    </label>
   );
 }
 

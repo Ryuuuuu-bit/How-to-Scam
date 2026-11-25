@@ -2,6 +2,7 @@ import { createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import {
   campaignSeed,
+  riskSeed,
   type Duration,
   achievementsFor,
   bangkokDate,
@@ -53,7 +54,7 @@ export const actionSchema: z.ZodType<Action> = z.discriminatedUnion('t', [
   z.object({ t: z.literal('careerFinale'), methodId: id, choice: z.enum(['fee', 'credit']) }),
   z.object({ t: z.literal('careerDecision'), methodId: id, choice: z.enum(['patron', 'local', 'talent']) }),
   z.object({ t: z.literal('relief'), job: z.enum(['mascot', 'stage', 'advance', 'favor']) }),
-  z.object({ t: z.literal('choosePlan'), methodId: id.nullable(), opening: z.literal(true).optional() }),
+  z.object({ t: z.literal('choosePlan'), methodId: id.nullable(), opening: z.literal(true).optional(), rush: z.literal(true).optional() }),
   z.object({ t: z.literal('replyOrigin'), reply: z.enum(['help', 'later']) }),
   z.object({ t: z.literal('readOrigin') }),
   z.object({ t: z.literal('invest'), itemId: id }),
@@ -82,8 +83,15 @@ export const MAX_ACTIONS = 4_000;
 const RUN_TTL_MS = 48 * 60 * 60 * 1000;
 const MAX_RUNS_PER_HOUR = 60;
 
-export function newSeed(days: Duration = 30): string {
-  return campaignSeed(days, randomBytes(16).toString('hex'));
+/**
+ * วันแรก (เวลาไทย) ที่รอบใหม่ใช้กติกา "เสี่ยงแล้วคุ้ม" (1.1) — ตรงกับวันเริ่มซีซั่นใหม่
+ * เพื่อไม่ให้คะแนนกติกาใหม่ปนกับซีซั่นที่เล่นกันมาแล้ว และ Daily ของวันเดียวกันได้ seed ชุดเดียวกันทุกคน
+ */
+export const RISK_RULES_FROM = '2026-12-01';
+
+export function newSeed(days: Duration = 30, now = new Date()): string {
+  const nonce = randomBytes(16).toString('hex');
+  return bangkokDate(now) >= RISK_RULES_FROM ? riskSeed(days, nonce) : campaignSeed(days, nonce);
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */
@@ -115,6 +123,7 @@ export async function startRun(
 /** seed ของ Daily Challenge: ทุกคนได้ seed เดียวกันในวันนั้น แต่เดาล่วงหน้าไม่ได้ */
 export function dailySeed(date: string, secret: string): string {
   const seed = createHmac('sha256', secret).update(`daily:${date}`).digest('hex').slice(0, 32);
+  if (date >= RISK_RULES_FROM) return riskSeed(30, seed);
   if (date >= '2026-11-26') return campaignSeed(30, seed);
   if (date >= '2026-11-25') return questSeedPrefix + seed;
   if (date >= '2026-11-24') return 'v3:soi:live:' + seed;

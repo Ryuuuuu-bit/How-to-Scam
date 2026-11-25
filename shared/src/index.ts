@@ -43,6 +43,15 @@ export { currentOffer } from './engine/offers';
 export { newsScout } from './engine/day';
 export { bribeCost, dreamSequence, escapeChance, escapeOf } from './engine/escape';
 export {
+  edgeIncomePct,
+  edgeScoreBonus,
+  isRush,
+  methodLevel,
+  nextRestDecay,
+  restStreak,
+  riskRules,
+} from './engine/risk';
+export {
   isLivingSoi,
   places,
   placeIds,

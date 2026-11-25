@@ -245,7 +245,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       expectPhase(s, 'plan');
       invariant(s.favorDay === undefined || s.day < s.favorDay, 'return the market favor first');
       invariant(soiBlocker(s) === null, 'the neighbourhood is waiting for you');
-      choosePlan(s, c, action.methodId, action.opening);
+      choosePlan(s, c, action.methodId, action.opening, action.rush === true);
       break;
     case 'invest':
       expectPhase(s, 'invest');

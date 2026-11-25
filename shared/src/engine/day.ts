@@ -11,6 +11,7 @@ import { offerBans, rollOffer, tickMission } from './offers';
 import { getMethod, getPitch, getShopItem } from './lookup';
 import { karmaDelta, perksOfKind, priceOf } from './perks';
 import type { Rng } from './rng';
+import { edgeIncomePct, isRush, methodLevel, restHeatDecay, riskRules, tallyEdgeDay } from './risk';
 import { addEvidence, afterShift, endOfDaySoi, isAlly, placeBonus, quietDayBonus } from './soi';
 import { applyNow, basePrice, contrabandWeight, dealDiscount, famePerShift, henchmanCap, hideoutPct, holdPrice, owns, placeUnlocked } from './shop';
 
@@ -32,7 +33,7 @@ export function methodBlock(
   c: GameContent,
   m: ScamMethod,
 ): 'level' | 'banned' | 'cooldown' | null {
-  if (m.level > s.gangLevel && !perksOfKind(s, c, 'earlyMethod').some(p => p.methodId === m.id)) return 'level';
+  if (methodLevel(s, c, m) > s.gangLevel && !perksOfKind(s, c, 'earlyMethod').some(p => p.methodId === m.id)) return 'level';
   if (perksOfKind(s, c, 'bannedMethod').some((p) => p.methodId === m.id)) return 'banned';
   if ((s.methodState[m.id]?.cooldownUntil ?? 0) >= s.day) return 'cooldown';
   return null;
@@ -67,16 +68,18 @@ export function ponziCrashPct(s: GameState, c: GameContent): number {
 }
 
 // ---------- 1. เลือกแผน ----------
-export function choosePlan(s: GameState, c: GameContent, methodId: string | null, fromOpening = false): void {
+export function choosePlan(s: GameState, c: GameContent, methodId: string | null, fromOpening = false, rush = false): void {
   const opening = fromOpening && s.day === 1 ? openingFor(s.seed, s.characterId) : null;
   if (fromOpening) invariant(!!opening && (methodId === null || methodId === 'fake_shop'), 'invalid opening choice');
   if (methodId !== null) {
     const block = methodBlock(s, c, getMethod(c, methodId));
     invariant(block === null, `method ${methodId} unavailable (${block})`);
   }
+  invariant(!rush || (methodId !== null && riskRules(s.seed)), 'rush unavailable');
   s.todayMethodId = methodId;
   s.history.push({
     ...(opening && { opening }),
+    ...(rush && { rush: true }),
     repeatableCost: methodId ? getMethod(c, methodId).cost : 0,
     day: s.day,
     methodId,
@@ -157,6 +160,7 @@ export function incomeBonusPct(s: GameState, c: GameContent, methodId: string): 
   const fit = outfitOf(s).incomePct;
   if (fit?.methodIds.includes(methodId)) pct += fit.pct;
   if (reformOf(s)) pct += reformIncomePct;
+  pct += edgeIncomePct(s, c);
   return pct;
 }
 
@@ -209,7 +213,7 @@ export function confirmInvest(s: GameState, c: GameContent, rng: Rng): void {
   tickMission(s, c, rng, methodId);
   if (methodId === null) {
     // วันพัก: Heat ลดเอง
-    s.heat -= c.config.heatDecayQuietDay + quietDayBonus(s) + homeOf(s).quietHeat;
+    s.heat -= restHeatDecay(s, c) + quietDayBonus(s) + homeOf(s).quietHeat;
     s.dirtyCash += petOf(s).quietCash ?? 0;
     clampHeat(s);
     s.workStreak = 0;
@@ -383,6 +387,10 @@ function applyIncome(
   rng: Rng,
 ): void {
   let mul = 1 + incomeBonusPct(s, c, m.id) / 100;
+  if (isRush(s)) {
+    baseIncome *= c.config.risk.rushIncomeMul;
+    baseHeat *= c.config.risk.rushHeatMul;
+  }
   if (s.henchmen.some((h) => h.recruit === 'host_tuk')) {
     s.fame += 2;
     baseHeat += 1;
@@ -528,6 +536,7 @@ export function endDay(s: GameState, c: GameContent, rng: Rng): boolean {
   s.modifiers = s.modifiers
     .map((m) => ({ ...m, daysLeft: m.daysLeft - 1 }))
     .filter((m) => m.daysLeft > 0);
+  tallyEdgeDay(s, c);
   s.dailyItems = {};
   s.todayMethodId = null;
   updateLevel(s, c);

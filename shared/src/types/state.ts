@@ -92,6 +92,8 @@ export interface MethodState {
 }
 
 export interface DayLog {
+  /** รับงานด่วนวันนี้ (กติกา 1.1) */
+  rush?: boolean;
   evidence?: number;
   raid?: 'raid' | 'warned' | 'decoy';
   relief?: 'mascot' | 'stage' | 'favor';
@@ -253,7 +255,13 @@ export interface GameState {
   escapes: number;
   methodsUsed: MethodId[];
   /** สถิติสำหรับ achievement */
-  stats: { specialChoices: number; maxPonziStreak: number; launderOk: number };
+  stats: {
+    specialChoices: number;
+    maxPonziStreak: number;
+    launderOk: number;
+    /** จำนวนวันที่จบวันด้วย Heat สูง (กติกา 1.1) */
+    edgeDays?: number;
+  };
   history: DayLog[];
   originStory?: { reply: 'help' | 'later'; followedUpOn?: number };
   lastResults: LastResult[];
@@ -276,7 +284,7 @@ export type Action =
   | { t: 'relief'; job: 'mascot' | 'stage' | 'advance' | 'favor' }
   | { t: 'replyOrigin'; reply: 'help' | 'later' }
   | { t: 'readOrigin' }
-  | { t: 'choosePlan'; methodId: MethodId | null; opening?: true | undefined }
+  | { t: 'choosePlan'; methodId: MethodId | null; opening?: true | undefined; rush?: true | undefined }
   | { t: 'invest'; itemId: ShopItemId }
   | { t: 'acceptOffer' }
   | { t: 'scoutNews' }

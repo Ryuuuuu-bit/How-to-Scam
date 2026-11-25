@@ -1,9 +1,13 @@
 // จำลองการเล่นหลายร้อยรอบด้วยบอทหลายนิสัย เพื่อดูสมดุลเกม
-// ใช้: pnpm sim  (หรือ pnpm sim 1000)
+// ใช้: pnpm sim  (หรือ pnpm sim 1000)  ·  RULES=legacy pnpm sim → กติกาก่อน 1.1 ไว้เทียบผล  ·  --detail แยกรายตัวละคร
 import { content } from '../shared/data';
 import {
   choiceAvailable,
   campaignSeed,
+  riskSeed,
+  riskRules,
+  restStreak,
+  heatBonusPct,
   durations,
   currentOffer,
   dreamSequence,
@@ -17,8 +21,10 @@ import {
   unlockedMethods,
 } from '../shared/src';
 import type { Action, GameState } from '../shared/src';
+import { botAction, soiAction } from '../shared/test/helpers';
 
-type Style = 'greedy' | 'careful' | 'random';
+type Style = 'greedy' | 'bold' | 'careful' | 'random';
+const legacy = process.env.RULES === 'legacy';
 
 function lcg(seed: number) {
   let x = seed >>> 0;
@@ -32,8 +38,12 @@ function bot(s: GameState, style: Style, r: () => number): Action {
       const stage = originStage(s);
       if (stage === 'opening') return { t: 'replyOrigin', reply: style === 'careful' ? 'later' : 'help' };
       if (stage === 'followup') return { t: 'readOrigin' };
-      const restAt = style === 'careful' ? 60 : style === 'greedy' ? 88 : 75;
+      const soi = soiAction(s);
+      if (soi) return soi;
+      const restAt = style === 'careful' ? 60 : style === 'greedy' ? 88 : style === 'bold' ? 76 : 75;
       if (s.heat > restAt) return { t: 'choosePlan', methodId: null };
+      // สายเสี่ยงแบบมีแผน: พักแล้วหลบเงียบต่อจน Heat ลงต่ำ ค่อยกลับมาลุย
+      if (style === 'bold' && restStreak(s) > 0 && s.heat > 35) return { t: 'choosePlan', methodId: null };
       if (style === 'careful' && s.day >= s.maxDays - 2 && s.cleanCash > 0) return { t: 'retire' };
       let opts = unlockedMethods(s, content).filter((m) => m.cost <= money * 0.8);
       if (opts.some((m) => m.id === 'ponzi') && ponziCrashPct(s, content) > 30) {
@@ -46,7 +56,13 @@ function bot(s: GameState, style: Style, r: () => number): Action {
           : [...opts].sort((a, b) => b.income[1] - a.income[1])[
               style === 'careful' && opts.length > 1 ? 1 : 0
             ];
-      return { t: 'choosePlan', methodId: pick?.id ?? null };
+      if (!pick) return { t: 'choosePlan', methodId: null };
+      const rushAt = style === 'greedy' ? 75 : style === 'random' ? (r() < 0.3 ? 60 : -1) : -1;
+      // สายเสี่ยงแบบมีแผน: รับงานด่วนเมื่อ Heat สูงสุดที่คาดไว้ยังไม่ทะลุเส้น (เหมือนคนดูตัวเลขบนจอ)
+      const worstRushHeat =
+        s.heat + pick.heat[1] * content.config.risk.rushHeatMul * (1 + heatBonusPct(s, content, pick.id) / 100);
+      const rush = riskRules(s.seed) && (style === 'bold' ? worstRushHeat <= 82 : s.heat <= rushAt);
+      return { t: 'choosePlan', methodId: pick.id, ...(rush && { rush: true as const }) };
     }
     case 'invest': {
       if (s.todayMethodId && style !== 'careful') {
@@ -103,7 +119,9 @@ function bot(s: GameState, style: Style, r: () => number): Action {
           priceOf(s, content, i.id, i.price) < money * 0.3 &&
           (!i.minLevel || i.minLevel <= s.gangLevel),
       );
-      if (up && style !== 'random') return { t: 'buy', itemId: up.id };
+      if (up && !up.line && style !== 'random') return { t: 'buy', itemId: up.id };
+      // รุ่น 1.0: ตลาดมืดกับห้องลับ ใช้แบบเดียวกับบอทในเทสต์
+      if (style !== 'random') return botAction(s);
       return { t: 'endDay' };
     }
     case 'escape': {
@@ -124,7 +142,7 @@ function bot(s: GameState, style: Style, r: () => number): Action {
 }
 
 const runs = Number(process.argv[2] ?? 500);
-const styles: Style[] = ['greedy', 'careful', 'random'];
+const styles: Style[] = ['greedy', 'bold', 'careful', 'random'];
 const rows: Record<
   string,
   { n: number; score: number[]; caught: number; lvl: number[]; days: number[] }
@@ -139,8 +157,15 @@ for (let i = 0; i < runs; i++) {
   const days = durations[Math.floor(i / (content.characters.length * styles.length)) % durations.length] ?? durations[0];
   if (!ch) break;
   const r = lcg(i * 7919 + 1);
-  let s = newGame(campaignSeed(days, 'sim-' + i), ch.id, content);
-  for (let k = 0; k < 5000 && s.phase !== 'ended'; k++) s = step(s, bot(s, style, r), content);
+  let s = newGame((legacy ? campaignSeed : riskSeed)(days, 'sim-' + i), ch.id, content);
+  for (let k = 0; k < 5000 && s.phase !== 'ended'; k++) {
+    try {
+      s = step(s, bot(s, style, r), content);
+    } catch {
+      // บอทนิสัยต่างๆ ยังไม่รู้จักทุกขั้นของรุ่นใหม่ ให้บอทในเทสต์ตอบแทน
+      s = step(s, botAction(s), content);
+    }
+  }
   if (!s.end) throw Error(`Run ${i} did not finish (day ${s.day}, ${s.phase})`);
   const key = `${ch.id}/${style}/${days}`;
   const row = (rows[key] ??= { n: 0, score: [], caught: 0, lvl: [], days: [] });
@@ -157,15 +182,38 @@ for (let i = 0; i < runs; i++) {
 
 const med = (a: number[]) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)] ?? 0;
 const avg = (a: number[]) => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length);
-console.log(
-  'character/style'.padEnd(30),
-  'n',
-  'medScore'.padStart(10),
-  'caught%'.padStart(8),
-  'avgLvl',
-  'avgDay',
-);
+const detail = process.argv.includes('--detail');
+if (detail)
+  console.log(
+    'character/style'.padEnd(30),
+    'n',
+    'medScore'.padStart(10),
+    'caught%'.padStart(8),
+    'avgLvl',
+    'avgDay',
+  );
+const byStyle: Record<string, { n: number; score: number[]; caught: number }> = {};
+for (const [k, v] of Object.entries(rows)) {
+  const [, st, d] = k.split('/');
+  const g = (byStyle[`${st}/${String(d).padStart(2, '0')}`] ??= { n: 0, score: [], caught: 0 });
+  g.n += v.n;
+  g.score.push(...v.score);
+  g.caught += v.caught;
+}
+const p75 = (a: number[]) => [...a].sort((x, y) => x - y)[Math.floor(a.length * 0.75)] ?? 0;
+console.log(`\n${legacy ? 'LEGACY rules' : 'risk rules (1.1)'} - by style/days`);
+console.log('style/days'.padEnd(14), 'n'.padStart(4), 'medScore'.padStart(10), 'p75Score'.padStart(10), 'meanScore'.padStart(10), 'caught%'.padStart(8));
+for (const [k, v] of Object.entries(byStyle).sort())
+  console.log(
+    k.padEnd(14),
+    String(v.n).padStart(4),
+    String(med(v.score)).padStart(10),
+    String(p75(v.score)).padStart(10),
+    String(Math.round(avg(v.score))).padStart(10),
+    String(Math.round((100 * v.caught) / v.n)).padStart(8),
+  );
 for (const [k, v] of Object.entries(rows).sort()) {
+  if (!detail) break;
   console.log(
     k.padEnd(30),
     String(v.n).padStart(2),

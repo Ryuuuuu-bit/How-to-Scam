@@ -2,7 +2,7 @@ import { heatBonusPct, incomeBonusPct, step } from '@hts/shared';
 import type { GameState, ScamMethod, ShopItem } from '@hts/shared';
 import { content } from '@hts/shared/data';
 
-export function planEstimate(state: GameState, method: ScamMethod, cart: Record<string, number>) {
+export function planEstimate(state: GameState, method: ScamMethod, cart: Record<string, number>, rush = false) {
   const projected = { ...state, dailyItems: { ...state.dailyItems } };
   let skillLow = 0,
     skillHigh = 0;
@@ -16,13 +16,16 @@ export function planEstimate(state: GameState, method: ScamMethod, cart: Record<
   const income = incomeBonusPct(projected, content, method.id);
   const heat = heatBonusPct(projected, content, method.id);
   const micHeat = state.henchmen.some((h) => h.recruit === 'host_tuk') || cart.host_tuk ? 1 : 0;
-  const scale = (base: number, pct: number) => Math.max(0, Math.round(base * (1 + pct / 100)));
+  const { rushIncomeMul, rushHeatMul } = content.config.risk;
+  const incomeMul = rush ? rushIncomeMul : 1;
+  const heatMul = rush ? rushHeatMul : 1;
+  const scale = (base: number, pct: number, mul = 1) => Math.max(0, Math.round(base * mul * (1 + pct / 100)));
   return {
     income: [
-      scale(method.income[0], income + skillLow),
-      scale(method.income[1], income + skillHigh),
+      scale(method.income[0], income + skillLow, incomeMul),
+      scale(method.income[1], income + skillHigh, incomeMul),
     ] as const,
-    heat: [scale(method.heat[0] + micHeat, heat), scale(method.heat[1] + micHeat, heat)] as const,
+    heat: [scale(method.heat[0] + micHeat, heat, heatMul), scale(method.heat[1] + micHeat, heat, heatMul)] as const,
   };
 }
 
@@ -41,8 +44,8 @@ export function itemEffect(it: ShopItem) {
 }
 
 // Run the same actions on a copy. Buying a report never advances the live random sequence.
-export function scoutHint(state: GameState, methodId: string, items: string[]) {
-  let forecast = step(state, { t: 'choosePlan', methodId }, content);
+export function scoutHint(state: GameState, methodId: string, items: string[], rush = false) {
+  let forecast = step(state, { t: 'choosePlan', methodId, ...(rush && { rush: true as const }) }, content);
   for (const itemId of items) forecast = step(forecast, { t: 'invest', itemId }, content);
   forecast = step(forecast, { t: 'confirmInvest' }, content);
   if (forecast.phase === 'escape') return 'ตำรวจเริ่มตามแล้ว ระวัง Heat พุ่ง';

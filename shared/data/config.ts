@@ -46,4 +46,18 @@ export const config: GameConfig = {
   caughtCleanKeepPct: 50,
   newsEveryDays: 7,
   score: { daysWeight: 1, maxVarietyBonus: 0.5, varietyTarget: 7, noEscapeBonus: 0.2 },
+  // กติกา "เสี่ยงแล้วคุ้ม" (seed รุ่น 1.1) ปรับจากผล pnpm sim
+  risk: {
+    rushIncomeMul: 1.6,
+    rushHeatMul: 1.7,
+    edgeIncome: [
+      [50, 15],
+      [75, 35],
+    ],
+    restDecay: { base: 9, perDay: 5, max: 19 },
+    edgeHeat: 70,
+    edgeScorePerDay: 0.035,
+    edgeScoreMax: 0.7,
+    methodLevels: { ponzi: 3 },
+  },
 };
