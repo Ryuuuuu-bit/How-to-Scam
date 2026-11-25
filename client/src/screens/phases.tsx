@@ -13,6 +13,7 @@ import {
   currentOffer,
   henchmanCap,
   launderSuccessPct,
+  launderPityPct,
   methodBlock,
   perksOfKind,
   ponziCrashPct,
@@ -416,6 +417,11 @@ export function LaunderPhase({ state, dispatch }: PhaseProps) {
   return (
     <>
       <ScreenTitle title={t('phase.launder')} hint={t('launder.hint')} />
+      {launderPityPct(state) > 0 && (
+        <p className="mb-3 rounded-2xl border-2 border-ink bg-white px-3 py-2 text-sm">
+          🍀 {t('launder.pity', { n: launderPityPct(state) })}
+        </p>
+      )}
       <div className="flex flex-col gap-3">
         {state.launderOffer.map((id, i) => {
           const c = content.launderCards.find((x) => x.id === id);

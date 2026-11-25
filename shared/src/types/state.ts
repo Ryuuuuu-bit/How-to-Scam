@@ -247,6 +247,8 @@ export interface GameState {
   pendingEvents: EventId[];
   seenEvents: EventId[];
   launderOffer: CardId[];
+  /** ฟอกพังติดกันกี่ครั้ง (ใช้คิดดวงชดเชย) — ไม่มี = 0 */
+  launderFailStreak?: number;
   flags: string[];
   escapes: number;
   methodsUsed: MethodId[];
