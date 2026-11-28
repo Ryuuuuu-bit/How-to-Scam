@@ -8,6 +8,7 @@ import {
   type Action,
   type FlowKind,
   type GameState,
+  washPending,
 } from '@hts/shared';
 import { content } from '@hts/shared/data';
 import { fmt, lt } from '../i18n';
@@ -84,7 +85,7 @@ const flowNames: Record<FlowKind, string> = {
   job: 'รายได้จากงาน (หักทุนแล้ว)',
   gear: 'ของช่วยงาน ข่าว และข้อเสนอ',
   events: 'เหตุการณ์ระหว่างวัน',
-  launder: 'ค่าฟอกเงินที่หายไป',
+  launder: 'ฟอกเงิน (ค่าฟอก หรือเงินที่ทยอยเข้า)',
   shop: 'ร้านค้าและตลาดใต้ดิน',
   wages: 'ค่าแรงทีม',
   escape: 'หนีตำรวจและค่าส่วย',
@@ -125,5 +126,20 @@ export function WeekLedgerCard({ state }: { state: GameState }) {
         </p>
       )}
     </details>
+  );
+}
+
+/** เงินสะอาดที่กำลังทยอยเข้า (การ์ดฟอกแบบทยอย) */
+export function WashPendingNote({ state }: { state: GameState }) {
+  const left = washPending(state);
+  if (left <= 0) return null;
+  const today = (state.washQueue ?? [])
+    .filter((x) => x.day === state.day + 1)
+    .reduce((n, x) => n + x.amount, 0);
+  return (
+    <p className="wash-pending mb-3 rounded-xl border-2 border-ink bg-paper px-3 py-2 text-sm text-ink">
+      ⏳ เงินสะอาดกำลังทยอยเข้าอีก <b>฿{fmt(left)}</b>
+      {today > 0 ? ` · พรุ่งนี้เข้า ฿${fmt(today)}` : ''} · ถ้าโดนจับก่อน ส่วนที่ค้างจะถูกยึด
+    </p>
   );
 }

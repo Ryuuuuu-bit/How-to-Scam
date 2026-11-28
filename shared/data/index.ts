@@ -24,6 +24,7 @@ import { luckyEvents } from './events/lucky';
 import { sillyEvents } from './events/silly';
 import { unluckyEvents } from './events/unlucky';
 import { launderCards } from './launderCards';
+import { washCards } from './launderCardsWash';
 import { methods } from './methods';
 import { shopItems } from './shop';
 import { shopV1Items } from './shopV1';
@@ -36,7 +37,7 @@ import { disguises, routes } from './escape';
 export const content: GameContent = {
   config,
   methods,
-  launderCards,
+  launderCards: [...launderCards, ...washCards],
   events: [
     ...luckyEvents,
     ...unluckyEvents,

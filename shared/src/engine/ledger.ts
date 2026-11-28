@@ -55,13 +55,24 @@ export function trackFlow(prev: GameState, s: GameState, action: Action): void {
       log.flow = { ...log.flow, [k]: (log.flow?.[k] ?? 0) + v };
     delete s.preFlow;
   }
-  if (delta === 0) return;
+  // เงินที่ระบบย้ายเอง (เช่น เงินฟอกทยอยเข้าตอนขึ้นวันใหม่) แยกหมวดให้ถูก
+  let rest = delta;
+  if (s.flowNote) {
+    const target = log ?? null;
+    for (const [k, v] of Object.entries(s.flowNote) as [FlowKind, number][]) {
+      rest -= v;
+      if (target) target.flow = { ...target.flow, [k]: (target.flow?.[k] ?? 0) + v };
+      else s.preFlow = { ...s.preFlow, [k]: (s.preFlow?.[k] ?? 0) + v };
+    }
+    delete s.flowNote;
+  }
+  if (rest === 0) return;
   const kind = kindOf[action.t] ?? 'other';
   if (!log) {
-    s.preFlow = { ...s.preFlow, [kind]: (s.preFlow?.[kind] ?? 0) + delta };
+    s.preFlow = { ...s.preFlow, [kind]: (s.preFlow?.[kind] ?? 0) + rest };
     return;
   }
-  log.flow = { ...log.flow, [kind]: (log.flow?.[kind] ?? 0) + delta };
+  log.flow = { ...log.flow, [kind]: (log.flow?.[kind] ?? 0) + rest };
 }
 
 export interface WeekLedger {

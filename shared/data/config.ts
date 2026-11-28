@@ -9,6 +9,7 @@ export const config: GameConfig = {
   heatDecayQuietDay: 6,
   eventCountWeights: [25, 50, 25],
   launderOfferSize: 3,
+  launderAllyBonus: 25,
   callCenter: {
     matchSuccessPct: 85,
     missSuccessPct: 25,

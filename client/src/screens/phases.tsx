@@ -15,13 +15,17 @@ import {
   henchmanCap,
   launderSuccessPct,
   launderPityPct,
+  launderPreview,
+  washPending,
+  allyHelps,
+  npcs,
   methodBlock,
   perksOfKind,
   ponziCrashPct,
   priceOf,
 } from '@hts/shared';
 import { content, soiSketches } from '@hts/shared/data';
-import { lt, t } from '../i18n';
+import { fmt, lt, t } from '../i18n';
 import { Art, Button, Chip, Panel, ScreenTitle } from '../components/ui';
 import { ConfirmPopup } from '../components/PopupControls';
 import { itemEffect } from '../game/plannerPreview';
@@ -436,6 +440,11 @@ export function LaunderPhase({ state, dispatch }: PhaseProps) {
   return (
     <>
       <ScreenTitle title={t('phase.launder')} hint={t('launder.hint')} />
+      {washPending(state) > 0 && (
+        <p className="mb-3 rounded-2xl border-2 border-ink bg-white px-3 py-2 text-sm">
+          ⏳ เงินสะอาดกำลังทยอยเข้าอีก ฿{fmt(washPending(state))} (ถ้าโดนจับก่อน ส่วนที่ค้างจะถูกยึด)
+        </p>
+      )}
       {launderPityPct(state) > 0 && (
         <p className="mb-3 rounded-2xl border-2 border-ink bg-white px-3 py-2 text-sm">
           🍀 {t('launder.pity', { n: launderPityPct(state) })}
@@ -445,7 +454,8 @@ export function LaunderPhase({ state, dispatch }: PhaseProps) {
         {state.launderOffer.map((id, i) => {
           const c = content.launderCards.find((x) => x.id === id);
           if (!c) return null;
-          const amount = Math.min(state.dirtyCash, c.capacity);
+          const p = launderPreview(state, content, c.id);
+          const npc = c.ally ? npcs[c.ally] : undefined;
           return (
             <button
               key={id}
@@ -472,9 +482,19 @@ export function LaunderPhase({ state, dispatch }: PhaseProps) {
                   {t('launder.success', { n: launderSuccessPct(state, content, c.id) })}
                 </Chip>
                 <Chip>{t('launder.loss', { n: c.lossPct })}</Chip>
-                <Chip className="text-danger">{t('launder.heat', { n: c.heat })}</Chip>
-                <Chip>{t('launder.capacity', { n: amount })}</Chip>
+                <Chip className={c.heat < 0 ? 'text-clean' : 'text-danger'}>{c.heat < 0 ? `Heat ${c.heat}` : t('launder.heat', { n: c.heat })}</Chip>
+                <Chip>{t('launder.capacity', { n: p.amount })}</Chip>
+                {c.style === 'drip' && <Chip className="text-clean">⏳ ทยอยเข้า {c.dripDays} วัน</Chip>}
+                {c.style === 'legit' && <Chip className="text-clean">✅ ทางสุจริต ผ่านแน่</Chip>}
+                {c.style === 'wild' && <Chip className="text-danger">🎲 เสี่ยงสุด ไม่หักค่าฟอก</Chip>}
+                {c.festival && <Chip>🏮 เฉพาะช่วงเทศกาล</Chip>}
+                {npc && <Chip className={allyHelps(state, c) ? 'text-clean' : ''}>{allyHelps(state, c) ? `🤝 ${npc.name} เป็นพวก +${content.config.launderAllyBonus}%` : `🤝 ถ้า${npc.name}เป็นพวก +${content.config.launderAllyBonus}%`}</Chip>}
               </div>
+              <p className="mt-2 text-sm">
+                ผ่าน: ได้เงินสะอาด <b className="text-clean">฿{fmt(p.clean)}</b>
+                {c.style === 'drip' && ` (วันละ ฿${fmt(p.perDay)})`}
+                {c.style !== 'legit' && <> · พัง: เสีย <b className="text-danger">฿{fmt(p.lost)}</b> และ Heat ×2</>}
+              </p>
             </button>
           );
         })}

@@ -2,7 +2,7 @@ import { createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import {
   campaignSeed,
-  comebackSeed,
+  washSeed,
   runStats,
   seedWithApprentice,
   spendHeir,
@@ -95,8 +95,8 @@ export const RISK_RULES_FROM = '2026-12-01';
 
 export function newSeed(days: Duration = 30, now = new Date()): string {
   const nonce = randomBytes(16).toString('hex');
-  // 1.2 (เหยื่อกลับมาหา) เริ่มพร้อม 1.1 ในซีซั่นเดียวกัน
-  return bangkokDate(now) >= RISK_RULES_FROM ? comebackSeed(days, nonce) : campaignSeed(days, nonce);
+  // 1.2 (เหยื่อกลับมาหา) และ 1.3 (การ์ดฟอกเงินชุด 2) เริ่มพร้อม 1.1 ในซีซั่นเดียวกัน
+  return bangkokDate(now) >= RISK_RULES_FROM ? washSeed(days, nonce) : campaignSeed(days, nonce);
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */
@@ -140,7 +140,7 @@ export async function startRun(
 /** seed ของ Daily Challenge: ทุกคนได้ seed เดียวกันในวันนั้น แต่เดาล่วงหน้าไม่ได้ */
 export function dailySeed(date: string, secret: string): string {
   const seed = createHmac('sha256', secret).update(`daily:${date}`).digest('hex').slice(0, 32);
-  if (date >= RISK_RULES_FROM) return comebackSeed(30, seed);
+  if (date >= RISK_RULES_FROM) return washSeed(30, seed);
   if (date >= '2026-11-26') return campaignSeed(30, seed);
   if (date >= '2026-11-25') return questSeedPrefix + seed;
   if (date >= '2026-11-24') return 'v3:soi:live:' + seed;

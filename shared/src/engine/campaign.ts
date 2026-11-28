@@ -19,6 +19,11 @@ export function comebackSeed(days: Duration, nonce: string) {
   return campaignPrefix + days + ':v1:risk1:back1:' + nonce;
 }
 
+/** seed รุ่น 1.3: 1.2 + การ์ดฟอกเงินชุด 2 (engine/launder.ts) */
+export function washSeed(days: Duration, nonce: string) {
+  return campaignPrefix + days + ':v1:risk1:back1:wash1:' + nonce;
+}
+
 export function campaignDays(seed: string) {
   return durations.find(days => seed.startsWith(campaignPrefix + days + ':'));
 }

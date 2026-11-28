@@ -269,6 +269,12 @@ export interface GameState {
   launderOffer: CardId[];
   /** ฟอกพังติดกันกี่ครั้ง (ใช้คิดดวงชดเชย) — ไม่มี = 0 */
   launderFailStreak?: number;
+  /** เงินสะอาดที่กำลังทยอยเข้า (การ์ดทยอยเข้า) วันละงวด */
+  washQueue?: { day: number; amount: number; cardId: CardId }[];
+  /** การ์ดที่โผล่เมื่อวาน (กันโผล่ซ้ำ) */
+  lastWashOffer?: CardId[];
+  /** เงินที่ระบบย้ายเองระหว่าง action (ใช้แยกหมวดในสรุปบัญชี) */
+  flowNote?: Partial<Record<FlowKind, number>>;
   flags: string[];
   escapes: number;
   methodsUsed: MethodId[];

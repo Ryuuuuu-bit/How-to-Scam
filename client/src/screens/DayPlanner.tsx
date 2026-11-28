@@ -6,7 +6,7 @@ import { CareerDesk, CareerDirectory, ReliefDesk } from '../components/CareerDes
 import type { Action, GameState, ScamMethod } from '@hts/shared';
 import { currentOffer, edgeIncomePct, methodBlock, methodLevel, newsScout, nextRestDecay, openingFor, originStage, priceOf, questSeedPrefix, restStreak, riskRules } from '@hts/shared';
 import { openingStories } from '../game/openingStories';
-import { WeekLedgerCard } from '../components/RiskExtras';
+import { WashPendingNote, WeekLedgerCard } from '../components/RiskExtras';
 import { limitLine } from '../game/limitLines';
 import { OriginChat } from './OriginChat';
 import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
@@ -231,6 +231,7 @@ export function DayPlanner({
       </aside>}
       <NewsCard state={state} compact />
       <WeekLedgerCard state={state} />
+      <WashPendingNote state={state} />
       {risky && <RiskBrief state={state} edgePct={edgePct} restDrop={restDrop} />}
       <div className="job-toolbar">
         <strong>งานที่เปิดวันนี้ <span>{available.length}</span></strong>

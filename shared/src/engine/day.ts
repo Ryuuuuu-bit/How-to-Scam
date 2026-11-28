@@ -12,6 +12,7 @@ import { getMethod, getPitch, getShopItem } from './lookup';
 import { karmaDelta, perksOfKind, priceOf } from './perks';
 import type { Rng } from './rng';
 import { maybeScheduleReturn } from './comeback';
+import { releaseWash } from './launder';
 import { edgeIncomePct, isRush, methodLevel, restHeatDecay, riskRules, tallyEdgeDay } from './risk';
 import { addEvidence, afterShift, endOfDaySoi, isAlly, placeBonus, quietDayBonus } from './soi';
 import { applyNow, basePrice, contrabandWeight, dealDiscount, famePerShift, henchmanCap, hideoutPct, holdPrice, owns, placeUnlocked } from './shop';
@@ -545,6 +546,7 @@ export function endDay(s: GameState, c: GameContent, rng: Rng): boolean {
   endOfDaySoi(s, rng);
   if (s.day >= s.maxDays) return true;
   s.day++;
+  releaseWash(s);
   if ((s.day - 1) % c.config.newsEveryDays === 0) rollNews(s, c, rng);
   rollOffer(s, c, rng);
   s.phase = 'plan';

@@ -189,6 +189,18 @@ export interface LaunderCard {
   /** ฟอกได้สูงสุดต่อครั้ง */
   capacity: number;
   karma?: number;
+  /** การ์ดชุด 2: โผล่เฉพาะ seed รุ่น wash1 (การ์ดชุดแรกไม่มีค่านี้) */
+  edition?: 'wash1';
+  /** วิธีเล่น: ทันที (ค่าเริ่มต้น) / ทยอยเข้า / ทางสุจริต (ผ่านแน่) / เสี่ยงสุด */
+  style?: 'drip' | 'legit' | 'wild';
+  /** ทยอยเข้ากี่วัน (style drip) */
+  dripDays?: number;
+  /** ต้องถึงระดับแก๊งนี้ก่อน */
+  minLevel?: GangLevel;
+  /** โผล่เฉพาะช่วงเทศกาล */
+  festival?: boolean;
+  /** ผ่านง่ายขึ้นมากถ้าคนในซอยคนนี้เป็นพวกเรา */
+  ally?: 'jae' | 'uncle' | 'coach' | 'auntie' | 'hia';
   name: LocalizedText;
   desc: LocalizedText;
   successText: LocalizedText;
@@ -370,6 +382,8 @@ export interface GameConfig {
   /** น้ำหนักจำนวนเหตุการณ์ต่อวัน [0 อย่าง, 1 อย่าง, 2 อย่าง] */
   eventCountWeights: readonly [number, number, number];
   launderOfferSize: number;
+  /** โอกาสสำเร็จที่เพิ่มเมื่อคนในซอยของการ์ดเป็นพวกเรา (การ์ดชุด 2) */
+  launderAllyBonus: number;
   callCenter: {
     matchSuccessPct: number;
     missSuccessPct: number;

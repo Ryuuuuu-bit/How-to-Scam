@@ -6,6 +6,7 @@ import {
   campaignSeed,
   riskSeed,
   comebackSeed,
+  washSeed,
   riskRules,
   restStreak,
   heatBonusPct,
@@ -158,7 +159,7 @@ for (let i = 0; i < runs; i++) {
   const days = durations[Math.floor(i / (content.characters.length * styles.length)) % durations.length] ?? durations[0];
   if (!ch) break;
   const r = lcg(i * 7919 + 1);
-  const seedOf = legacy ? campaignSeed : process.env.RULES === 'risk' ? riskSeed : comebackSeed;
+  const seedOf = legacy ? campaignSeed : process.env.RULES === 'risk' ? riskSeed : process.env.RULES === 'back' ? comebackSeed : washSeed;
   let s = newGame(seedOf(days, 'sim-' + i), ch.id, content);
   for (let k = 0; k < 5000 && s.phase !== 'ended'; k++) {
     try {

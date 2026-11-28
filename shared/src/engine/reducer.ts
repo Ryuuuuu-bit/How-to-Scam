@@ -34,7 +34,7 @@ import {
   escapeSurrender,
 } from './escape';
 import { HEAT_MAX } from './effects';
-import { launder } from './launder';
+import { launder, releaseWash } from './launder';
 import { acceptOffer, rollOffer } from './offers';
 import { getCharacter } from './lookup';
 import { hashSeed, Rng } from './rng';
@@ -107,7 +107,11 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
 }
 
 function finish(s: GameState, c: GameContent, rng: Rng, reason: EndReason): void {
-  if (reason === 'caught') applyCaught(s, c);
+  // จบรอดหรือวางมือ: เงินที่ทยอยเข้าค้างอยู่ได้ครบ / โดนจับ: ส่วนที่ค้างถูกยึด
+  if (reason === 'caught') {
+    applyCaught(s, c);
+    if (s.washQueue) s.washQueue = [];
+  } else releaseWash(s, true);
   finishSoi(s);
   s.phase = 'ended';
   s.end = {
