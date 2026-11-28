@@ -363,6 +363,12 @@ export function CallPhase({ state, dispatch }: PhaseProps) {
 }
 
 // ---------- เหตุการณ์ ----------
+const victimIllustrations: Record<string, string> = {
+  victim_report: 'คนในซอยยื่นสลิปให้เจ้าหน้าที่ที่โรงพัก',
+  victim_warning: 'คนในตลาดยืนดูข้อความเตือนภัยบนโทรศัพท์',
+  victim_hunter: 'หญิงเสื้อสีส้มยืนคุยโทรศัพท์อยู่ในซอย',
+};
+
 export function EventPhase({ state, dispatch }: PhaseProps) {
   const ev = content.events.find((e) => e.id === state.pendingEvents[0]);
   if (!ev) return null;
@@ -371,11 +377,22 @@ export function EventPhase({ state, dispatch }: PhaseProps) {
   if (ev.id === 'cat_keyboard') return <CatDesk choose={choiceIdx => dispatch({ t: 'eventChoice', choiceIdx })} />;
   if (ev.id === 'counter_live') return <LiveCounter seller={state.characterId === 'live_seller'} onFinish={cat => dispatch({ t: 'eventChoice', choiceIdx: cat ? 1 : 0 })} />;
   const tones = ['pink', 'mint', 'grape'] as const;
+  const victimAlt = victimIllustrations[ev.id];
+  const victimImage = victimAlt ? sceneUrl(ev.id) : undefined;
   return (
     <>
         <ScreenTitle title={ev.careerQuest ? 'เควสเสริมประจำอาชีพ' : t('phase.event')}
           hint={ev.careerQuest ? `${content.characters.find(ch => ch.id === state.characterId)?.name.th ?? ''} · งานที่ ${ev.careerQuest.chapter}/3 · เลือกทำหรือข้ามได้` : ''} />
       <Panel tone="paper" className="anim-rise-in" key={ev.id}>
+        {victimImage && (
+          <img
+            className="event-victim-art"
+            src={victimImage}
+            alt={victimAlt}
+            width={720}
+            height={720}
+          />
+        )}
         {ev.illustration && <figure className="mb-3">
           <img className="block w-full rounded-xl border-2 border-ink" width={624} height={416}
             src={sceneUrl(ev.illustration.scene)} alt={ev.illustration.alt} />

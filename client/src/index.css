@@ -8,24 +8,24 @@
 
 /* โทนสีสดแบบการ์ตูน — ใช้ผ่านคลาส เช่น bg-cream, text-ink, bg-pink */
 @theme {
-  --color-cream: #17191d;
-  --color-paper: #f7f4eb;
-  --color-ink: #23252b;
-  --color-ink-soft: #65636e;
-  --color-pink: #d92e69;
-  --color-mint: #087f71;
-  --color-sun: #e9fb77;
-  --color-orange: #ff8c42;
-  --color-danger: #e63946;
-  --color-grape: #7b5cff;
+  --color-cream: #151b30;
+  --color-paper: #fff3db;
+  --color-ink: #25233a;
+  --color-ink-soft: #625569;
+  --color-pink: #a42c5c;
+  --color-mint: #096e61;
+  --color-sun: #ffcf75;
+  --color-orange: #f39a5f;
+  --color-danger: #b22c42;
+  --color-grape: #604789;
   --color-dirty: #8a9a3b;
   --color-clean: #087a50;
 
   --font-display: 'Mitr', 'Sarabun', system-ui, sans-serif;
   --font-body: 'Sarabun', system-ui, sans-serif;
 
-  --shadow-pop: 0 4px 0 0 #080a0f;
-  --shadow-pop-sm: 0 2px 0 0 #080a0f;
+  --shadow-pop: 0 4px 0 0 #0d1023;
+  --shadow-pop-sm: 0 2px 0 0 #0d1023;
 }
 
 html,
@@ -43,15 +43,18 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* Midnight caper: ink, acid-yellow labels and warm illustrated city scenes. */
+/* Thai night market: indigo ink, warm paper, jade signage and amber lights. */
 :root {
-  --surface: #22252b;
-  --line: #ffffff20;
-  --muted: #b3b2bb;
-  --accent: #e9fb77;
+  --surface: #222946;
+  --line: #f9ded333;
+  --muted: #c7bdd2;
+  --accent: var(--color-sun);
+  --sign-jade: #91dac5;
+  --night-edge: #101426;
 }
 body {
-  background-image: radial-gradient(ellipse at 10% 10%, #32304450, transparent 55%);
+  background-image: radial-gradient(ellipse at 88% 3%, #67436175, transparent 44rem),
+    radial-gradient(ellipse at 0 34%, #23626849, transparent 38rem);
 }
 button,
 a,
@@ -70,7 +73,7 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 summary:focus-visible {
-  outline: 3px solid #f77fa8;
+  outline: 3px solid #45c9be;
   outline-offset: 5px;
 }
 button {
@@ -87,11 +90,11 @@ button {
 .game-button:hover:not(:disabled) {
   transform: translateY(-2px);
   filter: brightness(1.06);
-  box-shadow: 0 6px 0 #080a0f;
+  box-shadow: 0 6px 0 #0d1023;
 }
 .game-button:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #080a0f;
+  box-shadow: 0 1px 0 #0d1023;
 }
 .game-panel {
   color: var(--color-ink);
@@ -127,7 +130,7 @@ button {
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 12px #e9fb7740;
+  box-shadow: 0 0 12px #ffcf7540;
   flex-shrink: 0;
 }
 .menu-shell {
@@ -149,13 +152,6 @@ button {
   text-decoration: none;
   color: #faf7ee;
 }
-.brand-bar a span {
-  font-size: 12px;
-  vertical-align: top;
-  color: var(--accent);
-  margin-left: 3px;
-  letter-spacing: 0;
-}
 .brand-bar > span {
   font-size: 11px;
   color: var(--muted);
@@ -165,18 +161,18 @@ button {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 7%;
-  align-items: center;
+  align-items: start;
   padding: 40px 0;
 }
 .menu-copy {
   padding: 12px 0;
 }
 .game-logo {
-  font-family: Impact, 'Arial Black', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(64px, 7.7vw, 112px);
   font-weight: 900;
   line-height: 0.9;
-  letter-spacing: -3px;
+  letter-spacing: -0.06em;
   margin: 25px 0;
   position: relative;
   width: fit-content;
@@ -187,7 +183,7 @@ button {
 .game-logo i {
   display: inline-block;
   font-style: normal;
-  color: #fa78a3;
+  color: var(--sign-jade);
   transform: rotate(12deg);
   margin-left: 7px;
 }
@@ -247,7 +243,7 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
   margin: -20px -20px 20px;
   padding: 16px 20px;
   border-bottom: 2px solid #292534;
-  background: #e9fb77;
+  background: #ffcf75;
 }
 .feedback-heading h2 { flex: 1; }
 .feedback-types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
@@ -291,14 +287,14 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
   margin-top: 4px;
 }
 .menu-art {
-  min-height: 540px;
-  height: min(690px, 77vh);
+  min-height: 480px;
+  height: min(650px, 72vh);
   position: relative;
-  border-radius: 180px 180px 24px 24px;
-  border: 1px solid #ffffff30;
+  border-radius: 26px;
+  border: 2px solid #ffcf7580;
   isolation: isolate;
-  background: #34323d;
-  box-shadow: 12px 12px 0 #0d0f13;
+  background: var(--surface);
+  box-shadow: 0 7px 0 var(--night-edge), 0 18px 44px #090d2d70;
 }
 .menu-art > img {
   width: 100%;
@@ -312,26 +308,8 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
   position: absolute;
   inset: 50% 0 0;
   border-radius: 0 0 24px 24px;
-  background: linear-gradient(transparent, #11151ae8);
+  background: linear-gradient(transparent, #151b30e8);
   z-index: 0;
-}
-.art-stamp {
-  position: absolute;
-  top: 45px;
-  right: -18px;
-  transform: rotate(8deg);
-  background: var(--accent);
-  color: #202529;
-  padding: 12px 20px;
-  font: 500 16px var(--font-display);
-  border: 2px solid #202529;
-  box-shadow: 4px 4px 0 #202529;
-  z-index: 1;
-}
-.art-stamp span {
-  display: block;
-  font: 11px var(--font-body);
-  margin-top: 4px;
 }
 .art-caption {
   position: absolute;
@@ -362,23 +340,23 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
 }
 .menu-footer > span {
   white-space: nowrap;
-  color: #e9fb77b0;
+  color: #ffcf75b0;
 }
 .menu-footer p {
   max-width: 570px;
 }
 .scene-backdrop {
-  background: #17191d;
+  background: #151b30;
 }
 .scene-image {
   max-width: 100%;
   opacity: 0.8;
 }
 .scene-shade {
-  background: linear-gradient(180deg, #17191d25 0%, #17191d60 28%, #17191d 65%);
+  background: linear-gradient(180deg, #151b3025 0%, #151b3060 28%, #151b30 65%);
 }
 .game-hud {
-  background: #191c23ed;
+  background: #1b2239ed;
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(18px);
   padding-right: 90px;
@@ -468,8 +446,8 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
 }
 .decision-panel button:not(.game-button):hover:not(:disabled) {
   transform: translateY(-3px);
-  border-color: #d92e69;
-  box-shadow: 0 7px 0 #080a0f;
+  border-color: #a42c5c;
+  box-shadow: 0 7px 0 #0d1023;
 }
 .decision-panel button:not(.game-button):disabled {
   opacity: 0.62;
@@ -521,7 +499,7 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
   transform: translateY(-3px);
 }
 .character-footer {
-  background: #17191df5;
+  background: #151b30f5;
   border-top: 1px solid var(--line);
 }
 .end-screen {
@@ -560,7 +538,7 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
   align-items: center;
   gap: 6px;
   background: #282b32;
-  color: #e9fb77;
+  color: #ffcf75;
   border: 1px solid #ffffff30;
   padding: 8px 12px;
   border-radius: 10px;
@@ -613,8 +591,8 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
   }
   .play-shell .scene-shade {
     background:
-      linear-gradient(180deg, #17191d10 35%, #17191df5 95%),
-      linear-gradient(90deg, transparent 75%, #17191d);
+      linear-gradient(180deg, #151b3010 35%, #151b30f5 95%),
+      linear-gradient(90deg, transparent 75%, #151b30);
   }
   .scene-caption {
     display: block;
@@ -728,7 +706,7 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
     bottom: 0;
     inset-inline: 0;
     margin: 0;
-    background: #191c23f7;
+    background: #1b2239f7;
     border-top: 1px solid var(--line);
     padding: 8px max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom))
       max(12px, env(safe-area-inset-left));
@@ -774,22 +752,13 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
   .menu-art {
     grid-row: 1;
     min-height: 0;
-    height: 34vh;
-    margin: 22px 8px 24px;
-    border-radius: 100px 100px 18px 18px;
-    box-shadow: 6px 6px 0 #0d0f13;
+    height: clamp(180px, 29svh, 265px);
+    margin: 18px 0 24px;
+    border-radius: 18px;
+    box-shadow: 0 5px 0 var(--night-edge);
   }
   .menu-art > img {
     object-position: center 43%;
-  }
-  .art-stamp {
-    font-size: 12px;
-    top: 20px;
-    padding: 8px 12px;
-    right: -16px;
-  }
-  .art-stamp span {
-    font-size: 9px;
   }
   .art-caption {
     bottom: 18px;
@@ -807,16 +776,12 @@ dialog[aria-labelledby="feedback-title"] .popup-close:hover svg {
     letter-spacing: 1px;
   }
   .game-logo {
-    font-size: clamp(70px, 18vw, 108px);
+    font-size: clamp(32px, 11vw, 65px);
     margin: 18px 0;
     line-height: 0.88;
   }
   .game-logo br {
     display: none;
-  }
-  .game-logo {
-    font-size: 14vw;
-    letter-spacing: -2px;
   }
   .game-logo > span {
     margin-left: 8px;
@@ -1023,14 +988,14 @@ h3,
   background: #f8f4e9; border: 2px solid #363743; border-radius: 1rem;
   text-align: start; box-shadow: 0 3px 0 #101018;
 }
-.decision-panel button.job-tile[aria-pressed="true"] { border-color: #e8fa71; background: #f5fcc5; box-shadow: 0 0 0 2px #e8fa71; }
+.decision-panel button.job-tile[aria-pressed="true"] { border-color: #ffcf75; background: #ffebbe; box-shadow: 0 0 0 2px #ffcf75; }
 .job-photo { position: relative; width: 100%; height: clamp(64px, 15vw, 105px); background: #383046; overflow: hidden; }
 .job-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 43%; }
 .job-photo small, .job-photo b {
   position: absolute; bottom: .35rem; left: .4rem; padding: .13rem .45rem; border-radius: .45rem;
   color: white; background: #171921ef; font-weight: 700; font-size: .74rem;
 }
-.job-photo b { inset: .38rem .4rem auto auto; color: #202024; background: #e8fa71; }
+.job-photo b { inset: .38rem .4rem auto auto; color: #202024; background: #ffcf75; }
 .job-copy { display: grid; gap: .18rem; padding: .6rem .65rem .7rem; line-height: 1.28; }
 .job-copy strong { font-size: clamp(.92rem, 2vw, 1.03rem); }
 .job-copy span { font-size: .8rem; color: #215e46; font-weight: 650; }
@@ -1057,24 +1022,24 @@ h3,
 .plan-receipt[open] summary::after { transform: rotate(180deg); }
 .plan-receipt p, .plan-receipt small { display: block; font-size: .79rem; line-height: 1.55; }
 .plan-receipt small { color: #c5c4cb; margin: .25rem 0 .5rem; }
-.decision-panel .plan-receipt .receipt-link { min-height: 44px; color: #e8fa71; background: transparent; border: 0; text-decoration: underline; }
+.decision-panel .plan-receipt .receipt-link { min-height: 44px; color: #ffcf75; background: transparent; border: 0; text-decoration: underline; }
 .menu-modes, .menu-utilities { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; }
 .menu-modes .game-button, .menu-utilities .game-button { min-width: 0; min-height: 50px; padding: .55rem .65rem; font-size: .9rem; text-align: start; }
-.menu-utilities .game-button { color: #eeebe2; background: #252630; border: 1px solid #4d4e58; box-shadow: none; }
+.menu-utilities .game-button { color: #eeebe2; background: #222946; border: 1px solid #4d4e58; box-shadow: none; }
 .menu-utilities .game-button > span[aria-hidden] { display: none; }
 .collection-filter { align-self: flex-start; background: #383944; margin: 0 0 1rem; color: #e9e7df; }
-.collection-filter button[aria-pressed="true"] { background: #e8fa71; color: #202125; }
+.collection-filter button[aria-pressed="true"] { background: #ffcf75; color: #202125; }
 .collection-screen > :first-child, .character-screen > :first-child { padding-inline-end: 4.5rem; }
-.collection-progress { width: 100%; height: .5rem; margin: 0 0 1.1rem; accent-color: #dbea70; border-radius: 8px; overflow: hidden; border: 0; background-color: #454652; }
-.collection-progress::-webkit-progress-bar { background: #454652; }
-.collection-progress::-webkit-progress-value { background: #dbea70; }
+.collection-progress { width: 100%; height: .5rem; margin: 0 0 1.1rem; accent-color: #91dac5; border-radius: 8px; overflow: hidden; border: 0; background-color: #3b4561; }
+.collection-progress::-webkit-progress-bar { background: #3b4561; }
+.collection-progress::-webkit-progress-value { background: #91dac5; }
 .collection-screen button.bg-paper, .collection-screen button.bg-sun { color: #24252c; }
 .collection-screen > p.text-ink-soft, .end-screen > p.text-ink-soft { color: #c4c3cc; }
 .game-hud, .planner-actions, .collection-progress, .end-screen { font-variant-numeric: tabular-nums; }
 :where(button, a, summary, select, input, textarea):focus-visible { outline: 3px solid #45c9be; outline-offset: 3px; }
 .practice-nav { position: relative; z-index: 2; display: flex; align-items: center; gap: .85rem; flex-wrap: wrap; margin: 0 auto; padding: .2rem max(1rem, calc((100% - 1100px)/2)); background: #272935; color: #faf5e8; }
 .is-planning .play-heading:has(> :only-child) { display: none; }
-.practice-nav a, .practice-link { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: .2em; color: #e8fa71; }
+.practice-nav a, .practice-link { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: .2em; color: #ffcf75; }
 .practice-link { justify-content: center; }
 .practice-end { max-width: 34rem; margin: 10vh auto; padding: 1.5rem; display: grid; gap: 1rem; }
 @media (max-width: 767px) {
@@ -1085,4 +1050,54 @@ h3,
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
   .decision-panel button:not(.game-button):hover:not(:disabled) { transform: none; }
+}
+
+/* The same printed sign and paper treatment carries through the game. */
+.game-button {
+  border-radius: 10px;
+  border-top-color: color-mix(in srgb, currentColor 30%, transparent);
+}
+.game-panel {
+  border-radius: 14px;
+  box-shadow: var(--shadow-pop), inset 0 1px #ffffff70;
+}
+.screen-title {
+  border-image: linear-gradient(var(--color-sun), var(--color-orange)) 1;
+}
+.brand-bar {
+  background: linear-gradient(90deg, var(--color-sun), var(--sign-jade)) bottom left / 100% 1px no-repeat;
+}
+.game-hud {
+  border-bottom-color: #ffcf7566;
+}
+.play-feedback,
+.audio-panel {
+  background-color: var(--surface);
+}
+.rush-toggle {
+  border-inline-start: 5px solid var(--color-orange);
+}
+.risk-brief {
+  border-inline-start: 4px solid var(--color-pink);
+}
+dialog[aria-labelledby="paper-title"] article figure {
+  background: #efddb6;
+}
+.event-victim-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  aspect-ratio: 5 / 3;
+  object-fit: cover;
+  object-position: center 54%;
+  margin-bottom: 0.85rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+}
+
+@media (max-width: 600px) {
+  .event-victim-art {
+    max-height: 230px;
+  }
 }

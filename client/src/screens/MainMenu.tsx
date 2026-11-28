@@ -63,7 +63,7 @@ export function MainMenu({
     <main className="menu-shell">
       <header className="brand-bar">
         <a href="#" aria-label="How to Scam หน้าหลัก">
-          HTS<span>®</span>
+          HTS
         </a>
         <span>ตลกร้าย · วางแผน · เอาตัวรอด</span>
       </header>
@@ -209,11 +209,8 @@ export function MainMenu({
         </section>
         <section className="menu-art" aria-label="ภาพเมืองและตัวละคร How to Scam">
           <img src={sceneUrl(menuScene.scene)} alt={menuScene.name} />
-          <div className="art-stamp">
-            แฟ้มคดี #001 <span>เริ่มต้นใหม่ได้เสมอ</span>
-          </div>
           <div className="art-caption">
-            <span className="live-dot" /> เมืองนี้… ไม่มีอะไรฟรี<b>แม้แต่บทเรียนชีวิต</b>
+            <b>{menuScene.name}</b>
           </div>
         </section>
       </div>

@@ -1,13 +1,13 @@
 .caper-entry {
-  --paper: #fff5e2;
-  --ink: #100e16;
-  --lime: #e7fb09;
+  --paper: var(--color-paper);
+  --ink: var(--color-ink);
+  --lime: var(--color-sun);
   min-height: 100svh;
   display: grid;
   align-items: end;
   padding: max(72px, env(safe-area-inset-top)) 4vw max(5svh, env(safe-area-inset-bottom));
   background:
-    linear-gradient(0deg, #260b3670, transparent 52%),
+    linear-gradient(0deg, #151b30d9, transparent 52%),
     url('../assets/img/login-twilight.webp') center / cover;
 }
 .entry-layout {
@@ -66,7 +66,7 @@
 }
 .entry-pass {
   color: var(--ink);
-  background: linear-gradient(135deg, #fff8eb, #fbefdb);
+  background: linear-gradient(135deg, var(--paper), #f1debb);
   border: 3px solid var(--ink);
   border-radius: clamp(16px, 1.55vw, 26px);
   box-shadow: 3px 8px 0 var(--ink);

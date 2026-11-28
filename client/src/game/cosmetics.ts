@@ -1,7 +1,7 @@
 import type { UnlockProgress } from '@hts/shared';
 
 export const menuScenes = [
-  { id: 'menu', name: 'ฐานบัญชาการ', scene: 'menu', xp: 0, hint: 'มีให้ตั้งแต่เริ่มเกม' },
+  { id: 'menu', name: 'ตลาดเย็นในซอย', scene: 'menu_courtyard', xp: 0, hint: 'มีให้ตั้งแต่เริ่มเกม' },
   { id: 'condo', name: 'คอนโดวิวหลักล้าน', scene: 'menu_condo', xp: 300, hint: 'ค่าหัวถึง ฿6 ล้าน' },
   { id: 'jail', name: 'ห้องพักมีลูกกรง', scene: 'menu_jail', ending: 'jailed', hint: 'พบฉากจบติดคุก' },
   {
