@@ -76,6 +76,8 @@ export function edgeScoreBonus(s: GameState, c: GameContent): number {
 
 /** นับวันเสียวตอนจบวัน */
 export function tallyEdgeDay(s: GameState, c: GameContent): void {
-  if (!riskRules(s.seed) || s.heat < c.config.risk.edgeHeat) return;
+  if (!riskRules(s.seed)) return;
+  s.stats.peakHeat = Math.max(s.stats.peakHeat ?? 0, s.heat);
+  if (s.heat < c.config.risk.edgeHeat) return;
   s.stats.edgeDays = (s.stats.edgeDays ?? 0) + 1;
 }

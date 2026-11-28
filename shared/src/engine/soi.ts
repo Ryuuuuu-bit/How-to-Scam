@@ -164,6 +164,8 @@ export const evidenceInfo: Record<EvidenceKind, { name: string; note: string }> 
   witness: { name: 'คำให้การเพื่อนบ้าน', note: 'คนในซอยเริ่มพูด' },
   decoy: { name: 'เบาะแสปลอม', note: 'แผนที่ไปโกดังร้างที่คุณวาดเอง' },
   contraband: { name: 'ใบเสร็จของเถื่อน', note: 'ดีลใต้โต๊ะกับร้านหมูกระทะ มีคนถ่ายรูปไว้' },
+  victim: { name: 'บันทึกแจ้งความของเหยื่อ', note: 'แฟ้มสีฟ้าพร้อมสลิปโอนเงินครบทุกใบ' },
+  oldcase: { name: 'คดีค้างของอาจารย์', note: 'สารวัตรยังจำนามสกุลแก๊งนี้ได้' },
 };
 
 export const raidAt = 7;

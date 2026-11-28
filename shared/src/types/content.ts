@@ -89,7 +89,13 @@ export type Effect =
   /** นัดเหตุการณ์ต่อเนื่องให้เกิดในอีก N วัน */
   | { kind: 'schedule'; eventId: EventId; inDays: number }
   /** ปิดวิธีโกงชั่วคราว */
-  | { kind: 'cooldown'; methodId: MethodId; days: number };
+  | { kind: 'cooldown'; methodId: MethodId; days: number }
+  /** เพิ่มหลักฐานในคดีของสารวัตร */
+  | { kind: 'evidence'; evidence: 'victim' | 'exposed' | 'witness'; weight: number }
+  /** เฉพาะเหตุการณ์เหยื่อกลับมา: ปรับรายได้ของงานที่หลอกเขา */
+  | { kind: 'jobModifier'; pct: number; days: number }
+  /** เฉพาะเหตุการณ์เหยื่อกลับมา: คืนเงิน % ของที่ได้จากเขา (จากเงินสกปรกก่อน) */
+  | { kind: 'refund'; pct: number };
 
 export interface EventOutcome {
   /** น้ำหนักโอกาสของผลลัพธ์นี้ (ค่าเริ่มต้น 1) */
@@ -396,6 +402,12 @@ export interface GameConfig {
   score: { daysWeight: number; maxVarietyBonus: number; varietyTarget: number; noEscapeBonus: number };
   /** กติกา "เสี่ยงแล้วคุ้ม" ใช้เฉพาะ seed รุ่น 1.1 (ดู engine/risk.ts) */
   risk: RiskConfig;
+  /** เหยื่อกลับมาหา (กติกา 1.2) */
+  comeback: ComebackConfig;
+  /** หักตัวคูณสไตล์เมื่อใช้ย้อนวัน */
+  rewindStylePenalty: number;
+  /** ลูกศิษย์สืบทอดแก๊ง */
+  apprentice: ApprenticeConfig;
 }
 
 export interface RiskConfig {
@@ -412,6 +424,25 @@ export interface RiskConfig {
   edgeScoreMax: number;
   /** ปลดวิธีโกงเร็วขึ้นในกติการุ่นนี้ (methodId → ระดับแก๊ง) */
   methodLevels: Readonly<Record<string, GangLevel>>;
+}
+
+export interface ComebackConfig {
+  /** โอกาส % ที่เหยื่อของงานที่หลอกสำเร็จจะกลับมา */
+  chancePct: number;
+  /** กลับมาภายในกี่วัน [ต่ำสุด, สูงสุด] */
+  inDays: readonly [number, number];
+  /** นัดค้างพร้อมกันได้มากสุด */
+  maxPending: number;
+  /** น้ำหนักแต่ละแบบ */
+  weights: { report: number; warning: number; hunter: number };
+}
+
+export interface ApprenticeConfig {
+  giftCash: number;
+  giftFame: number;
+  giftRep: number;
+  debtCash: number;
+  oldCaseWeight: number;
 }
 
 /** ฉายาอัตโนมัติ */

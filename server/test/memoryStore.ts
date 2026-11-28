@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Board, BoardRow, RunRec, Scope, ScoreInput, Store, UserRec } from '../src/store';
+import { weeklyColumn } from '../src/store';
 
 type ScoreRow = ScoreInput & { createdAt: Date };
 
@@ -139,6 +140,34 @@ export function memoryStore() {
         run.status = 'rejected';
         run.reject = reason;
       }
+    },
+    async weekly(theme, since, until, limit) {
+      const col = weeklyColumn[theme];
+      const min = theme === 'lineage' ? 1 : 0;
+      const rows = scores
+        .filter((s) => s.createdAt >= since && s.createdAt < until && s[col] > min)
+        .sort((a, b) => b[col] - a[col] || b.score - a.score);
+      const seen = new Set<string>();
+      const out: BoardRow[] = [];
+      for (const r of rows) {
+        if (seen.has(r.userId) || out.length >= limit) continue;
+        seen.add(r.userId);
+        const u = find(r.userId);
+        out.push({
+          rank: out.length + 1,
+          userId: r.userId,
+          displayName: u?.displayName ?? '',
+          avatarUrl: u?.avatarUrl ?? null,
+          characterId: r.characterId,
+          score: r.score,
+          days: r.days,
+          reason: r.reason,
+          titleId: r.titleId,
+          createdAt: r.createdAt,
+          value: r[col],
+        });
+      }
+      return out;
     },
     async leaderboard(scope, board: Board, limit) {
       const rows = scores

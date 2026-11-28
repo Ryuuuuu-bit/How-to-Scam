@@ -1,4 +1,6 @@
 import { campaignDays } from './campaign';
+import { applyApprentice } from './apprentice';
+import { trackFlow } from './ledger';
 import { reformFlag, reformOf, reformStartKarma } from './loadout';
 import { careerFee, careerSignatures, careerStatus, minimumJobCost } from './careerPaths';
 import type { EndReason, GameContent } from '../types/content';
@@ -97,6 +99,7 @@ export function newGame(seed: string, characterId: string, c: GameContent): Game
     s.flags.push(reformFlag);
     s.karma += reformStartKarma;
   }
+  applyApprentice(s, c);
   rollNews(s, c, rng);
   rollOffer(s, c, rng);
   s.rng = rng.state;
@@ -351,6 +354,9 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
       expectPhase(s, 'plan', 'shop');
       finish(s, c, rng, 'retired');
       break;
+    case 'rewindDay':
+      invariant(false, 'rewindDay is handled by replay');
+      break;
     default: {
       const never: never = action;
       invariant(false, `unknown action ${JSON.stringify(never)}`);
@@ -359,6 +365,7 @@ export function step(prev: GameState, action: Action, c: GameContent): GameState
 
   if (s.phase === 'escape' && !s.escape) s.escape = { step: 'disguise', bonus: -caseEscapePenalty(s) + (owns(s, 'app_case') ? 10 : 0) };
   if (s.phase === 'shop') openShop(s, c);
+  trackFlow(prev, s, action);
   s.rng = rng.state;
   return s;
 }

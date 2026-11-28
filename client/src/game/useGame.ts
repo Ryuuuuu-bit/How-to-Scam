@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { InvalidActionError, newGame, riskSeed, seedWithLoadout, type Duration, type Loadout, replay, step } from '@hts/shared';
+import { InvalidActionError, newGame, comebackSeed, seedWithApprentice, seedWithLoadout, type Duration, type HeirOffer, type Loadout, replay, step } from '@hts/shared';
 import type { Action, GameState } from '@hts/shared';
 import { content } from '@hts/shared/data';
 
@@ -84,8 +84,9 @@ export function useGame() {
   const [tick, setTick] = useState(0);
 
   /** เริ่มรอบ: ถ้ามี seed จาก server (runId) คะแนนจะส่งขึ้นกระดานได้ */
-  const start = useCallback((characterId: string, server?: { runId: string; seed: string }, days: Duration = 30, loadout?: Loadout) => {
-    const fresh = riskSeed(days, randomSeed());
+  const start = useCallback((characterId: string, server?: { runId: string; seed: string }, days: Duration = 30, loadout?: Loadout, heir?: HeirOffer) => {
+    const base = comebackSeed(days, randomSeed());
+    const fresh = heir ? seedWithApprentice(base, heir) : base;
     const seed = server?.seed ?? (loadout ? seedWithLoadout(fresh, loadout) : fresh);
     const next: Run = {
       seed,
@@ -122,13 +123,30 @@ export function useGame() {
     setTick((x) => x + 1);
   }, []);
 
+  /** ย้อนกลับไปต้นวัน (ครั้งเดียวต่อรอบ): ต่อ action ย้อนวันท้าย log แล้ว replay ใหม่ทั้งรอบ */
+  const rewind = useCallback(() => {
+    setRun((prev) => {
+      if (!prev) return prev;
+      const actions: Action[] = [...prev.actions, { t: 'rewindDay' }];
+      try {
+        const next: Run = { ...prev, actions, state: replay(prev.seed, prev.characterId, actions, content) };
+        writeSave(next);
+        return next;
+      } catch (err) {
+        if (err instanceof InvalidActionError) return prev;
+        throw err;
+      }
+    });
+    setTick((x) => x + 1);
+  }, []);
+
   const quit = useCallback(() => {
     setRun(null);
   }, []);
 
   const clearSave = useCallback(() => writeSave(null), []);
 
-  return { run, tick, start, resume, dispatch, quit, clearSave };
+  return { run, tick, start, resume, dispatch, rewind, quit, clearSave };
 }
 
 export { content };

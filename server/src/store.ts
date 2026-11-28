@@ -3,6 +3,9 @@ import type { Career, Scrapbook } from '@hts/shared';
 import type { SeasonInfo } from './season';
 
 export type Board = 'top' | 'longest' | 'fastest';
+/** กระดานรายสัปดาห์แบบมีธีม */
+export type WeeklyTheme = 'edge' | 'heat' | 'rush' | 'lineage';
+export const weeklyColumn = { edge: 'edgeDays', heat: 'peakHeat', rush: 'rushStreak', lineage: 'generation' } as const;
 export type RunMode = 'normal' | 'normal60' | 'normal90' | 'daily';
 
 /** ขอบเขตของกระดาน: ซีซั่นรายเดือน (รอบปกติ) หรือวัน (Daily Challenge) */
@@ -52,6 +55,11 @@ export interface ScoreInput {
   reason: string;
   endingId: string;
   titleId: string;
+  /** สถิติรอบ (กระดานรายสัปดาห์) */
+  edgeDays: number;
+  peakHeat: number;
+  rushStreak: number;
+  generation: number;
   actionCount: number;
   xpGained: number;
   moneyGained: number;
@@ -74,6 +82,8 @@ export interface BoardRow {
   reason: string;
   titleId: string;
   createdAt: Date;
+  /** ค่าของธีม (เฉพาะกระดานรายสัปดาห์) */
+  value?: number;
 }
 
 export interface NewRun {
@@ -110,6 +120,8 @@ export interface Store {
   ): Promise<UserRec>;
   rejectRun(runId: string, reason: string, actionCount: number): Promise<void>;
   leaderboard(scope: Scope, board: Board, limit: number): Promise<BoardRow[]>;
+  /** กระดานรายสัปดาห์: คนละแถว เรียงตามค่าธีม (เฉพาะค่ามากกว่าค่าเริ่มต้น) ในช่วง [since, until) */
+  weekly(theme: WeeklyTheme, since: Date, until: Date, limit: number): Promise<BoardRow[]>;
   /** อันดับของคะแนนนี้ในกระดานคะแนนสูงสุด (นับผู้เล่นที่ทำได้ดีกว่า) */
   rankOf(scope: Scope, score: number): Promise<number>;
   /** คะแนน Daily ของผู้เล่นในวันนั้น (ถ้ามี) */

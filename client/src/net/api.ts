@@ -126,8 +126,10 @@ export const api = {
     }),
   rename: (displayName: string) =>
     call<{ user: PublicUser }>('/api/me', { method: 'PATCH', body: { displayName } }),
-  startRun: (characterId: string, days = 30, pick: LoadoutPick = {}) =>
-    call<{ runId: string; seed: string }>('/api/runs', { body: { characterId, days, ...pick } }),
+  startRun: (characterId: string, days = 30, pick: LoadoutPick = {}, apprentice = false) =>
+    call<{ runId: string; seed: string }>('/api/runs', { body: { characterId, days, ...pick, ...(apprentice && { apprentice: true }) } }),
+  weekly: (theme: 'edge' | 'heat' | 'rush' | 'lineage') =>
+    call<{ theme: string; week: string; endsAt: string; rows: (BoardRow & { value?: number })[] }>(`/api/leaderboard/weekly?theme=${theme}`),
   submitRun: (runId: string, actions: Action[]) =>
     call<SubmitResult>(`/api/runs/${runId}/submit`, { body: { actions } }),
   leaderboard: (board: 'top' | 'longest' | 'fastest' | 'daily', season?: string, days = 30) =>

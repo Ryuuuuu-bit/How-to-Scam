@@ -60,4 +60,12 @@ export const config: GameConfig = {
     edgeScoreMax: 0.7,
     methodLevels: { ponzi: 3 },
   },
+  comeback: {
+    chancePct: 30,
+    inDays: [2, 5],
+    maxPending: 2,
+    weights: { report: 40, warning: 35, hunter: 25 },
+  },
+  rewindStylePenalty: 0.1,
+  apprentice: { giftCash: 2_500, giftFame: 6, giftRep: 2, debtCash: 2_000, oldCaseWeight: 2 },
 };

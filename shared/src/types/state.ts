@@ -94,6 +94,8 @@ export interface MethodState {
 export interface DayLog {
   /** รับงานด่วนวันนี้ (กติกา 1.1) */
   rush?: boolean;
+  /** เงินเข้า/ออกของวันนี้แยกตามที่มา (บวก = เข้า, ลบ = ออก) ใช้ทำสรุปบัญชี */
+  flow?: Partial<Record<FlowKind, number>>;
   evidence?: number;
   raid?: 'raid' | 'warned' | 'decoy';
   relief?: 'mascot' | 'stage' | 'favor';
@@ -148,7 +150,23 @@ export interface LastResult {
 export type SoiPlaceId = 'market' | 'temple' | 'field' | 'dorm' | 'mookata';
 export type SoiForm = 'patron' | 'local' | 'show';
 export type SoiNpcId = 'jae' | 'uncle' | 'coach' | 'auntie' | 'hia';
-export type EvidenceKind = 'shift' | 'sting' | 'clip' | 'exposed' | 'crash' | 'paper' | 'witness' | 'decoy' | 'contraband';
+export type EvidenceKind = 'shift' | 'sting' | 'clip' | 'exposed' | 'crash' | 'paper' | 'witness' | 'decoy' | 'contraband' | 'victim' | 'oldcase';
+
+/** หมวดเงินในสรุปบัญชี */
+export type FlowKind = 'job' | 'gear' | 'events' | 'launder' | 'shop' | 'wages' | 'escape' | 'other';
+
+/** เหยื่อที่จะกลับมาหา (กติกา 1.2) */
+export interface VictimReturn {
+  eventId: string;
+  /** งานที่หลอกเขา */
+  methodId: string;
+  /** วันที่หลอกสำเร็จ */
+  from: number;
+  /** วันที่จะกลับมา */
+  day: number;
+  /** เงินที่ได้จากเขา */
+  take: number;
+}
 
 /** 1.0: ซอยมีชีวิต สถานที่เปลี่ยนตามการตัดสินใจ และคนในซอยจำได้ */
 export interface SoiState {
@@ -261,7 +279,15 @@ export interface GameState {
     launderOk: number;
     /** จำนวนวันที่จบวันด้วย Heat สูง (กติกา 1.1) */
     edgeDays?: number;
+    /** Heat สูงสุดตอนจบวันที่รอดมาได้ (กติกา 1.1) */
+    peakHeat?: number;
   };
+  /** เงินที่เปลี่ยนก่อนเลือกแผนของวัน รอรวมเข้าบันทึกของวันนั้น */
+  preFlow?: Partial<Record<FlowKind, number>>;
+  /** ใช้ย้อนวันไปแล้วกี่ครั้ง (ทำได้ครั้งเดียวต่อรอบ) */
+  rewinds?: number;
+  /** เหยื่อที่นัดกลับมาหา (กติกา 1.2) */
+  returns?: VictimReturn[];
   history: DayLog[];
   originStory?: { reply: 'help' | 'later'; followedUpOn?: number };
   lastResults: LastResult[];
@@ -304,6 +330,8 @@ export type Action =
   | { t: 'escapeQte'; hits: number; custody?: true | undefined }
   | { t: 'escapeSurrender'; custody?: true | undefined }
   | { t: 'custodyVerdict'; answer: number[] | null }
-  | { t: 'retire' };
+  | { t: 'retire' }
+  /** ย้อนกลับไปต้นวัน (ประมวลผลใน replay เท่านั้น) */
+  | { t: 'rewindDay' };
 
 export type PublicGameState = Omit<GameState, 'karma' | 'rng'>;

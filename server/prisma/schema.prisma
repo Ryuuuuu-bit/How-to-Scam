@@ -110,6 +110,11 @@ model Score {
   titleId     String
   mode        String   @default("normal")
   dailyDate   String?
+  /** สถิติรอบสำหรับกระดานรายสัปดาห์ */
+  edgeDays    Int      @default(0)
+  peakHeat    Int      @default(0)
+  rushStreak  Int      @default(0)
+  generation  Int      @default(1)
   createdAt   DateTime @default(now())
 
   @@index([dailyDate, score])

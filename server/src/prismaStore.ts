@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from './generated/prisma/client';
-import { scopeWhere } from './store';
+import { scopeWhere, weeklyColumn } from './store';
 import type { Board, BoardRow, GoogleProfile, RunRec, ScoreInput, Store } from './store';
 
 export function createPrisma(databaseUrl: string): PrismaClient {
@@ -103,6 +103,10 @@ export function prismaStore(db: PrismaClient): Store {
             reason: s.reason,
             endingId: s.endingId,
             titleId: s.titleId,
+            edgeDays: s.edgeDays,
+            peakHeat: s.peakHeat,
+            rushStreak: s.rushStreak,
+            generation: s.generation,
           },
         });
         if (s.newAchievements.length > 0) {
@@ -186,6 +190,29 @@ export function prismaStore(db: PrismaClient): Store {
         });
       }
       return out;
+    },
+    async weekly(theme, since, until, limit) {
+      const col = weeklyColumn[theme];
+      const rows = await db.score.findMany({
+        where: { createdAt: { gte: since, lt: until }, [col]: { gt: theme === 'lineage' ? 1 : 0 } },
+        orderBy: [{ [col]: 'desc' as const }, { score: 'desc' as const }, { id: 'asc' }],
+        distinct: ['userId'],
+        take: limit,
+        include: { user: { select: { displayName: true, avatarUrl: true } } },
+      });
+      return rows.map((r, i) => ({
+        rank: i + 1,
+        userId: r.userId,
+        displayName: r.user.displayName,
+        avatarUrl: r.user.avatarUrl,
+        characterId: r.characterId,
+        score: r.score,
+        days: r.days,
+        reason: r.reason,
+        titleId: r.titleId,
+        createdAt: r.createdAt,
+        value: r[col],
+      }));
     },
     async rankOf(scope, score) {
       const better = await db.score.groupBy({

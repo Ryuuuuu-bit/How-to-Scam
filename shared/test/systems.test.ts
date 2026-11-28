@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '../data';
+import { isComebackEvent } from '../src/engine/comeback';
 import {
   choiceAvailable,
   dateOf,
@@ -156,6 +157,7 @@ describe('ความหลากหลาย', () => {
       const ch = content.characters[i % content.characters.length]?.id ?? 'ex_insurance';
       for (const e of autoPlay(`variety-${i}`, ch).state.seenEvents) seen.add(e);
     }
-    expect(seen.size).toBeGreaterThan(content.events.filter(event => !event.lifeStory).length / 2);
+    // เหตุการณ์เหยื่อกลับมาหาเกิดเฉพาะ seed รุ่น 1.2 จึงไม่นับในรอบจากเซฟรุ่นก่อน
+    expect(seen.size).toBeGreaterThan(content.events.filter(event => !event.lifeStory && !isComebackEvent(event.id)).length / 2);
   });
 });

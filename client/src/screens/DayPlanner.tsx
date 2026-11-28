@@ -6,6 +6,8 @@ import { CareerDesk, CareerDirectory, ReliefDesk } from '../components/CareerDes
 import type { Action, GameState, ScamMethod } from '@hts/shared';
 import { currentOffer, edgeIncomePct, methodBlock, methodLevel, newsScout, nextRestDecay, openingFor, originStage, priceOf, questSeedPrefix, restStreak, riskRules } from '@hts/shared';
 import { openingStories } from '../game/openingStories';
+import { WeekLedgerCard } from '../components/RiskExtras';
+import { limitLine } from '../game/limitLines';
 import { OriginChat } from './OriginChat';
 import { itemEffect, planEstimate, scoutHint } from '../game/plannerPreview';
 import { content } from '@hts/shared/data';
@@ -228,6 +230,7 @@ export function DayPlanner({
         <p className="font-display">{openingStories[yesterday.opening][yesterday.methodId ? 'workNews' : 'quietNews']}</p>
       </aside>}
       <NewsCard state={state} compact />
+      <WeekLedgerCard state={state} />
       {risky && <RiskBrief state={state} edgePct={edgePct} restDrop={restDrop} />}
       <div className="job-toolbar">
         <strong>งานที่เปิดวันนี้ <span>{available.length}</span></strong>
@@ -261,8 +264,8 @@ export function DayPlanner({
                 <span className="job-copy"><strong>{lt(m.name)}</strong>
                   <small>{careerStatus(state, m.id).shifts} วันในสายงานนี้</small>
                   <span>{m.cleanIncome ? 'เงินสะอาด' : 'รายได้'} ฿{fmt(estimate.income[0])}–{fmt(estimate.income[1])}</span>
-                  <small>{block === 'banned' ? t('plan.banned') : block === 'cooldown'
-                    ? t('plan.cooldown', { n: state.methodState[m.id]?.cooldownUntil ?? 0 })
+                  <small>{block === 'banned' ? limitLine('banned', m.id, state.day) : block === 'cooldown'
+                    ? limitLine('cooldown', m.id, state.day, state.methodState[m.id]?.cooldownUntil ?? state.day)
                     : `Heat ${estimate.heat[1] === 0 ? '0' : '+' + estimate.heat.join('–')}`}</small>
                 </span>
               </button>

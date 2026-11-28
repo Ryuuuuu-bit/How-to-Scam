@@ -1,5 +1,6 @@
 import type { GameContent, Weakness } from './types/content';
 import { callerNameIndices, callerPortraits } from './engine/callerIdentity';
+import { isComebackEvent } from './engine/comeback';
 
 /**
  * ตรวจความถูกต้องของข้อมูลเกม คืนรายการปัญหา (ว่าง = ผ่าน)
@@ -105,7 +106,8 @@ export function validateContent(c: GameContent): string[] {
   }
 
   for (const ev of c.events) {
-    if (ev.chainOnly && !scheduled.has(ev.id))
+    // เหยื่อกลับมาหา: engine/comeback.ts เป็นคนนัด
+    if (ev.chainOnly && !scheduled.has(ev.id) && !isComebackEvent(ev.id))
       errors.push(`chain event ${ev.id} is never scheduled`);
     for (const ch of ev.when.characters ?? []) {
       if (!charIds.has(ch)) errors.push(`event ${ev.id}: unknown character ${ch}`);

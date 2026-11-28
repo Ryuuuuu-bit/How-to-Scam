@@ -1,6 +1,7 @@
 import type { GameContent } from '../types/content';
 import type { Action, GameState, LastResult } from '../types/state';
-import { newGame, step } from './reducer';
+import { generationOf, heirFrom, isHeirDebt, isHeirGift, MAX_GEN, type HeirOffer } from './apprentice';
+import { playLog } from './replay';
 
 // สมุดภาพการ์ดเหยื่อกับประวัติการเล่นข้ามรอบ (ใช้คิดยศในซอย)
 // ใช้ร่วมกันทั้ง client และ server: server เป็นที่เก็บหลัก client เก็บสำเนาในเครื่องไว้ระหว่างเล่น
@@ -30,6 +31,10 @@ export interface Career {
   escapes: number;
   bestScore: number;
   honest: number;
+  /** มรดกที่รอให้ลูกศิษย์รอบถัดไปรับ (จากรอบล่าสุดที่จบ) */
+  heir?: HeirOffer;
+  /** สายสืบทอดยาวสุดที่เคยเล่นถึง */
+  bestGen?: number;
 }
 
 export const emptyCareer = (): Career => ({
@@ -94,7 +99,18 @@ export function addRun(c: Career, s: GameState): Career {
     escapes: c.escapes + s.escapes,
     bestScore: Math.max(c.bestScore, s.end.score),
     honest: c.honest + (s.end.endingId === 'honest_shop' ? 1 : 0),
+    ...withHeir(heirFrom(s)),
+    bestGen: Math.max(c.bestGen ?? 1, generationOf(s.seed)),
   };
+}
+
+const withHeir = (h: HeirOffer | null | undefined) => (h ? { heir: h } : {});
+
+/** ใช้มรดกไปแล้ว (เริ่มรอบลูกศิษย์) */
+export function spendHeir(c: Career): Career {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { heir, ...rest } = c;
+  return rest;
 }
 
 /** รวมสมุดสองเล่ม: ได้ทุกใบ เก็บวันที่ได้ครั้งแรกของเล่มแรก และนับว่าหลอกสำเร็จถ้าเล่มไหนก็ได้สำเร็จ */
@@ -120,6 +136,8 @@ export function mergeCareer(a: Career, b: Career): Career {
     escapes: Math.max(a.escapes, b.escapes),
     bestScore: Math.max(a.bestScore, b.bestScore),
     honest: Math.max(a.honest, b.honest),
+    ...withHeir(!a.heir ? b.heir : !b.heir ? a.heir : b.heir.gen > a.heir.gen ? b.heir : a.heir),
+    bestGen: Math.max(a.bestGen ?? 1, b.bestGen ?? 1),
   };
 }
 
@@ -159,7 +177,17 @@ export function cleanCareer(raw: unknown): Career {
     escapes: int(o.escapes, 1_000_000),
     bestScore: int(o.bestScore, 1_000_000_000),
     honest: Math.min(runs, int(o.honest, 100_000)),
+    ...withHeir(cleanHeir(o.heir)),
+    bestGen: Math.max(1, int(o.bestGen, MAX_GEN)),
   };
+}
+
+function cleanHeir(raw: unknown): HeirOffer | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  const gen = int(o.gen, MAX_GEN);
+  if (gen < 2 || !isHeirGift(o.gift) || !isHeirDebt(o.debt)) return null;
+  return { gen, gift: o.gift, debt: o.debt, from: str(o.from, 64) ?? '' };
 }
 
 /** replay พร้อมเก็บการ์ดทุกวัน (server ใช้ตอนรับผลรอบ) */
@@ -169,11 +197,9 @@ export function replayWithCards(
   actions: readonly Action[],
   c: GameContent,
 ): { state: GameState; cards: Scrapbook } {
-  let s = newGame(seed, characterId, c);
   let cards: Scrapbook = {};
-  for (const a of actions) {
-    s = step(s, a, c);
+  const state = playLog(seed, characterId, actions, c, (s) => {
     if (s.lastResults.length > 0) cards = addCards(cards, s.lastResults, seed).book;
-  }
-  return { state: s, cards };
+  });
+  return { state, cards };
 }

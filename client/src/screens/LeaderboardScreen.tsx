@@ -7,8 +7,16 @@ import { useAuth } from '../net/auth';
 import { lt, t } from '../i18n';
 import { Art, Button, ScreenTitle } from '../components/ui';
 
-type Board = 'top' | 'longest' | 'fastest' | 'daily';
-const BOARDS: Board[] = ['daily', 'top', 'longest', 'fastest'];
+type Board = 'top' | 'longest' | 'fastest' | 'daily' | 'weekly';
+const BOARDS: Board[] = ['daily', 'top', 'longest', 'fastest', 'weekly'];
+type Theme = 'edge' | 'heat' | 'rush' | 'lineage';
+/** กระดานรายสัปดาห์แบบมีธีม: ชื่อ คำอธิบาย และหน่วยของค่า */
+const THEMES: Record<Theme, { name: string; hint: string; unit: (n: number) => string }> = {
+  edge: { name: '🔥 วันเสียวมากสุด', hint: 'จบวันด้วย Heat 70+ แล้วรอดได้กี่วัน', unit: (n) => `${n} วันเสียว` },
+  heat: { name: '🌡️ รอดตอน Heat สูงสุด', hint: 'Heat สูงสุดตอนจบวันที่ยังไม่โดนจับ', unit: (n) => `Heat ${n}` },
+  rush: { name: '⚡ งานด่วนติดกันยาวสุด', hint: 'รับงานด่วนติดกันได้กี่วัน', unit: (n) => `${n} วันติด` },
+  lineage: { name: '🎓 สายสืบทอดยาวสุด', hint: 'เล่นเป็นลูกศิษย์ต่อกันได้กี่รุ่น', unit: (n) => `รุ่นที่ ${n}` },
+};
 
 export function LeaderboardScreen({
   onBack,
@@ -22,7 +30,8 @@ export function LeaderboardScreen({
   const [board, setBoard] = useState<Board>(initialBoard);
   const [season, setSeason] = useState<string>('');
   const [seasons, setSeasons] = useState<string[]>([]);
-  const [rows, setRows] = useState<BoardRow[] | null>(null);
+  const [theme, setTheme] = useState<Theme>('edge');
+  const [rows, setRows] = useState<(BoardRow & { value?: number })[] | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
 
@@ -41,16 +50,16 @@ export function LeaderboardScreen({
   }, [retry]);
 
   useEffect(() => {
-    if (!season) return;
+    if (!season && board !== 'weekly') return;
     let active = true;
     setRows(null);
     setError(false);
-    api
-      .leaderboard(board, season, days)
+    const load = board === 'weekly' ? api.weekly(theme) : api.leaderboard(board, season, days);
+    load
       .then((r) => { if (active) setRows(r.rows); })
       .catch(() => { if (active) setError(true); });
     return () => { active = false; };
-  }, [board, season, days, retry]);
+  }, [board, season, days, theme, retry]);
 
   const titleName = (id: string) => {
     const tt = content.titles.find((x) => x.id === id);
@@ -60,14 +69,14 @@ export function LeaderboardScreen({
   return (
     <main className="collection-screen mx-auto flex min-h-dvh max-w-md flex-col px-4 py-6">
       <ScreenTitle title={t('leaderboard.title')} />
-      {board !== 'daily' && (<fieldset className="mb-3">
+      {board !== 'daily' && board !== 'weekly' && (<fieldset className="mb-3">
         <legend className="mb-1 font-semibold">กระดานคะแนนแยกตามระยะเวลา</legend>
         <div className="collection-filter">
           {durations.map(n => <button type="button" key={n} aria-pressed={days === n} onClick={() => setDays(n)}>{n} วัน</button>)}
         </div>
       </fieldset>)}
       <div className="mb-2">
-        {seasons.length > 0 && board !== 'daily' && (
+        {seasons.length > 0 && board !== 'daily' && board !== 'weekly' && (
           <select
             aria-label="ซีซันกระดานคะแนน"
             value={season}
@@ -82,7 +91,7 @@ export function LeaderboardScreen({
           </select>
         )}
       </div>
-      <div className="mb-3 grid grid-cols-4 gap-1.5">
+      <div className="mb-3 grid grid-cols-5 gap-1.5">
         {BOARDS.map((b) => (
           <button
             aria-pressed={b === board}
@@ -95,6 +104,19 @@ export function LeaderboardScreen({
           </button>
         ))}
       </div>
+      {board === 'weekly' && (
+        <fieldset className="mb-3">
+          <legend className="mb-1 font-semibold">ธีมสัปดาห์นี้ (รีเซ็ตทุกวันจันทร์)</legend>
+          <div className="grid grid-cols-2 gap-1.5">
+            {(Object.keys(THEMES) as Theme[]).map((k) => (
+              <button key={k} type="button" aria-pressed={theme === k} onClick={() => setTheme(k)}
+                className={`min-h-11 rounded-xl border-2 border-ink px-2 py-1 text-left text-xs text-ink ${theme === k ? 'bg-sun' : 'bg-paper'}`}>
+                <b className="block">{THEMES[k].name}</b>{THEMES[k].hint}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      )}
       {error && <div className="grid justify-items-center gap-2" role="status">
         <p>{t('leaderboard.error')}</p>
         <Button tone="paper" onClick={() => { setError(false); setRetry(n => n + 1); }}>โหลดอันดับอีกครั้ง</Button>
@@ -122,9 +144,11 @@ export function LeaderboardScreen({
               </div>
               <div className="text-right">
                 <div className="font-display font-semibold text-pink">
-                  {board === 'top' || board === 'daily'
-                    ? t('leaderboard.points', { n: r.score })
-                    : t('leaderboard.days', { n: r.days })}
+                  {board === 'weekly'
+                    ? THEMES[theme].unit(r.value ?? 0)
+                    : board === 'top' || board === 'daily'
+                      ? t('leaderboard.points', { n: r.score })
+                      : t('leaderboard.days', { n: r.days })}
                 </div>
                 {board !== 'top' && board !== 'daily' && (
                   <div className="text-xs text-ink-soft">{t('leaderboard.points', { n: r.score })}</div>

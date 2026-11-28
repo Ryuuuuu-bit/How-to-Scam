@@ -3,6 +3,8 @@ import type { GameState } from '../types/state';
 import { ambientModifiers } from './calendar';
 import { karmaDelta } from './perks';
 import type { Rng } from './rng';
+import { activeReturn } from './comeback';
+import { addEvidence } from './soi';
 
 export const HEAT_MAX = 100;
 
@@ -72,6 +74,23 @@ export function applyEffect(s: GameState, c: GameContent, e: Effect, rng: Rng): 
     case 'cooldown': {
       const ms = methodStateOf(s, e.methodId);
       ms.cooldownUntil = Math.max(ms.cooldownUntil, s.day + e.days);
+      return;
+    }
+    case 'evidence':
+      addEvidence(s, e.evidence, e.weight);
+      return;
+    case 'jobModifier': {
+      const r = activeReturn(s);
+      if (r) s.modifiers.push({ target: 'income', methodId: r.methodId, pct: e.pct, daysLeft: e.days });
+      return;
+    }
+    case 'refund': {
+      const r = activeReturn(s);
+      if (!r) return;
+      const due = Math.min(s.dirtyCash + s.cleanCash, Math.round((r.take * e.pct) / 100));
+      const fromDirty = Math.min(s.dirtyCash, due);
+      s.dirtyCash -= fromDirty;
+      s.cleanCash -= due - fromDirty;
       return;
     }
   }

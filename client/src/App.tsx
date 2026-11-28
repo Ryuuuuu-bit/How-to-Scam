@@ -30,6 +30,7 @@ import { currentLoadout, loadPick } from './game/loadout';
 import { CardCollector } from './components/Collection';
 import { CollectionScreen } from './screens/CollectionScreen';
 import { progressFor } from './game/meta';
+import { loadCareer, spendLocalHeir } from './game/collection';
 import './components/phone.css';
 
 type Screen =
@@ -90,13 +91,14 @@ function GameScreens() {
   useEffect(() => { window.scrollTo({ top: 0 }); }, [screen]);
 
   /** ออนไลน์: ขอ seed จาก server เพื่อให้ส่งคะแนนได้ / ออฟไลน์: สุ่มเอง */
-  const startRun = async (characterId: string, days: Duration) => {
+  const startRun = async (characterId: string, days: Duration, apprentice = false) => {
+    const heir = apprentice ? loadCareer(auth.user).heir : undefined;
     setStarting(true);
     setStartError(false);
     let server: { runId: string; seed: string } | undefined;
     if (auth.status === 'ready') {
       try {
-        server = await api.startRun(characterId, days, loadPick(auth.user?.uid));
+        server = await api.startRun(characterId, days, loadPick(auth.user?.uid), !!heir);
       } catch {
         setStarting(false);
         setStartError(true);
@@ -104,7 +106,8 @@ function GameScreens() {
       }
     }
     // ออฟไลน์: บ้านกับชุดติดไปกับ seed ที่สุ่มเอง
-    game.start(characterId, server, days, currentLoadout(progressFor(auth.user).owned, auth.user?.uid));
+    game.start(characterId, server, days, currentLoadout(progressFor(auth.user).owned, auth.user?.uid), server ? undefined : heir);
+    if (heir) spendLocalHeir(auth.user?.uid);
     setStarting(false);
     setScreen('play');
   };
@@ -160,8 +163,9 @@ function GameScreens() {
         starting={starting}
         startError={startError}
         onBack={() => { setStartError(false); setScreen('menu'); }}
-        onStart={(id, days) => {
-          if (!starting) void startRun(id, days);
+        heir={loadCareer(auth.user).heir}
+        onStart={(id, days, apprentice) => {
+          if (!starting) void startRun(id, days, apprentice);
         }}
       />
     );
@@ -210,6 +214,7 @@ function GameScreens() {
           tick={game.tick}
           dispatch={game.dispatch}
           actions={game.run.actions}
+          onRewind={game.rewind}
         />
         <CardCollector state={state} />
       </>

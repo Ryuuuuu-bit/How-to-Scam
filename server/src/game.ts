@@ -2,7 +2,10 @@ import { createHmac, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import {
   campaignSeed,
-  riskSeed,
+  comebackSeed,
+  runStats,
+  seedWithApprentice,
+  spendHeir,
   type Duration,
   achievementsFor,
   bangkokDate,
@@ -77,6 +80,7 @@ export const actionSchema: z.ZodType<Action> = z.discriminatedUnion('t', [
   z.object({ t: z.literal('custodyVerdict'), answer: z.array(z.number().int().min(0).max(2)).length(3).nullable() }),
   z.object({ t: z.literal('callHangup') }),
   z.object({ t: z.literal('retire') }),
+  z.object({ t: z.literal('rewindDay') }),
 ]) as z.ZodType<Action>;
 
 export const MAX_ACTIONS = 4_000;
@@ -91,7 +95,8 @@ export const RISK_RULES_FROM = '2026-12-01';
 
 export function newSeed(days: Duration = 30, now = new Date()): string {
   const nonce = randomBytes(16).toString('hex');
-  return bangkokDate(now) >= RISK_RULES_FROM ? riskSeed(days, nonce) : campaignSeed(days, nonce);
+  // 1.2 (เหยื่อกลับมาหา) เริ่มพร้อม 1.1 ในซีซั่นเดียวกัน
+  return bangkokDate(now) >= RISK_RULES_FROM ? comebackSeed(days, nonce) : campaignSeed(days, nonce);
 }
 
 /** เริ่มรอบใหม่: server เป็นคนออก seed */
@@ -102,6 +107,7 @@ export async function startRun(
   characterId: string,
   days: Duration = 30,
   pick: LoadoutPick = {},
+  apprentice = false,
 ) {
   const ch = c.characters.find((x) => x.id === characterId);
   if (!ch) throw new HttpError(400, 'unknown_character');
@@ -109,11 +115,22 @@ export async function startRun(
   const recent = await store.countRecentRuns(user.id, new Date(Date.now() - 60 * 60 * 1000));
   if (recent >= MAX_RUNS_PER_HOUR) throw new HttpError(429, 'too_many_runs');
   const mode = days === 90 ? 'normal90' : days === 60 ? 'normal60' : 'normal';
+  let base = newSeed(days);
+  if (apprentice) {
+    // ลูกศิษย์: ใช้มรดกจากรอบล่าสุดที่จบบน server ได้ครั้งเดียว
+    const heir = cleanCareer(user.career).heir;
+    if (!heir) throw new HttpError(409, 'no_heir');
+    base = seedWithApprentice(base, heir);
+    await store.mergeCollection(user.id, (book, career) => ({
+      scrapbook: cleanScrapbook(book, cardIdsOf(c)),
+      career: spendHeir(cleanCareer(career)),
+    }));
+  }
   const run = await store.createRun({
     userId: user.id,
     characterId,
     // บ้าน ชุด สัตว์เลี้ยง รถ และทุนกลับใจติดไปกับ seed: ใช้ได้เฉพาะของที่ผู้เล่นมีจริง
-    seed: seedWithLoadout(newSeed(days), loadoutFor(user.owned, pick)),
+    seed: seedWithLoadout(base, loadoutFor(user.owned, pick)),
     mode,
     dailyDate: null,
   });
@@ -123,7 +140,7 @@ export async function startRun(
 /** seed ของ Daily Challenge: ทุกคนได้ seed เดียวกันในวันนั้น แต่เดาล่วงหน้าไม่ได้ */
 export function dailySeed(date: string, secret: string): string {
   const seed = createHmac('sha256', secret).update(`daily:${date}`).digest('hex').slice(0, 32);
-  if (date >= RISK_RULES_FROM) return riskSeed(30, seed);
+  if (date >= RISK_RULES_FROM) return comebackSeed(30, seed);
   if (date >= '2026-11-26') return campaignSeed(30, seed);
   if (date >= '2026-11-25') return questSeedPrefix + seed;
   if (date >= '2026-11-24') return 'v3:soi:live:' + seed;
@@ -242,6 +259,7 @@ export async function submitRun(
     reason: state.end.reason,
     endingId: state.end.endingId,
     titleId,
+    ...runStats(state),
     actionCount: actions.length,
     xpGained,
     moneyGained,

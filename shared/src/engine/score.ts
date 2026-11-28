@@ -15,6 +15,7 @@ export function computeScore(s: GameState, c: GameContent, reason: EndReason): n
   let style = 1 + (total > 1 ? (score.maxVarietyBonus * Math.max(0, used - 1)) / (total - 1) : 0);
   if (s.escapes === 0 && reason !== 'caught') style += score.noEscapeBonus;
   style += edgeScoreBonus(s, c);
+  if (s.rewinds) style -= c.config.rewindStylePenalty;
   return Math.round(s.cleanCash * daysMult * style);
 }
 

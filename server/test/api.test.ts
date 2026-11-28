@@ -514,3 +514,38 @@ describe('Daily Challenge และเหรียญ', () => {
     expect(me.body.achievements).toContain('first_run');
   });
 });
+
+it('accepts one rewind, hands down an apprentice and ranks lineages on the weekly board', async () => {
+  const g = await guest();
+  const first = await api('/api/runs', { token: g.token, body: { characterId: 'ex_insurance' } });
+  const { runId, seed } = first.body as { runId: string; seed: string };
+  const actions = play(seed, 'ex_insurance');
+  const cut = actions.findIndex((a) => a.t === 'endDay');
+  const rewound: Action[] = [...actions.slice(0, cut + 3), { t: 'rewindDay' }];
+  let s = replay(seed, 'ex_insurance', rewound, content);
+  // ย้อนกลับไปต้นวันที่ 2 แล้วเล่นต่อด้วย action เดิมตั้งแต่ต้นวันนั้น
+  for (const a of actions.slice(cut + 1)) {
+    if (s.phase === 'ended') break;
+    rewound.push(a);
+    s = step(s, a, content);
+  }
+  expect(s.phase).toBe('ended');
+  expect(s.rewinds).toBe(1);
+  const sub = await api(`/api/runs/${runId}/submit`, { token: g.token, body: { actions: rewound } });
+  expect(sub.status).toBe(200);
+  expect(sub.body.score).toBe(s.end?.score);
+
+  const heir = (await api('/api/me', { token: g.token })).body as { user?: { career?: { heir?: { gen: number } } } };
+  expect(heir.user?.career?.heir?.gen).toBe(2);
+  const second = await api('/api/runs', { token: g.token, body: { characterId: 'ex_insurance', apprentice: true } });
+  expect(second.status).toBe(200);
+  const s2 = second.body as { runId: string; seed: string };
+  expect(s2.seed).toContain('|A=2.');
+  const again = await api('/api/runs', { token: g.token, body: { characterId: 'ex_insurance', apprentice: true } });
+  expect(again.status).toBe(409);
+  const sub2 = await api(`/api/runs/${s2.runId}/submit`, { token: g.token, body: { actions: play(s2.seed, 'ex_insurance') } });
+  expect(sub2.status).toBe(200);
+  const board = await api('/api/leaderboard/weekly?theme=lineage');
+  const rows = board.body.rows as { userId: string; value: number }[];
+  expect(rows.find((r) => r.userId === g.user.uid)?.value).toBe(2);
+});

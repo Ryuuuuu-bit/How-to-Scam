@@ -1,4 +1,5 @@
 import { homeOf } from '@hts/shared';
+import { VictimTag } from '../components/RiskExtras';
 import { useState } from 'react';
 import { sceneUrl } from '../assets/art';
 import { LiveCounter } from './LiveCounter';
@@ -385,6 +386,7 @@ export function EventPhase({ state, dispatch }: PhaseProps) {
           <h3 className="text-xl leading-snug font-semibold">{lt(ev.title)}</h3>
         </div>
         <p className="mt-2">{lt(ev.body)}</p>
+        <VictimTag state={state} />
       </Panel>
       <div className="mt-4 flex flex-col gap-3">
         {ev.choices.map((c, i) => {

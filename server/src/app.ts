@@ -9,7 +9,7 @@ import type { GameContent } from '@hts/shared';
 import { attachUser, guestName, requireUser, signToken } from './auth';
 import type { GoogleVerifier } from './auth';
 import { buyMarketItem, dailyInfo, HttpError, importCollection, MAX_ACTIONS, startDaily, startRun, submitRun } from './game';
-import { isSeasonId, seasonFor } from './season';
+import { isSeasonId, seasonFor, weekFor } from './season';
 import type { Board, Scope, Store, UserRec } from './store';
 
 export interface AppDeps {
@@ -172,7 +172,7 @@ export function createApp(d: AppDeps) {
     limit(10, 40),
     wrap(async (req) => {
       const user = requireUser(req);
-      const { characterId, days, ...pick } = z
+      const { characterId, days, apprentice, ...pick } = z
         .object({
           days: z.union([z.literal(30), z.literal(60), z.literal(90)]).default(30),
           characterId: z.string().min(1).max(64),
@@ -180,9 +180,10 @@ export function createApp(d: AppDeps) {
           pet: z.enum(['none', 'dog', 'cat', 'parrot']).optional(),
           car: z.enum(['none', 'scooter', 'pickup', 'sports']).optional(),
           reform: z.boolean().optional(),
+          apprentice: z.boolean().optional(),
         })
         .parse(req.body);
-      return startRun(d.store, d.content, user, characterId, days, pick);
+      return startRun(d.store, d.content, user, characterId, days, pick, apprentice === true);
     }),
   );
 
@@ -243,6 +244,16 @@ export function createApp(d: AppDeps) {
       }
       const rows = await d.store.leaderboard({ seasonId, mode: q.days === '90' ? 'normal90' : q.days === '60' ? 'normal60' : 'normal' }, q.board as Board, 50);
       return { seasonId, board: q.board, rows };
+    }),
+  );
+
+  app.get(
+    '/api/leaderboard/weekly',
+    wrap(async (req) => {
+      const { theme } = z.object({ theme: z.enum(['edge', 'heat', 'rush', 'lineage']).default('edge') }).parse(req.query);
+      const week = weekFor(new Date());
+      const rows = await d.store.weekly(theme, week.startsAt, week.endsAt, 50);
+      return { theme, week: week.id, endsAt: week.endsAt, rows };
     }),
   );
 

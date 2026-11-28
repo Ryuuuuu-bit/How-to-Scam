@@ -6,7 +6,11 @@ export { Rng, hashSeed } from './engine/rng';
 export { openingFor, originFor, origins, originStage, originSeedPrefix, careerSeedPrefix, sketchSeedPrefix, questSeedPrefix, careerOrigins, originRewards, type Origin } from './engine/opening';
 export { InvalidActionError } from './engine/errors';
 export { newGame, step } from './engine/reducer';
-export { replay, toPublicView } from './engine/replay';
+export { replay, playLog, canRewind, MAX_REWINDS, toPublicView } from './engine/replay';
+export { comebackRules, comebackEvents, activeReturn, isComebackEvent, type ComebackKind } from './engine/comeback';
+export { apprenticeOf, generationOf, heirFrom, seedWithApprentice, type HeirOffer, type HeirGift, type HeirDebt } from './engine/apprentice';
+export { flowKinds, weekLedger, finishedWeek, type WeekLedger } from './engine/ledger';
+export { runStats, type RunStats } from './engine/runStats';
 export { computeScore, xpForRun } from './engine/score';
 export {
   unlockedMethods,
@@ -105,6 +109,7 @@ export {
   mergeCareer,
   mergeScrapbook,
   replayWithCards,
+  spendHeir,
   trapCards,
   type Career,
   type Scrapbook,

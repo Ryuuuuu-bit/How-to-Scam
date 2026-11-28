@@ -11,6 +11,7 @@ import { offerBans, rollOffer, tickMission } from './offers';
 import { getMethod, getPitch, getShopItem } from './lookup';
 import { karmaDelta, perksOfKind, priceOf } from './perks';
 import type { Rng } from './rng';
+import { maybeScheduleReturn } from './comeback';
 import { edgeIncomePct, isRush, methodLevel, restHeatDecay, riskRules, tallyEdgeDay } from './risk';
 import { addEvidence, afterShift, endOfDaySoi, isAlly, placeBonus, quietDayBonus } from './soi';
 import { applyNow, basePrice, contrabandWeight, dealDiscount, famePerShift, henchmanCap, hideoutPct, holdPrice, owns, placeUnlocked } from './shop';
@@ -411,6 +412,7 @@ function applyIncome(
     log.heatGained = s.heat - before;
   }
   s.lastResults.push({ kind: 'resolve', [wallet]: income, heat: s.heat - before });
+  if (wallet === 'dirtyCash') maybeScheduleReturn(s, c, rng, m, income);
   afterShift(s, m.id, s.heat - before);
   s.fame += famePerShift(s, c, m.id);
   for (const h of s.henchmen) if (h.recruit === 'intern_nat') h.skill = Math.min(15, h.skill + 1);

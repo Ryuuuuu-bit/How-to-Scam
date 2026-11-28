@@ -20,17 +20,20 @@ import { Art } from '../components/ui';
 import { usePlayerPortrait } from '../game/usePlayerPortrait';
 import { MemeSticker } from '../components/MemeSticker';
 import { reactionMeme } from '../game/memes';
+import { RewindButton } from '../components/RiskExtras';
 
 export function PlayScreen({
   state,
   tick,
   dispatch,
   actions = [],
+  onRewind,
 }: {
   state: GameState;
   tick: number;
   dispatch: (a: Action) => void;
   actions?: Action[];
+  onRewind?: () => void;
 }) {
   const portrait = usePlayerPortrait(state.characterId);
   const [dismissedTick, setDismissedTick] = useState<number>();
@@ -156,6 +159,9 @@ export function PlayScreen({
           )}
         </div>
         {meme && !showResults && <MemeSticker meme={meme} />}
+        {onRewind && (state.phase === 'escape' || state.phase === 'event' || state.phase === 'launder' || state.phase === 'shop') && (
+          <div className="mb-3 flex justify-end"><RewindButton state={state} actions={actions} onRewind={onRewind} /></div>
+        )}
         <div key={phaseKey}>
           {state.phase === 'plan' && <DayPlanner {...props} lastPlan={lastPlanFrom(actions)} />}
           {state.phase === 'invest' && <InvestPhase {...props} />}

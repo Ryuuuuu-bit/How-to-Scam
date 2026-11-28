@@ -2,6 +2,7 @@ import { campaignDays } from './campaign';
 import type { ChoiceRequirement, EventCondition, GameContent, GameEvent } from '../types/content';
 import type { GameState } from '../types/state';
 import { activeFestivals, dateOf } from './calendar';
+import { activeReturn, settleReturn } from './comeback';
 import { applyEffects } from './effects';
 import { invariant } from './errors';
 import { getEvent } from './lookup';
@@ -145,7 +146,9 @@ export function resolveEventChoice(
   const outcome = choice.outcomes[oi];
   invariant(outcome, `event ${ev.id} choice ${choiceIdx} has no outcomes`);
   const before = { dirty: s.dirtyCash, clean: s.cleanCash, heat: s.heat };
+  const returning = activeReturn(s);
   applyEffects(s, c, outcome.effects, rng);
+  if (returning) settleReturn(s, returning);
   s.pendingEvents.shift();
   s.history.at(-1)?.events.push(ev.id);
   const log = s.history.at(-1);

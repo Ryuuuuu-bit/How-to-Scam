@@ -1,4 +1,5 @@
-import { careerAffinities, charKey, durations, type Duration } from '@hts/shared';
+import { careerAffinities, charKey, durations, type Duration, type HeirOffer } from '@hts/shared';
+import { heirDebtText, heirGiftText } from '../game/heir';
 import { useState } from 'react';
 import { content } from '@hts/shared/data';
 import { isUnlocked } from '../game/meta';
@@ -15,13 +16,16 @@ export function CharacterSelect({
   onBack,
   starting = false,
   startError = false,
+  heir,
 }: {
-  onStart: (characterId: string, days: Duration) => void;
+  heir?: HeirOffer | undefined;
+  onStart: (characterId: string, days: Duration, apprentice: boolean) => void;
   onBack: () => void;
   starting?: boolean;
   startError?: boolean;
 }) {
   const [days, setDays] = useState<Duration>(30);
+  const [apprentice, setApprentice] = useState(false);
   const { user } = useAuth();
   const market = useMarket();
   const meta = market.progress;
@@ -128,12 +132,21 @@ export function CharacterSelect({
         })}
       </div>
       <div className="character-footer fixed inset-x-0 bottom-0 z-10 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)] backdrop-blur">
+        {heir && (
+          <label className={`heir-card mx-auto mb-2 flex max-w-md items-start gap-3 rounded-xl border-2 border-ink p-3 text-sm text-ink ${apprentice ? 'bg-sun' : 'bg-paper'}`}>
+            <input type="checkbox" className="mt-1 h-5 w-5 shrink-0" checked={apprentice} onChange={(e) => setApprentice(e.target.checked)} />
+            <span>
+              <b>🎓 เล่นเป็นลูกศิษย์รุ่นที่ {heir.gen}</b>
+              <small className="block">ได้: {heirGiftText(heir)} · รับมาด้วย: {heirDebtText(heir)}</small>
+            </span>
+          </label>
+        )}
         {startError && <p role="alert" className="mx-auto mb-2 max-w-md rounded-xl bg-paper p-2 text-sm">เริ่มรอบเก็บคะแนนไม่สำเร็จ กรุณาลองอีกครั้ง</p>}
         <div className="mx-auto flex max-w-md gap-3">
           <Button tone="paper" disabled={starting} onClick={onBack}>
             {t('character.back')}
           </Button>
-          <Button tone="pink" block disabled={starting} onClick={() => onStart(picked, days)}>
+          <Button tone="pink" block disabled={starting} onClick={() => onStart(picked, days, apprentice && !!heir)}>
             {starting ? 'กำลังเริ่มรอบ…' : t('character.start')}
           </Button>
         </div>

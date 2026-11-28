@@ -5,6 +5,7 @@ import {
   cardIdsOf,
   cars,
   cleanCareer,
+  spendHeir,
   cleanScrapbook,
   emptyCareer,
   mergeCareer,
@@ -51,6 +52,11 @@ function writeJson(key: string, v: unknown) {
 export const localScrapbook = (uid?: string): Scrapbook => cleanScrapbook(readJson(bookKey(uid)), allCardIds);
 /** ประวัติในเครื่องอย่างเดียว */
 export const localCareer = (uid?: string): Career => cleanCareer(readJson(careerKey(uid)));
+
+/** ใช้มรดกของลูกศิษย์ในเครื่องไปแล้ว (server ตัดของตัวเองตอนเริ่มรอบ) */
+export function spendLocalHeir(uid?: string): void {
+  writeJson(careerKey(uid), spendHeir(localCareer(uid)));
+}
 
 /** สมุดภาพที่ใช้โชว์: ของ server รวมกับของในเครื่อง */
 export function loadScrapbook(user?: PublicUser | null): Scrapbook {
